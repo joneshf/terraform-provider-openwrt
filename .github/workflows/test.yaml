@@ -10,6 +10,4 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v19
       - name: Test
-        uses: workflow/nix-shell-action@v3
-        with:
-          script: bazel test //...
+        run: nix-shell --run 'bazel test //...'
