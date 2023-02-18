@@ -1,0 +1,11 @@
+on:
+  - push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Nix
+        uses: cachix/install-nix-action@v19
+      - name: Test
+        run: bazel test //...
