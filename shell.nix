@@ -12,6 +12,8 @@ in
 
 pkgs.mkShell {
   nativeBuildInputs = [
+    pkgs.bazel_6
+    pkgs.bazel-buildtools
     pkgs.gh
     pkgs.git
     pkgs.go
