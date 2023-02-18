@@ -1,8 +1,23 @@
 
 ### DO NOT EDIT ANYTHING BELOW HERE BY HAND; REGNERATE IT AT THE EDIT LINK.
 
-# Created by https://www.toptal.com/developers/gitignore/api/go,macos,terraform,visualstudiocode
-# Edit at https://www.toptal.com/developers/gitignore?templates=go,macos,terraform,visualstudiocode
+# Created by https://www.toptal.com/developers/gitignore/api/bazel,go,macos,terraform,visualstudiocode
+# Edit at https://www.toptal.com/developers/gitignore?templates=bazel,go,macos,terraform,visualstudiocode
+
+### Bazel ###
+# gitignore template for Bazel build system
+# website: https://bazel.build/
+
+# Ignore all bazel-* symlinks. There is no full list since this can change
+# based on the name of the directory bazel is cloned into.
+/bazel-*
+
+# Directories for the Bazel IntelliJ plugin containing the generated
+# IntelliJ project files and plugin configuration. Seperate directories are
+# for the IntelliJ, Android Studio and CLion versions of the plugin.
+/.ijwb/
+/.aswb/
+/.clwb/
 
 ### Go ###
 # If you prefer the allow list template instead of the deny list, see community template:
@@ -115,4 +130,4 @@ terraform.rc
 .history
 .ionide
 
-# End of https://www.toptal.com/developers/gitignore/api/go,macos,terraform,visualstudiocode
+# End of https://www.toptal.com/developers/gitignore/api/bazel,go,macos,terraform,visualstudiocode
