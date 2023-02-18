@@ -1,0 +1,6 @@
+{
+    "nixEnvSelector.nixFile": "${workspaceRoot}/shell.nix",
+    "[nix]": {
+        "editor.defaultFormatter": "B4dM4n.nixpkgs-fmt",
+    },
+}
