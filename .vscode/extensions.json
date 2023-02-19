@@ -6,7 +6,6 @@
     "recommendations": [
         "arrterian.nix-env-selector",
         "b4dm4n.nixpkgs-fmt",
-        "bazelbuild.vscode-bazel",
         "golang.go",
         "hashicorp.terraform",
         "rubymaniac.vscode-direnv",
