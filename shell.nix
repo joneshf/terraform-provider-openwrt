@@ -1,9 +1,9 @@
 let
 
   nixpkgs-tarball_22-11 = builtins.fetchTarball {
-    sha256 = "sha256:11w3wn2yjhaa5pv20gbfbirvjq6i3m7pqrq2msf0g7cv44vijwgw";
+    sha256 = "sha256:0745rigamnnzz4qf712pvjs3vz8qsg3r9g903k6m4z92yxr1w942";
     # 22.11
-    url = "https://github.com/NixOS/nixpkgs/archive/4d2b37a84fad1091b9de401eb450aae66f1a741e.tar.gz";
+    url = "https://github.com/NixOS/nixpkgs/archive/e6d5772f3515b8518d50122471381feae7cbae36.tar.gz";
   };
 
 in
