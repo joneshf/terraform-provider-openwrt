@@ -14,7 +14,7 @@ func main() {
 	ctx := context.Background()
 	providerNew := openwrt.New
 	options := providerserver.ServeOpts{
-		Address: "registry.terraform.io/joneshf/terraform-provider-openwrt",
+		Address: "registry.terraform.io/joneshf/openwrt",
 	}
 	providerserver.Serve(
 		ctx,
