@@ -15,6 +15,10 @@ clean:
 docs:
 	go generate ./...
 
+.PHONY: install
+install:
+	go install ./...
+
 .PHONY: test
 test: build test-docs test-go
 
