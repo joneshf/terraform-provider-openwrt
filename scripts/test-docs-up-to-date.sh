@@ -7,6 +7,8 @@ IFS=$'\n\t'
 # We first generate new docs.
 make docs
 
+# We have to update the index (since timestamps might have changed).
+git update-index --refresh
 # We then check to see if there are any differences.
 output=$(git diff-index --exit-code --patch --stat HEAD -- docs)
 up_to_date=$?
