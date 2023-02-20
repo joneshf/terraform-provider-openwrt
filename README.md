@@ -46,24 +46,24 @@ it should be enough to allow it to work: `direnv allow`.
 
 ## Development
 
-[`bazel`][] is used to build everything in this repo.
-Installation of [`bazel`][] is taken care of by [`nix`][].
+[`make`][] is used to build everything in this repo.
+Installation of [`make`][] is taken care of by [`nix`][].
 
 Everything can be built from the top-level:
 
 ```sh
-$ bazel build //...
+$ make build
 ```
 
 Easier than that,
 everything can be built and tested in one step:
 
 ```sh
-$ bazel test //...
+$ make test
 ```
 
-[`bazel`]: https://bazel.build/
 [`direnv`]: https://github.com/direnv/direnv
+[`make`]: https://www.gnu.org/software/make/
 [`nix`]: https://nixos.org
 [direnv install]: https://github.com/direnv/direnv#install
 [nix install]: https://nixos.org/nix/

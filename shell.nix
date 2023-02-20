@@ -12,10 +12,9 @@ in
 
 pkgs.mkShell {
   nativeBuildInputs = [
-    pkgs.bazel_6
-    pkgs.bazel-buildtools
     pkgs.gh
     pkgs.git
+    pkgs.gnumake
     pkgs.go
     pkgs.go-tools
     pkgs.nixpkgs-fmt
