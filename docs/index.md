@@ -22,4 +22,4 @@ provider "openwrt" {
 
 ### Optional
 
-- `configuration` (String) The configuration directory to use. Defaults to `/etc/config`.
+- `configuration_directory` (String) The configuration directory to use. Defaults to "/etc/config".
