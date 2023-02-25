@@ -38,7 +38,7 @@ func (c *Client) GetSection(
 	encoder := json.NewEncoder(&buffer)
 	err := encoder.Encode(requestBody)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("problem encoding uci request: %w", err)
 	}
 
 	request, err := http.NewRequestWithContext(
@@ -48,23 +48,31 @@ func (c *Client) GetSection(
 		&buffer,
 	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("problem creating uci request: %w", err)
 	}
 
 	response, err := c.client.Do(request)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("problem sending request to uci: %w", err)
+	}
+
+	if response.StatusCode != 200 {
+		return nil, fmt.Errorf("expected 200 response: got %s", response.Status)
 	}
 
 	var responseBody getSectionResponseBody
 	decoder := json.NewDecoder(response.Body)
 	err = decoder.Decode(&responseBody)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to process uci response: %w", err)
 	}
 
 	if responseBody.Error != nil {
-		return nil, fmt.Errorf(*responseBody.Error)
+		return nil, fmt.Errorf("unable to get section: %s", *responseBody.Error)
+	}
+
+	if responseBody.Result == nil {
+		return nil, errors.New("invalid uci response: expected either an error or a result, got neither")
 	}
 
 	result := *responseBody.Result
