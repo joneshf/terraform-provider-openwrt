@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -97,7 +98,7 @@ func NewClient(
 	encoder := json.NewEncoder(&buffer)
 	err := encoder.Encode(requestBody)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("problem encoding login request: %w", err)
 	}
 
 	request, err := http.NewRequestWithContext(
@@ -107,23 +108,31 @@ func NewClient(
 		&buffer,
 	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("problem creating login request: %w", err)
 	}
 
 	response, err := httpClient.Do(request)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("problem sending request to login: %w", err)
+	}
+
+	if response.StatusCode != 200 {
+		return nil, fmt.Errorf("expected 200 response: got %s", response.Status)
 	}
 
 	var responseBody authResponseBody
 	decoder := json.NewDecoder(response.Body)
 	err = decoder.Decode(&responseBody)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to process login response: %w", err)
 	}
 
 	if responseBody.Error != nil {
-		return nil, fmt.Errorf(*responseBody.Error)
+		return nil, fmt.Errorf("unable to login: %s", *responseBody.Error)
+	}
+
+	if responseBody.Result == nil {
+		return nil, errors.New("invalid login response: expected either an error or a result, got neither")
 	}
 
 	authToken := *responseBody.Result
