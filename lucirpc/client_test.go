@@ -222,6 +222,36 @@ func TestNewClient(t *testing.T) {
 		assert.ErrorContains(t, err, "problem sending request to login")
 	})
 
+	t.Run("makes request to correct endpoint", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		handle := func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path != "/cgi-bin/luci/rpc/auth" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+
+			fmt.Fprintf(w, `{
+				"result": "correct path"
+			}`)
+		}
+		address, port, close := newServer(t, http.HandlerFunc(handle))
+		defer close()
+
+		// When
+		_, err := lucirpc.NewClient(
+			ctx,
+			address.Scheme,
+			address.Hostname(),
+			uint16(port),
+			"root",
+			"",
+		)
+
+		// Then
+		assert.NilError(t, err)
+	})
+
 	t.Run("expects a 200 response", func(t *testing.T) {
 		// Given
 		ctx := context.Background()
@@ -314,36 +344,6 @@ func TestNewClient(t *testing.T) {
 
 		// Then
 		assert.ErrorContains(t, err, "invalid login response")
-	})
-
-	t.Run("makes request to correct endpoint", func(t *testing.T) {
-		// Given
-		ctx := context.Background()
-		handle := func(w http.ResponseWriter, r *http.Request) {
-			if r.URL.Path != "/cgi-bin/luci/rpc/auth" {
-				w.WriteHeader(http.StatusNotFound)
-				return
-			}
-
-			fmt.Fprintf(w, `{
-				"result": "correct path"
-			}`)
-		}
-		address, port, close := newServer(t, http.HandlerFunc(handle))
-		defer close()
-
-		// When
-		_, err := lucirpc.NewClient(
-			ctx,
-			address.Scheme,
-			address.Hostname(),
-			uint16(port),
-			"root",
-			"",
-		)
-
-		// Then
-		assert.NilError(t, err)
 	})
 
 	t.Run("does not error when authentication succeeds", func(t *testing.T) {
