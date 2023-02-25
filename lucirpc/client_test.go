@@ -34,7 +34,7 @@ func TestClientGetSection(t *testing.T) {
 		)
 
 		// Then
-		assert.ErrorContains(t, err, "problem sending request to uci")
+		assert.ErrorContains(t, err, "problem sending request to get section")
 	})
 
 	t.Run("makes a request to correct endpoint", func(t *testing.T) {
@@ -114,7 +114,7 @@ func TestClientGetSection(t *testing.T) {
 		)
 
 		// Then
-		assert.ErrorContains(t, err, "unable to process uci response")
+		assert.ErrorContains(t, err, "unable to process get section response")
 	})
 
 	t.Run("returns error when get section fails", func(t *testing.T) {
@@ -164,7 +164,7 @@ func TestClientGetSection(t *testing.T) {
 		)
 
 		// Then
-		assert.ErrorContains(t, err, "invalid uci response")
+		assert.ErrorContains(t, err, "invalid get section response")
 	})
 
 	t.Run("returns section data when successful", func(t *testing.T) {
