@@ -379,6 +379,7 @@ func authenticatedClient(
 	ctx context.Context,
 	handler http.Handler,
 ) (*lucirpc.Client, func()) {
+	t.Helper()
 	handleWithAuth := func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/cgi-bin/luci/rpc/auth":
@@ -401,7 +402,10 @@ func authenticatedClient(
 		"root",
 		"",
 	)
-	assert.NilError(t, err)
+	if err != nil {
+		close()
+		assert.NilError(t, err)
+	}
 
 	return client, close
 }
@@ -410,11 +414,19 @@ func newServer(
 	t *testing.T,
 	handler http.Handler,
 ) (*url.URL, int, func()) {
+	t.Helper()
 	server := httptest.NewServer(handler)
 	address, err := url.Parse(server.URL)
-	assert.NilError(t, err)
+	if err != nil {
+		server.Close()
+		assert.NilError(t, err)
+	}
+
 	port, err := strconv.Atoi(address.Port())
-	assert.NilError(t, err)
+	if err != nil {
+		server.Close()
+		assert.NilError(t, err)
+	}
 
 	return address, port, server.Close
 }
