@@ -23,8 +23,7 @@ const (
 )
 
 type Client struct {
-	addressUCI url.URL
-	client     *http.Client
+	jsonRPCClientUCI jsonRPCClient
 }
 
 func (c *Client) GetSection(
@@ -36,11 +35,9 @@ func (c *Client) GetSection(
 		Method: methodGetAll,
 		Params: []string{config, section},
 	}
-	responseBody, err := jsonRPCInvoke(
+	responseBody, err := c.jsonRPCClientUCI.Invoke(
 		ctx,
-		*c.client,
-		c.addressUCI,
-		humanReadableGetSection,
+		humanReadableLogin,
 		requestBody,
 	)
 	if err != nil {
@@ -79,10 +76,12 @@ func NewClient(
 		Method: methodLogin,
 		Params: []string{username, password},
 	}
-	responseBody, err := jsonRPCInvoke(
-		ctx,
+	jsonRPCClient := jsonRPCNewClient(
 		*httpClient,
 		address,
+	)
+	responseBody, err := jsonRPCClient.Invoke(
+		ctx,
 		humanReadableLogin,
 		requestBody,
 	)
@@ -104,17 +103,23 @@ func NewClient(
 		RawQuery: query.Encode(),
 		Scheme:   scheme,
 	}
+	jsonRPCClientUCI := jsonRPCNewClient(
+		*httpClient,
+		addressUCI,
+	)
 	client := &Client{
-		addressUCI: addressUCI,
-		client:     httpClient,
+		jsonRPCClientUCI: jsonRPCClientUCI,
 	}
 	return client, nil
 }
 
-func jsonRPCInvoke(
+type jsonRPCClient struct {
+	address url.URL
+	client  http.Client
+}
+
+func (c jsonRPCClient) Invoke(
 	ctx context.Context,
-	httpClient http.Client,
-	address url.URL,
 	humanReadableMethod string,
 	requestBody jsonRPCRequestBody,
 ) (json.RawMessage, error) {
@@ -128,14 +133,14 @@ func jsonRPCInvoke(
 	request, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodPost,
-		address.String(),
+		c.address.String(),
 		&buffer,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("problem creating %s request: %w", humanReadableMethod, err)
 	}
 
-	response, err := httpClient.Do(request)
+	response, err := c.client.Do(request)
 	if err != nil {
 		return nil, fmt.Errorf("problem sending request to %s: %w", humanReadableMethod, err)
 	}
@@ -160,6 +165,16 @@ func jsonRPCInvoke(
 	}
 
 	return *responseBody.Result, nil
+}
+
+func jsonRPCNewClient(
+	httpClient http.Client,
+	address url.URL,
+) jsonRPCClient {
+	return jsonRPCClient{
+		address: address,
+		client:  httpClient,
+	}
 }
 
 type jsonRPCRequestBody struct {
