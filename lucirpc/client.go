@@ -57,14 +57,14 @@ func (c *Client) GetSection(
 	}
 
 	if response.StatusCode != 200 {
-		return nil, fmt.Errorf("expected 200 response: got %s", response.Status)
+		return nil, fmt.Errorf("expected get section to respond with a 200: got %s", response.Status)
 	}
 
 	var responseBody getSectionResponseBody
 	decoder := json.NewDecoder(response.Body)
 	err = decoder.Decode(&responseBody)
 	if err != nil {
-		return nil, fmt.Errorf("unable to process get section response: %w", err)
+		return nil, fmt.Errorf("unable to parse get section response: %w", err)
 	}
 
 	if responseBody.Error != nil {
@@ -125,14 +125,14 @@ func NewClient(
 	}
 
 	if response.StatusCode != 200 {
-		return nil, fmt.Errorf("expected 200 response: got %s", response.Status)
+		return nil, fmt.Errorf("expected login to respond with a 200: got %s", response.Status)
 	}
 
 	var responseBody authResponseBody
 	decoder := json.NewDecoder(response.Body)
 	err = decoder.Decode(&responseBody)
 	if err != nil {
-		return nil, fmt.Errorf("unable to process login response: %w", err)
+		return nil, fmt.Errorf("unable to parse login response: %w", err)
 	}
 
 	if responseBody.Error != nil {

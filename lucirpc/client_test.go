@@ -90,7 +90,7 @@ func TestClientGetSection(t *testing.T) {
 		)
 
 		// Then
-		assert.ErrorContains(t, err, "expected 200 response")
+		assert.ErrorContains(t, err, "expected get section to respond with a 200")
 	})
 
 	t.Run("expects a valid JSON-RPC response", func(t *testing.T) {
@@ -114,7 +114,7 @@ func TestClientGetSection(t *testing.T) {
 		)
 
 		// Then
-		assert.ErrorContains(t, err, "unable to process get section response")
+		assert.ErrorContains(t, err, "unable to parse get section response")
 	})
 
 	t.Run("returns error when get section fails", func(t *testing.T) {
@@ -274,7 +274,7 @@ func TestNewClient(t *testing.T) {
 		)
 
 		// Then
-		assert.ErrorContains(t, err, "expected 200 response")
+		assert.ErrorContains(t, err, "expected login to respond with a 200")
 	})
 
 	t.Run("expects a valid JSON-RPC response", func(t *testing.T) {
@@ -297,7 +297,7 @@ func TestNewClient(t *testing.T) {
 		)
 
 		// Then
-		assert.ErrorContains(t, err, "unable to process login response")
+		assert.ErrorContains(t, err, "unable to parse login response")
 	})
 
 	t.Run("returns error when authentication fails", func(t *testing.T) {
