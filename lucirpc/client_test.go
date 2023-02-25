@@ -41,14 +41,15 @@ func TestClientGetSection(t *testing.T) {
 		// Given
 		ctx := context.Background()
 		handle := func(w http.ResponseWriter, r *http.Request) {
-			if r.URL.Path != "/cgi-bin/luci/rpc/uci" {
-				w.WriteHeader(http.StatusNotFound)
-				return
-			}
+			switch r.URL.Path {
+			case "/cgi-bin/luci/rpc/uci":
+				fmt.Fprintf(w, `{
+					"result": {}
+				}`)
 
-			fmt.Fprintf(w, `{
-				"result": {}
-			}`)
+			default:
+				w.WriteHeader(http.StatusNotFound)
+			}
 		}
 		client, close := authenticatedClient(
 			t,
@@ -226,14 +227,15 @@ func TestNewClient(t *testing.T) {
 		// Given
 		ctx := context.Background()
 		handle := func(w http.ResponseWriter, r *http.Request) {
-			if r.URL.Path != "/cgi-bin/luci/rpc/auth" {
-				w.WriteHeader(http.StatusNotFound)
-				return
-			}
+			switch r.URL.Path {
+			case "/cgi-bin/luci/rpc/auth":
+				fmt.Fprintf(w, `{
+					"result": "correct path"
+				}`)
 
-			fmt.Fprintf(w, `{
-				"result": "correct path"
-			}`)
+			default:
+				w.WriteHeader(http.StatusNotFound)
+			}
 		}
 		address, port, close := newServer(t, http.HandlerFunc(handle))
 		defer close()
