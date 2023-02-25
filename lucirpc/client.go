@@ -37,7 +37,7 @@ func (c *Client) GetSection(
 	}
 	responseBody, err := c.jsonRPCClientUCI.Invoke(
 		ctx,
-		humanReadableLogin,
+		humanReadableGetSection,
 		requestBody,
 	)
 	if err != nil {
