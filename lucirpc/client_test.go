@@ -245,7 +245,7 @@ func TestNewClient(t *testing.T) {
 		assert.ErrorContains(t, err, "expected 200 response")
 	})
 
-	t.Run("expects a valid JSONRPC response", func(t *testing.T) {
+	t.Run("expects a valid JSON-RPC response", func(t *testing.T) {
 		// Given
 		ctx := context.Background()
 		handle := func(w http.ResponseWriter, r *http.Request) {
