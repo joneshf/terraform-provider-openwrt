@@ -128,7 +128,7 @@ func (p *openWrtProvider) Configure(
 	}
 
 	ctx = setField(ctx, "configure_success", true)
-	tflog.Info(ctx, "Configured HashiCups client")
+	tflog.Info(ctx, "Configured OpenWrt API client")
 }
 
 // DataSources defines the data sources implemented in the provider.
