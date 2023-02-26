@@ -30,7 +30,7 @@ func (c *Client) GetSection(
 	ctx context.Context,
 	config string,
 	section string,
-) (map[string]string, error) {
+) (map[string]json.RawMessage, error) {
 	requestBody := jsonRPCRequestBody{
 		Method: methodGetAll,
 		Params: []string{config, section},
@@ -44,7 +44,21 @@ func (c *Client) GetSection(
 		return nil, fmt.Errorf("unable to %s: %w", humanReadableGetSection, err)
 	}
 
-	var result map[string]string
+	// Depending on the `config` and `section`,
+	// this method can return a response that is an array instead of an object.
+	// We have to handle that case as well.
+	var unknownResult any
+	err = json.Unmarshal(responseBody, &unknownResult)
+	if err != nil {
+		return nil, fmt.Errorf("unable to determine type of %s response: %w", humanReadableGetSection, err)
+	}
+
+	_, ok := unknownResult.([]any)
+	if ok {
+		return nil, fmt.Errorf("incorrect config (%q) and/or section (%q): result from LuCI: %s", config, section, responseBody)
+	}
+
+	var result map[string]json.RawMessage
 	err = json.Unmarshal(responseBody, &result)
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse %s response: %w", humanReadableGetSection, err)
