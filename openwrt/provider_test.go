@@ -12,13 +12,13 @@ import (
 	"gotest.tools/v3/assert"
 )
 
-func TestOpenWRTProviderConfigureDoesNotErrorWithNoConfiguration(t *testing.T) {
+func TestOpenWrtProviderConfigureDoesNotErrorWithNoConfiguration(t *testing.T) {
 	// Given
 	ctx := context.Background()
-	openWRTProvider := openwrt.New()
+	openWrtProvider := openwrt.New()
 	schemaReq := provider.SchemaRequest{}
 	schemaRes := &provider.SchemaResponse{}
-	openWRTProvider.Schema(ctx, schemaReq, schemaRes)
+	openWrtProvider.Schema(ctx, schemaReq, schemaRes)
 	config := tfsdk.Config{
 		Schema: schemaRes.Schema,
 		Raw: tftypes.NewValue(
@@ -38,49 +38,49 @@ func TestOpenWRTProviderConfigureDoesNotErrorWithNoConfiguration(t *testing.T) {
 	res := &provider.ConfigureResponse{}
 
 	// When
-	openWRTProvider.Configure(ctx, req, res)
+	openWrtProvider.Configure(ctx, req, res)
 
 	// Then
 	assert.DeepEqual(t, res.Diagnostics, diag.Diagnostics{})
 }
 
-func TestOpenWRTProviderMetadataDoesNotSetVersion(t *testing.T) {
+func TestOpenWrtProviderMetadataDoesNotSetVersion(t *testing.T) {
 	// Given
 	ctx := context.Background()
-	openWRTProvider := openwrt.New()
+	openWrtProvider := openwrt.New()
 	req := provider.MetadataRequest{}
 	res := &provider.MetadataResponse{}
 
 	// When
-	openWRTProvider.Metadata(ctx, req, res)
+	openWrtProvider.Metadata(ctx, req, res)
 
 	// Then
 	assert.DeepEqual(t, res.Version, "")
 }
 
-func TestOpenWRTProviderMetadataSetsTypeName(t *testing.T) {
+func TestOpenWrtProviderMetadataSetsTypeName(t *testing.T) {
 	// Given
 	ctx := context.Background()
-	openWRTProvider := openwrt.New()
+	openWrtProvider := openwrt.New()
 	req := provider.MetadataRequest{}
 	res := &provider.MetadataResponse{}
 
 	// When
-	openWRTProvider.Metadata(ctx, req, res)
+	openWrtProvider.Metadata(ctx, req, res)
 
 	// Then
 	assert.DeepEqual(t, res.TypeName, "openwrt")
 }
 
-func TestOpenWRTProviderSchemaHasOptionalConfigurationDirectory(t *testing.T) {
+func TestOpenWrtProviderSchemaHasOptionalConfigurationDirectory(t *testing.T) {
 	// Given
 	ctx := context.Background()
-	openWRTProvider := openwrt.New()
+	openWrtProvider := openwrt.New()
 	req := provider.SchemaRequest{}
 	res := &provider.SchemaResponse{}
 
 	// When
-	openWRTProvider.Schema(ctx, req, res)
+	openWrtProvider.Schema(ctx, req, res)
 
 	// Then
 	attributes := res.Schema.Attributes
@@ -89,13 +89,13 @@ func TestOpenWRTProviderSchemaHasOptionalConfigurationDirectory(t *testing.T) {
 	assert.Check(t, configurationDirectory.IsOptional())
 }
 
-func TestOpenWRTProviderSchemaDoesNotUseInvalidAttributes(t *testing.T) {
+func TestOpenWrtProviderSchemaDoesNotUseInvalidAttributes(t *testing.T) {
 	// Given
 	ctx := context.Background()
-	openWRTProvider := openwrt.New()
+	openWrtProvider := openwrt.New()
 	req := provider.SchemaRequest{}
 	res := &provider.SchemaResponse{}
-	openWRTProvider.Schema(ctx, req, res)
+	openWrtProvider.Schema(ctx, req, res)
 
 	// When
 	diagnostics := res.Schema.Validate()

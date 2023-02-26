@@ -1,6 +1,6 @@
 # terraform-provider-openwrt
 
-A [Terraform][] provider for [OpenWRT][].
+A [Terraform][] provider for [OpenWrt][].
 
 ## Setup
 
