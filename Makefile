@@ -18,7 +18,7 @@ clean-acceptance-test-server:
 	docker compose --file $(ACCEPTANCE_TEST_DOCKER_COMPOSE_FILE) down --remove-orphans --rmi all --volumes
 
 .PHONY: docs
-docs:
+docs: install
 	go generate ./...
 
 .PHONY: install
