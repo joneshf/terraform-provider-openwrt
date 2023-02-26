@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strconv"
 
-	"github.com/digineo/go-uci"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -15,13 +16,34 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
 )
 
 const (
-	configurationDirectoryAttribute           = "configuration_directory"
-	configurationDirectoryDefaultValue        = "/etc/config"
-	configurationDirectoryEnvironmentVariable = "OPENWRT_CONFIGURATION_DIRECTORY"
-	configurationDirectoryHumanReadableName   = "configuration directory"
+	hostnameAttribute           = "hostname"
+	hostnameDefaultValue        = "192.168.1.1"
+	hostnameEnvironmentVariable = "OPENWRT_HOSTNAME"
+	hostnameHumanReadableName   = "hostname"
+
+	passwordAttribute           = "password"
+	passwordDefaultValue        = ""
+	passwordEnvironmentVariable = "OPENWRT_PASSWORD"
+	passwordHumanReadableName   = "password"
+
+	portAttribute           = "port"
+	portDefaultValue        = 80
+	portEnvironmentVariable = "OPENWRT_PORT"
+	portHumanReadableName   = "port"
+
+	schemeAttribute           = "scheme"
+	schemeDefaultValue        = "http"
+	schemeEnvironmentVariable = "OPENWRT_SCHEME"
+	schemeHumanReadableName   = "URI scheme"
+
+	usernameAttribute           = "username"
+	usernameDefaultValue        = "root"
+	usernameEnvironmentVariable = "OPENWRT_USERNAME"
+	usernameHumanReadableName   = "username"
 
 	providerTypeName = "openwrt"
 )
@@ -55,14 +77,47 @@ func (p *openWrtProvider) Configure(
 		return
 	}
 
-	configurationDirectory := defaultAttributeValue(
-		model.ConfigurationDirectory,
-		configurationDirectoryEnvironmentVariable,
-		configurationDirectoryDefaultValue,
+	hostname := defaultStringAttributeValue(
+		model.Hostname,
+		hostnameEnvironmentVariable,
+		hostnameDefaultValue,
+	)
+	password := defaultStringAttributeValue(
+		model.Password,
+		passwordEnvironmentVariable,
+		passwordDefaultValue,
+	)
+	port := defaultInt64AttributeValue(
+		model.Port,
+		portEnvironmentVariable,
+		portDefaultValue,
+	)
+	scheme := defaultStringAttributeValue(
+		model.Scheme,
+		schemeEnvironmentVariable,
+		schemeDefaultValue,
+	)
+	username := defaultStringAttributeValue(
+		model.Username,
+		usernameEnvironmentVariable,
+		usernameDefaultValue,
 	)
 
-	ctx = setField(ctx, configurationDirectoryAttribute, configurationDirectory)
-	client := newOpenWrtClient(ctx, configurationDirectory, res)
+	ctx = setField(ctx, hostnameAttribute, hostname)
+	ctx = setField(ctx, passwordAttribute, password)
+	ctx = setField(ctx, portAttribute, port)
+	ctx = setField(ctx, schemeAttribute, scheme)
+	ctx = setField(ctx, usernameAttribute, username)
+
+	client := newOpenWrtClient(
+		ctx,
+		scheme,
+		hostname,
+		port,
+		username,
+		password,
+		res,
+	)
 	if res.Diagnostics.HasError() {
 		return
 	}
@@ -105,10 +160,60 @@ func (p *openWrtProvider) Schema(
 	req provider.SchemaRequest,
 	res *provider.SchemaResponse,
 ) {
-	configurationDirectory := schema.StringAttribute{
+	hostname := schema.StringAttribute{
 		Description: fmt.Sprintf(
-			"The configuration directory to use. Defaults to %q.",
-			configurationDirectoryDefaultValue,
+			"The %s to use. Defaults to %q.",
+			hostnameHumanReadableName,
+			hostnameDefaultValue,
+		),
+		Optional: true,
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
+	}
+
+	password := schema.StringAttribute{
+		Description: fmt.Sprintf(
+			"The %s to use. Defaults to %q.",
+			passwordHumanReadableName,
+			passwordDefaultValue,
+		),
+		Optional:  true,
+		Sensitive: true,
+	}
+
+	port := schema.Int64Attribute{
+		Description: fmt.Sprintf(
+			"The %s to use. Defaults to %d.",
+			portHumanReadableName,
+			portDefaultValue,
+		),
+		Optional: true,
+		Validators: []validator.Int64{
+			int64validator.Between(1, 65535),
+		},
+	}
+
+	scheme := schema.StringAttribute{
+		Description: fmt.Sprintf(
+			"The %s to use. Defaults to %q.",
+			schemeHumanReadableName,
+			schemeDefaultValue,
+		),
+		Optional: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf(
+				"http",
+				"https",
+			),
+		},
+	}
+
+	username := schema.StringAttribute{
+		Description: fmt.Sprintf(
+			"The %s to use. Defaults to %q.",
+			usernameHumanReadableName,
+			usernameDefaultValue,
 		),
 		Optional: true,
 		Validators: []validator.String{
@@ -118,18 +223,31 @@ func (p *openWrtProvider) Schema(
 
 	res.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			configurationDirectoryAttribute: configurationDirectory,
+			hostnameAttribute: hostname,
+			passwordAttribute: password,
+			portAttribute:     port,
+			schemeAttribute:   scheme,
+			usernameAttribute: username,
 		},
-		Description: "Interfaces with an OpenWrt device through UCI.",
+		Description: "Interfaces with an OpenWrt device through LuCI RPC. See https://github.com/openwrt/luci/wiki/JsonRpcHowTo#basics for setup instructions.",
 	}
 }
 
 // openWrtProviderModel maps provider schema data to a Go type.
 type openWrtProviderModel struct {
-	ConfigurationDirectory types.String `tfsdk:"configuration_directory"`
+	Hostname types.String `tfsdk:"hostname"`
+	Password types.String `tfsdk:"password"`
+	Port     types.Int64  `tfsdk:"port"`
+	Scheme   types.String `tfsdk:"scheme"`
+	Username types.String `tfsdk:"username"`
 }
 
-type attributeDefault interface {
+type attributeInt64Default interface {
+	IsNull() bool
+	ValueInt64() int64
+}
+
+type attributeStringDefault interface {
 	IsNull() bool
 	ValueString() string
 }
@@ -138,27 +256,70 @@ type attributeKnown interface {
 	IsUnknown() bool
 }
 
-func defaultAttributeValue(
-	attribute attributeDefault,
+func defaultInt64AttributeValue(
+	attribute attributeInt64Default,
+	environmentVariable string,
+	defaultValue int64,
+) int64 {
+	value := defaultValue
+	variable, ok := os.LookupEnv(environmentVariable)
+	if ok {
+		parsed, err := strconv.Atoi(variable)
+		if err != nil {
+			value = int64(parsed)
+		}
+	}
+
+	if !attribute.IsNull() {
+		value = attribute.ValueInt64()
+	}
+
+	return value
+}
+
+func defaultStringAttributeValue(
+	attribute attributeStringDefault,
 	environmentVariable string,
 	defaultValue string,
 ) string {
-	configurationDirectory := os.Getenv(environmentVariable)
-	if !attribute.IsNull() {
-		configurationDirectory = attribute.ValueString()
+	value := defaultValue
+	variable, ok := os.LookupEnv(environmentVariable)
+	if ok {
+		value = variable
 	}
 
-	return configurationDirectory
+	if !attribute.IsNull() {
+		value = attribute.ValueString()
+	}
+
+	return value
 }
 
 func newOpenWrtClient(
 	ctx context.Context,
-	configurationDirectory string,
+	scheme string,
+	hostname string,
+	port int64,
+	username string,
+	password string,
 	res *provider.ConfigureResponse,
-) uci.Tree {
+) *lucirpc.Client {
 	tflog.Debug(ctx, "Creating OpenWrt API Client")
 
-	client := uci.NewTree(configurationDirectory)
+	client, err := lucirpc.NewClient(
+		ctx,
+		scheme,
+		hostname,
+		uint16(port),
+		username,
+		password,
+	)
+	if err != nil {
+		res.Diagnostics.AddError(
+			"problem creating LuCI RPC client",
+			err.Error(),
+		)
+	}
 
 	return client
 }
@@ -178,7 +339,7 @@ func newProviderModel(
 
 func provideClient(
 	ctx context.Context,
-	client uci.Tree,
+	client *lucirpc.Client,
 	res *provider.ConfigureResponse,
 ) {
 	tflog.Debug(ctx, "Making OpenWrt client available during DataSource, and Resource type Configure methods")
@@ -204,10 +365,38 @@ func validateConfigurationKnown(
 ) {
 	tflog.Debug(ctx, "Validating configuration values are known")
 	validateKnown(
-		model.ConfigurationDirectory,
-		path.Root(configurationDirectoryAttribute),
-		configurationDirectoryEnvironmentVariable,
-		configurationDirectoryHumanReadableName,
+		model.Hostname,
+		path.Root(hostnameAttribute),
+		hostnameEnvironmentVariable,
+		hostnameHumanReadableName,
+		res,
+	)
+	validateKnown(
+		model.Password,
+		path.Root(passwordAttribute),
+		passwordEnvironmentVariable,
+		passwordHumanReadableName,
+		res,
+	)
+	validateKnown(
+		model.Port,
+		path.Root(portAttribute),
+		portEnvironmentVariable,
+		portHumanReadableName,
+		res,
+	)
+	validateKnown(
+		model.Scheme,
+		path.Root(schemeAttribute),
+		schemeEnvironmentVariable,
+		schemeHumanReadableName,
+		res,
+	)
+	validateKnown(
+		model.Username,
+		path.Root(usernameAttribute),
+		usernameEnvironmentVariable,
+		usernameHumanReadableName,
 		res,
 	)
 }

@@ -6,43 +6,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
-	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt"
 	"gotest.tools/v3/assert"
 )
-
-func TestOpenWrtProviderConfigureDoesNotErrorWithNoConfiguration(t *testing.T) {
-	// Given
-	ctx := context.Background()
-	openWrtProvider := openwrt.New()
-	schemaReq := provider.SchemaRequest{}
-	schemaRes := &provider.SchemaResponse{}
-	openWrtProvider.Schema(ctx, schemaReq, schemaRes)
-	config := tfsdk.Config{
-		Schema: schemaRes.Schema,
-		Raw: tftypes.NewValue(
-			tftypes.Object{
-				AttributeTypes: map[string]tftypes.Type{
-					"configuration_directory": tftypes.String,
-				},
-			},
-			map[string]tftypes.Value{
-				"configuration_directory": tftypes.NewValue(tftypes.String, ""),
-			},
-		),
-	}
-	req := provider.ConfigureRequest{
-		Config: config,
-	}
-	res := &provider.ConfigureResponse{}
-
-	// When
-	openWrtProvider.Configure(ctx, req, res)
-
-	// Then
-	assert.DeepEqual(t, res.Diagnostics, diag.Diagnostics{})
-}
 
 func TestOpenWrtProviderMetadataDoesNotSetVersion(t *testing.T) {
 	// Given
@@ -72,21 +38,180 @@ func TestOpenWrtProviderMetadataSetsTypeName(t *testing.T) {
 	assert.DeepEqual(t, res.TypeName, "openwrt")
 }
 
-func TestOpenWrtProviderSchemaHasOptionalConfigurationDirectory(t *testing.T) {
-	// Given
-	ctx := context.Background()
-	openWrtProvider := openwrt.New()
-	req := provider.SchemaRequest{}
-	res := &provider.SchemaResponse{}
+func TestOpenWrtProviderSchemaHostnameAttribute(t *testing.T) {
+	t.Run("exists", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		openWrtProvider := openwrt.New()
+		req := provider.SchemaRequest{}
+		res := &provider.SchemaResponse{}
 
-	// When
-	openWrtProvider.Schema(ctx, req, res)
+		// When
+		openWrtProvider.Schema(ctx, req, res)
 
-	// Then
-	attributes := res.Schema.Attributes
-	configurationDirectory, ok := attributes["configuration_directory"]
-	assert.Check(t, ok)
-	assert.Check(t, configurationDirectory.IsOptional())
+		// Then
+		_, ok := res.Schema.Attributes["hostname"]
+		assert.Check(t, ok)
+	})
+
+	t.Run("is optional", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		openWrtProvider := openwrt.New()
+		req := provider.SchemaRequest{}
+		res := &provider.SchemaResponse{}
+
+		// When
+		openWrtProvider.Schema(ctx, req, res)
+
+		// Then
+		got := res.Schema.Attributes["hostname"]
+		assert.Check(t, got.IsOptional())
+	})
+
+}
+
+func TestOpenWrtProviderSchemaPasswordAttribute(t *testing.T) {
+	t.Run("exists", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		openWrtProvider := openwrt.New()
+		req := provider.SchemaRequest{}
+		res := &provider.SchemaResponse{}
+
+		// When
+		openWrtProvider.Schema(ctx, req, res)
+
+		// Then
+		_, ok := res.Schema.Attributes["password"]
+		assert.Check(t, ok)
+	})
+
+	t.Run("is optional", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		openWrtProvider := openwrt.New()
+		req := provider.SchemaRequest{}
+		res := &provider.SchemaResponse{}
+
+		// When
+		openWrtProvider.Schema(ctx, req, res)
+
+		// Then
+		got := res.Schema.Attributes["password"]
+		assert.Check(t, got.IsOptional())
+	})
+
+	t.Run("is sensitive", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		openWrtProvider := openwrt.New()
+		req := provider.SchemaRequest{}
+		res := &provider.SchemaResponse{}
+
+		// When
+		openWrtProvider.Schema(ctx, req, res)
+
+		// Then
+		got := res.Schema.Attributes["password"]
+		assert.Check(t, got.IsSensitive())
+	})
+}
+
+func TestOpenWrtProviderSchemaPortAttribute(t *testing.T) {
+	t.Run("exists", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		openWrtProvider := openwrt.New()
+		req := provider.SchemaRequest{}
+		res := &provider.SchemaResponse{}
+
+		// When
+		openWrtProvider.Schema(ctx, req, res)
+
+		// Then
+		_, ok := res.Schema.Attributes["port"]
+		assert.Check(t, ok)
+	})
+
+	t.Run("is optional", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		openWrtProvider := openwrt.New()
+		req := provider.SchemaRequest{}
+		res := &provider.SchemaResponse{}
+
+		// When
+		openWrtProvider.Schema(ctx, req, res)
+
+		// Then
+		got := res.Schema.Attributes["port"]
+		assert.Check(t, got.IsOptional())
+	})
+}
+
+func TestOpenWrtProviderSchemaSchemeAttribute(t *testing.T) {
+	t.Run("exists", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		openWrtProvider := openwrt.New()
+		req := provider.SchemaRequest{}
+		res := &provider.SchemaResponse{}
+
+		// When
+		openWrtProvider.Schema(ctx, req, res)
+
+		// Then
+		_, ok := res.Schema.Attributes["scheme"]
+		assert.Check(t, ok)
+	})
+
+	t.Run("is optional", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		openWrtProvider := openwrt.New()
+		req := provider.SchemaRequest{}
+		res := &provider.SchemaResponse{}
+
+		// When
+		openWrtProvider.Schema(ctx, req, res)
+
+		// Then
+		got := res.Schema.Attributes["scheme"]
+		assert.Check(t, got.IsOptional())
+	})
+}
+
+func TestOpenWrtProviderSchemaUsernameAttribute(t *testing.T) {
+	t.Run("exists", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		openWrtProvider := openwrt.New()
+		req := provider.SchemaRequest{}
+		res := &provider.SchemaResponse{}
+
+		// When
+		openWrtProvider.Schema(ctx, req, res)
+
+		// Then
+		_, ok := res.Schema.Attributes["username"]
+		assert.Check(t, ok)
+	})
+
+	t.Run("is optional", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		openWrtProvider := openwrt.New()
+		req := provider.SchemaRequest{}
+		res := &provider.SchemaResponse{}
+
+		// When
+		openWrtProvider.Schema(ctx, req, res)
+
+		// Then
+		got := res.Schema.Attributes["username"]
+		assert.Check(t, got.IsOptional())
+	})
 }
 
 func TestOpenWrtProviderSchemaDoesNotUseInvalidAttributes(t *testing.T) {
