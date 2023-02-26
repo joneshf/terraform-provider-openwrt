@@ -3,12 +3,12 @@
 page_title: "openwrt Provider"
 subcategory: ""
 description: |-
-  Interfaces with an OpenWrt device through UCI.
+  Interfaces with an OpenWrt device through LuCI RPC. See https://github.com/openwrt/luci/wiki/JsonRpcHowTo#basics for setup instructions.
 ---
 
 # openwrt Provider
 
-Interfaces with an OpenWrt device through UCI.
+Interfaces with an OpenWrt device through LuCI RPC. See https://github.com/openwrt/luci/wiki/JsonRpcHowTo#basics for setup instructions.
 
 ## Example Usage
 
@@ -22,4 +22,8 @@ provider "openwrt" {
 
 ### Optional
 
-- `configuration_directory` (String) The configuration directory to use. Defaults to "/etc/config".
+- `hostname` (String) The hostname to use. Defaults to "192.168.1.1".
+- `password` (String, Sensitive) The password to use. Defaults to "".
+- `port` (Number) The port to use. Defaults to 80.
+- `scheme` (String) The URI scheme to use. Defaults to "http".
+- `username` (String) The username to use. Defaults to "root".
