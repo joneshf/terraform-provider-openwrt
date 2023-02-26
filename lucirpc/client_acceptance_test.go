@@ -1,4 +1,4 @@
-//go:build acceptance
+//go:build acceptance.test
 
 package lucirpc_test
 

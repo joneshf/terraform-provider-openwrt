@@ -1,7 +1,7 @@
 {
     "gopls": {
         "build.buildFlags": [
-            "-tags=acceptance",
+            "-tags=acceptance.test",
         ],
     },
     "nixEnvSelector.nixFile": "${workspaceRoot}/shell.nix",

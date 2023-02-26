@@ -1,6 +1,7 @@
 .SUFFIXES:
 Makefile:;
 
+ACCEPTANCE_TEST_BUILD_CONSTRAINT := acceptance.test
 ACCEPTANCE_TEST_DOCKER_COMPOSE_FILE := lucirpc/docker-compose.acceptance-test.yaml
 
 .DEFAULT_GOAL := test
@@ -43,7 +44,7 @@ test-go: test-go-unit-test test-go-acceptance-test
 
 .PHONY: test-go-acceptance-test
 test-go-acceptance-test:
-	go test -tags=acceptance ./...
+	go test -tags=$(ACCEPTANCE_TEST_BUILD_CONSTRAINT) ./...
 
 .PHONY: test-go-unit-test
 test-go-unit-test:
