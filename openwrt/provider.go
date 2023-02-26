@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
+	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/system"
 )
 
 const (
@@ -135,7 +136,9 @@ func (p *openWrtProvider) Configure(
 func (p *openWrtProvider) DataSources(
 	ctx context.Context,
 ) []func() datasource.DataSource {
-	return []func() datasource.DataSource{}
+	return []func() datasource.DataSource{
+		system.NewSystemDataSource,
+	}
 }
 
 // Metadata returns the provider type name.
