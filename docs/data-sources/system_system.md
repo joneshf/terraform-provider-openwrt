@@ -33,11 +33,11 @@ output "system_system" {
 
 - `description` (String) The hostname for the system.
 - `hostname` (String) A short single-line description for the system.
-- `log_size` (Number) Size of the file based log buffer in KiB
-- `notes` (String) Multi-line free-form text about the system
-- `timezone` (String) The POSIX.1 time zone string. This has no corresponding value in LuCI. See: https://github.com/openwrt/luci/blob/cd82ccacef78d3bb8b8af6b87dabb9e892e2b2aa/modules/luci-base/luasrc/sys/zoneinfo/tzdata.lua
+- `log_size` (Number) Size of the file based log buffer in KiB.
+- `notes` (String) Multi-line free-form text about the system.
+- `timezone` (String) The POSIX.1 time zone string. This has no corresponding value in LuCI. See: https://github.com/openwrt/luci/blob/cd82ccacef78d3bb8b8af6b87dabb9e892e2b2aa/modules/luci-base/luasrc/sys/zoneinfo/tzdata.lua.
 - `ttylogin` (Boolean) Require authentication for local users to log in the system.
-- `zonename` (String) The IANA/Olson time zone string. This corresponds to "Timezone" in LuCI. See: https://github.com/openwrt/luci/blob/cd82ccacef78d3bb8b8af6b87dabb9e892e2b2aa/modules/luci-base/luasrc/sys/zoneinfo/tzdata.lua
+- `zonename` (String) The IANA/Olson time zone string. This corresponds to "Timezone" in LuCI. See: https://github.com/openwrt/luci/blob/cd82ccacef78d3bb8b8af6b87dabb9e892e2b2aa/modules/luci-base/luasrc/sys/zoneinfo/tzdata.lua.
 
 ### Read-Only
 
