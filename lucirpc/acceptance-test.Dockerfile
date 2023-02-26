@@ -2,6 +2,9 @@ FROM openwrtorg/rootfs:x86_64-22.03.3@sha256:bf650d3c71a5d31c51c50228c2991c6f41e
 
 RUN mkdir /var/lock
 RUN opkg update && opkg install \
+    # Install curl so we can make a healthcheck
+    # wget is installed, but it's hard to use for a health check.
+    curl \
     # Install LuCI JSON-RPC packages.
     # See https://github.com/openwrt/luci/wiki/JsonRpcHowTo#basics
     luci-compat \
@@ -12,3 +15,9 @@ RUN opkg update && opkg install \
     luci \
     luci-ssl
 RUN /etc/init.d/uhttpd restart
+
+HEALTHCHECK --interval=5s CMD curl \
+    --data '{"id": 1, "method": "login", "params": ["root", ""]}' \
+    --fail \
+    --no-progress-meter \
+    http://localhost/cgi-bin/luci/rpc/auth
