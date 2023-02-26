@@ -2,6 +2,7 @@ package lucirpc_test
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -143,6 +144,61 @@ func TestClientGetSection(t *testing.T) {
 		assert.ErrorContains(t, err, "unable to get section")
 	})
 
+	t.Run("handles errors in result", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		handle := func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, `{
+				"result": [
+					false,
+					"Invalid argument"
+				]
+			}`)
+		}
+		client, close := authenticatedClient(
+			t,
+			ctx,
+			http.HandlerFunc(handle),
+		)
+		defer close()
+
+		// When
+		_, err := client.GetSection(
+			ctx,
+			"",
+			"",
+		)
+
+		// Then
+		assert.ErrorContains(t, err, `incorrect config ("") and/or section (""): result from LuCI`)
+	})
+
+	t.Run("does not handle unknown stuff in result", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		handle := func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, `{
+				"result": 31
+			}`)
+		}
+		client, close := authenticatedClient(
+			t,
+			ctx,
+			http.HandlerFunc(handle),
+		)
+		defer close()
+
+		// When
+		_, err := client.GetSection(
+			ctx,
+			"",
+			"",
+		)
+
+		// Then
+		assert.ErrorContains(t, err, "unable to parse get section response")
+	})
+
 	t.Run("handles invalid response", func(t *testing.T) {
 		// Given
 		ctx := context.Background()
@@ -195,10 +251,10 @@ func TestClientGetSection(t *testing.T) {
 
 		// Then
 		assert.NilError(t, err)
-		want := map[string]string{
-			".name": "section-name",
-			"baz":   "1",
-			"foo":   "bar",
+		want := map[string]json.RawMessage{
+			".name": json.RawMessage(`"section-name"`),
+			"baz":   json.RawMessage(`"1"`),
+			"foo":   json.RawMessage(`"bar"`),
 		}
 		assert.DeepEqual(t, got, want)
 	})

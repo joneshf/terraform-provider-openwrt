@@ -12,11 +12,15 @@ in
 
 pkgs.mkShell {
   nativeBuildInputs = [
+    pkgs.colima
+    pkgs.docker
+    pkgs.docker-credential-helpers
     pkgs.gh
     pkgs.git
     pkgs.gnumake
     pkgs.go
     pkgs.go-tools
+    pkgs.gopls
     pkgs.nixpkgs-fmt
     pkgs.terraform
   ];

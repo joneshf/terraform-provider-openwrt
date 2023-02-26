@@ -1,0 +1,9 @@
+services:
+  openwrt:
+    build:
+      context: .
+      dockerfile: acceptance-test.Dockerfile
+    ports:
+      - "8022:22"
+      - "8080:80"
+      - "8443:443"
