@@ -30,7 +30,7 @@ start-acceptance-test-server:
 	docker compose --file $(ACCEPTANCE_TEST_DOCKER_COMPOSE_FILE) up --build --detach --remove-orphans
 
 .PHONY: test
-test: build start-acceptance-test-server test-docs test-go
+test: build test-docs test-go
 
 .PHONY: test-docs
 test-docs: test-docs-up-to-date
@@ -43,7 +43,7 @@ test-docs-up-to-date:
 test-go: test-go-unit-test test-go-acceptance-test
 
 .PHONY: test-go-acceptance-test
-test-go-acceptance-test:
+test-go-acceptance-test: start-acceptance-test-server
 	go test -tags=$(ACCEPTANCE_TEST_BUILD_CONSTRAINT) ./...
 
 .PHONY: test-go-unit-test
