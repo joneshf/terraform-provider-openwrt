@@ -27,23 +27,23 @@ const (
 )
 
 var (
-	_ provider.Provider = &openWRTProvider{}
+	_ provider.Provider = &openWrtProvider{}
 )
 
 func New() provider.Provider {
-	return &openWRTProvider{}
+	return &openWrtProvider{}
 }
 
-type openWRTProvider struct {
+type openWrtProvider struct {
 }
 
-// Configure prepares an OpenWRT API client for data sources and resources.
-func (p *openWRTProvider) Configure(
+// Configure prepares an OpenWrt API client for data sources and resources.
+func (p *openWrtProvider) Configure(
 	ctx context.Context,
 	req provider.ConfigureRequest,
 	res *provider.ConfigureResponse,
 ) {
-	tflog.Info(ctx, "Configuring OpenWRT API client")
+	tflog.Info(ctx, "Configuring OpenWrt API client")
 
 	model := newProviderModel(ctx, req, res)
 	if res.Diagnostics.HasError() {
@@ -62,7 +62,7 @@ func (p *openWRTProvider) Configure(
 	)
 
 	ctx = setField(ctx, configurationDirectoryAttribute, configurationDirectory)
-	client := newOpenWRTClient(ctx, configurationDirectory, res)
+	client := newOpenWrtClient(ctx, configurationDirectory, res)
 	if res.Diagnostics.HasError() {
 		return
 	}
@@ -77,14 +77,14 @@ func (p *openWRTProvider) Configure(
 }
 
 // DataSources defines the data sources implemented in the provider.
-func (p *openWRTProvider) DataSources(
+func (p *openWrtProvider) DataSources(
 	ctx context.Context,
 ) []func() datasource.DataSource {
 	return []func() datasource.DataSource{}
 }
 
 // Metadata returns the provider type name.
-func (p *openWRTProvider) Metadata(
+func (p *openWrtProvider) Metadata(
 	ctx context.Context,
 	req provider.MetadataRequest,
 	res *provider.MetadataResponse,
@@ -93,14 +93,14 @@ func (p *openWRTProvider) Metadata(
 }
 
 // Resources defines the resources implemented in the provider.
-func (p *openWRTProvider) Resources(
+func (p *openWrtProvider) Resources(
 	ctx context.Context,
 ) []func() resource.Resource {
 	return []func() resource.Resource{}
 }
 
 // Schema defines the provider-level schema for configuration data.
-func (p *openWRTProvider) Schema(
+func (p *openWrtProvider) Schema(
 	ctx context.Context,
 	req provider.SchemaRequest,
 	res *provider.SchemaResponse,
@@ -120,12 +120,12 @@ func (p *openWRTProvider) Schema(
 		Attributes: map[string]schema.Attribute{
 			configurationDirectoryAttribute: configurationDirectory,
 		},
-		Description: "Interfaces with an OpenWRT device through UCI.",
+		Description: "Interfaces with an OpenWrt device through UCI.",
 	}
 }
 
-// openWRTProviderModel maps provider schema data to a Go type.
-type openWRTProviderModel struct {
+// openWrtProviderModel maps provider schema data to a Go type.
+type openWrtProviderModel struct {
 	ConfigurationDirectory types.String `tfsdk:"configuration_directory"`
 }
 
@@ -151,12 +151,12 @@ func defaultAttributeValue(
 	return configurationDirectory
 }
 
-func newOpenWRTClient(
+func newOpenWrtClient(
 	ctx context.Context,
 	configurationDirectory string,
 	res *provider.ConfigureResponse,
 ) uci.Tree {
-	tflog.Debug(ctx, "Creating OpenWRT API Client")
+	tflog.Debug(ctx, "Creating OpenWrt API Client")
 
 	client := uci.NewTree(configurationDirectory)
 
@@ -167,10 +167,10 @@ func newProviderModel(
 	ctx context.Context,
 	req provider.ConfigureRequest,
 	res *provider.ConfigureResponse,
-) openWRTProviderModel {
+) openWrtProviderModel {
 	tflog.Debug(ctx, "Retrieving provider data from configuration")
 
-	var config openWRTProviderModel
+	var config openWrtProviderModel
 	diagnostics := req.Config.Get(ctx, &config)
 	res.Diagnostics.Append(diagnostics...)
 	return config
@@ -181,7 +181,7 @@ func provideClient(
 	client uci.Tree,
 	res *provider.ConfigureResponse,
 ) {
-	tflog.Debug(ctx, "Making OpenWRT client available during DataSource, and Resource type Configure methods")
+	tflog.Debug(ctx, "Making OpenWrt client available during DataSource, and Resource type Configure methods")
 
 	res.DataSourceData = client
 	res.ResourceData = client
@@ -199,7 +199,7 @@ func setField(
 
 func validateConfigurationKnown(
 	ctx context.Context,
-	model openWRTProviderModel,
+	model openWrtProviderModel,
 	res *provider.ConfigureResponse,
 ) {
 	tflog.Debug(ctx, "Validating configuration values are known")
@@ -222,7 +222,7 @@ func validateKnown(
 	if attribute.IsUnknown() {
 		res.Diagnostics.AddAttributeError(
 			attributePath,
-			fmt.Sprintf("Unknown OpenWRT %s", humanReadableName),
+			fmt.Sprintf("Unknown OpenWrt %s", humanReadableName),
 			validateKnownMessage(attributePath, environmentVariable),
 		)
 	}
@@ -233,7 +233,7 @@ func validateKnownMessage(
 	environmentVariable string,
 ) string {
 	pathPart := fmt.Sprintf(
-		"The provider cannot create the OpenWRT API client as there is an unknown configuration value for the OpenWRT %s.",
+		"The provider cannot create the OpenWrt API client as there is an unknown configuration value for the OpenWrt %s.",
 		attributePath.String(),
 	)
 	environmentVariablePart := fmt.Sprintf(

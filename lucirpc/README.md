@@ -2,7 +2,7 @@
 
 An RPC client for [LuCI][].
 
-This requires a little bit of [setup][] on the [OpenWRT][] device.
+This requires a little bit of [setup][] on the [OpenWrt][] device.
 
 [luci]: https://openwrt.org/docs/techref/luci
 [openwrt]: https://openwrt.org/

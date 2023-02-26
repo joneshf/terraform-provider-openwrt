@@ -3,12 +3,12 @@
 page_title: "openwrt Provider"
 subcategory: ""
 description: |-
-  Interfaces with an OpenWRT device through UCI.
+  Interfaces with an OpenWrt device through UCI.
 ---
 
 # openwrt Provider
 
-Interfaces with an OpenWRT device through UCI.
+Interfaces with an OpenWrt device through UCI.
 
 ## Example Usage
 
