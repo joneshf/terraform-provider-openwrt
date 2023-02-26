@@ -88,6 +88,8 @@ func schemaAttributeExists(
 	attribute string,
 ) func(*testing.T) {
 	return func(t *testing.T) {
+		t.Helper()
+
 		// Given
 		ctx := context.Background()
 		openWrtProvider := openwrt.New()
@@ -107,6 +109,8 @@ func schemaAttributeIsOptional(
 	attribute string,
 ) func(*testing.T) {
 	return func(t *testing.T) {
+		t.Helper()
+
 		// Given
 		ctx := context.Background()
 		openWrtProvider := openwrt.New()
@@ -126,6 +130,8 @@ func schemaAttributeIsSensitive(
 	attribute string,
 ) func(*testing.T) {
 	return func(t *testing.T) {
+		t.Helper()
+
 		// Given
 		ctx := context.Background()
 		openWrtProvider := openwrt.New()
