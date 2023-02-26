@@ -27,7 +27,7 @@ install:
 
 .PHONY: start-acceptance-test-server
 start-acceptance-test-server:
-	docker compose --file $(ACCEPTANCE_TEST_DOCKER_COMPOSE_FILE) up --build --detach --remove-orphans
+	docker compose --file $(ACCEPTANCE_TEST_DOCKER_COMPOSE_FILE) up --build --remove-orphans --wait
 
 .PHONY: test
 test: build test-docs test-go
