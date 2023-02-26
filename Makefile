@@ -44,7 +44,7 @@ test-go: test-go-unit-test test-go-acceptance-test
 
 .PHONY: test-go-acceptance-test
 test-go-acceptance-test: start-acceptance-test-server
-	go test -tags=$(ACCEPTANCE_TEST_BUILD_CONSTRAINT) ./...
+	TF_ACC=1 go test -tags=$(ACCEPTANCE_TEST_BUILD_CONSTRAINT) ./...
 
 .PHONY: test-go-unit-test
 test-go-unit-test:
