@@ -1,5 +1,7 @@
 on:
-  - push
+  push:
+    tags-ignore:
+      - "*"
 
 jobs:
   test:
