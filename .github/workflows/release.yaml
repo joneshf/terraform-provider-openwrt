@@ -22,7 +22,7 @@ jobs:
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
-      - name: Test
+      - name: Release
         run: nix-shell --run 'make release'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

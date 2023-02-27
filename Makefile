@@ -27,7 +27,7 @@ install:
 
 .PHONY: release
 release:
-	goreleaser release --clean
+	goreleaser release
 
 .PHONY: start-acceptance-test-server
 start-acceptance-test-server:

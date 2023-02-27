@@ -39,13 +39,13 @@ checksum:
 signs:
   - args:
       - --batch
-      - --detach-sign
-      - ${artifact}
       - --local-user
       # This comes from the GitHub Action environment
       - "{{ .Env.GPG_FINGERPRINT }}"
       - --output
       - ${signature}
+      - --detach-sign
+      - ${artifact}
     artifacts: checksum
 
 release:
