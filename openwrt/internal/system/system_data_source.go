@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
+	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/logger"
 )
 
 const (
@@ -235,7 +236,7 @@ func getMetadataString(
 	}
 
 	result = types.StringValue(value)
-	ctx = logSetFieldString(ctx, fullTypeName, terraformType, key, result)
+	ctx = logger.SetFieldString(ctx, fullTypeName, terraformType, key, result)
 	return ctx, result, diagnostics
 }
 
@@ -285,7 +286,7 @@ func getOptionBool(
 		return ctx, result, diagnostics
 	}
 
-	ctx = logSetFieldBool(ctx, fullTypeName, terraformType, option, result)
+	ctx = logger.SetFieldBool(ctx, fullTypeName, terraformType, option, result)
 	return ctx, result, diagnostics
 }
 
@@ -328,7 +329,7 @@ func getOptionInt64(
 	}
 
 	result = types.Int64Value(int64(value))
-	ctx = logSetFieldInt64(ctx, fullTypeName, terraformType, option, result)
+	ctx = logger.SetFieldInt64(ctx, fullTypeName, terraformType, option, result)
 	return ctx, result, diagnostics
 }
 
@@ -359,7 +360,7 @@ func getOptionString(
 	}
 
 	result = types.StringValue(value)
-	ctx = logSetFieldString(ctx, fullTypeName, terraformType, option, result)
+	ctx = logger.SetFieldString(ctx, fullTypeName, terraformType, option, result)
 	return ctx, result, diagnostics
 }
 
@@ -378,51 +379,6 @@ func getSection(
 	}
 
 	return section, diagnostics
-}
-
-func logSetFieldBool(
-	ctx context.Context,
-	fullTypeName string,
-	terraformType string,
-	key string,
-	value logValueBool,
-) context.Context {
-	ctx = tflog.SetField(ctx, fmt.Sprintf("%s_%s_%s", fullTypeName, terraformType, key), value.ValueBool())
-	return ctx
-}
-
-func logSetFieldInt64(
-	ctx context.Context,
-	fullTypeName string,
-	terraformType string,
-	key string,
-	value logValueInt64,
-) context.Context {
-	ctx = tflog.SetField(ctx, fmt.Sprintf("%s_%s_%s", fullTypeName, terraformType, key), value.ValueInt64())
-	return ctx
-}
-
-func logSetFieldString(
-	ctx context.Context,
-	fullTypeName string,
-	terraformType string,
-	key string,
-	value logValueString,
-) context.Context {
-	ctx = tflog.SetField(ctx, fmt.Sprintf("%s_%s_%s", fullTypeName, terraformType, key), value.ValueString())
-	return ctx
-}
-
-type logValueBool interface {
-	ValueBool() bool
-}
-
-type logValueInt64 interface {
-	ValueInt64() int64
-}
-
-type logValueString interface {
-	ValueString() string
 }
 
 func newUCIClient(
