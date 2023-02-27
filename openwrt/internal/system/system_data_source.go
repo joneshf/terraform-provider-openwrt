@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -76,7 +77,8 @@ func (d *systemDataSource) Configure(
 		return
 	}
 
-	client := newUCIClient(req, res)
+	client, diagnostics := newUCIClient(req)
+	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {
 		return
 	}
@@ -103,28 +105,39 @@ func (d *systemDataSource) Read(
 ) {
 	tflog.Info(ctx, fmt.Sprintf("Reading %s data source", d.fullTypeName))
 
-	section := getSection(ctx, d.client, res)
+	section, diagnostics := getSection(ctx, d.client)
+	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {
 		return
 	}
 
 	var model systemModel
-	ctx, model.ConLogLevel = getOptionInt64(ctx, d.fullTypeName, section, path.Root(systemConLogLevelAttribute), systemConLogLevelUCIOption, res)
-	ctx, model.CronLogLevel = getOptionInt64(ctx, d.fullTypeName, section, path.Root(systemCronLogLevelAttribute), systemCronLogLevelUCIOption, res)
-	ctx, model.Description = getOptionString(ctx, d.fullTypeName, section, path.Root(systemDescriptionAttribute), systemDescriptionUCIOption, res)
-	ctx, model.Hostname = getOptionString(ctx, d.fullTypeName, section, path.Root(systemHostnameAttribute), systemHostnameUCIOption, res)
-	ctx, model.LogSize = getOptionInt64(ctx, d.fullTypeName, section, path.Root(systemLogSizeAttribute), systemLogSizeUCIOption, res)
-	ctx, model.Notes = getOptionString(ctx, d.fullTypeName, section, path.Root(systemNotesAttribute), systemNotesUCIOption, res)
-	ctx, model.Timezone = getOptionString(ctx, d.fullTypeName, section, path.Root(systemTimezoneAttribute), systemTimezoneUCIOption, res)
-	ctx, model.TTYLogin = getOptionBool(ctx, d.fullTypeName, section, path.Root(systemTTYLoginAttribute), systemTTYLoginUCIOption, res)
-	ctx, model.Zonename = getOptionString(ctx, d.fullTypeName, section, path.Root(systemZonenameAttribute), systemZonenameUCIOption, res)
-	ctx, model.Id = getMetadataString(ctx, d.fullTypeName, section, systemIdUCISection, res)
+	ctx, model.ConLogLevel, diagnostics = getOptionInt64(ctx, d.fullTypeName, section, path.Root(systemConLogLevelAttribute), systemConLogLevelUCIOption)
+	res.Diagnostics.Append(diagnostics...)
+	ctx, model.CronLogLevel, diagnostics = getOptionInt64(ctx, d.fullTypeName, section, path.Root(systemCronLogLevelAttribute), systemCronLogLevelUCIOption)
+	res.Diagnostics.Append(diagnostics...)
+	ctx, model.Description, diagnostics = getOptionString(ctx, d.fullTypeName, section, path.Root(systemDescriptionAttribute), systemDescriptionUCIOption)
+	res.Diagnostics.Append(diagnostics...)
+	ctx, model.Hostname, diagnostics = getOptionString(ctx, d.fullTypeName, section, path.Root(systemHostnameAttribute), systemHostnameUCIOption)
+	res.Diagnostics.Append(diagnostics...)
+	ctx, model.LogSize, diagnostics = getOptionInt64(ctx, d.fullTypeName, section, path.Root(systemLogSizeAttribute), systemLogSizeUCIOption)
+	res.Diagnostics.Append(diagnostics...)
+	ctx, model.Notes, diagnostics = getOptionString(ctx, d.fullTypeName, section, path.Root(systemNotesAttribute), systemNotesUCIOption)
+	res.Diagnostics.Append(diagnostics...)
+	ctx, model.Timezone, diagnostics = getOptionString(ctx, d.fullTypeName, section, path.Root(systemTimezoneAttribute), systemTimezoneUCIOption)
+	res.Diagnostics.Append(diagnostics...)
+	ctx, model.TTYLogin, diagnostics = getOptionBool(ctx, d.fullTypeName, section, path.Root(systemTTYLoginAttribute), systemTTYLoginUCIOption)
+	res.Diagnostics.Append(diagnostics...)
+	ctx, model.Zonename, diagnostics = getOptionString(ctx, d.fullTypeName, section, path.Root(systemZonenameAttribute), systemZonenameUCIOption)
+	res.Diagnostics.Append(diagnostics...)
+	ctx, model.Id, diagnostics = getMetadataString(ctx, d.fullTypeName, section, systemIdUCISection)
+	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {
 		return
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Setting the %s data source state", d.fullTypeName))
-	diagnostics := res.State.Set(ctx, model)
+	diagnostics = res.State.Set(ctx, model)
 	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {
 		return
@@ -200,27 +213,27 @@ func getMetadataString(
 	fullTypeName string,
 	section map[string]json.RawMessage,
 	key string,
-	res *datasource.ReadResponse,
-) (context.Context, types.String) {
+) (context.Context, types.String, diag.Diagnostics) {
+	diagnostics := diag.Diagnostics{}
 	result := types.StringNull()
 	raw, ok := section[key]
 	if !ok {
-		return ctx, result
+		return ctx, result, diagnostics
 	}
 
 	var value string
 	err := json.Unmarshal(raw, &value)
 	if err != nil {
-		res.Diagnostics.AddError(
+		diagnostics.AddError(
 			fmt.Sprintf("unable to parse metadata: %q", key),
 			err.Error(),
 		)
-		return ctx, result
+		return ctx, result, diagnostics
 	}
 
 	result = types.StringValue(value)
 	ctx = logSetFieldString(ctx, fullTypeName, key, result)
-	return ctx, result
+	return ctx, result, diagnostics
 }
 
 func getOptionBool(
@@ -229,12 +242,12 @@ func getOptionBool(
 	section map[string]json.RawMessage,
 	attribute path.Path,
 	option string,
-	res *datasource.ReadResponse,
-) (context.Context, types.Bool) {
+) (context.Context, types.Bool, diag.Diagnostics) {
+	diagnostics := diag.Diagnostics{}
 	result := types.BoolNull()
 	raw, ok := section[option]
 	if !ok {
-		return ctx, result
+		return ctx, result, diagnostics
 	}
 
 	// Booleans in UCI can be any number of things:
@@ -244,12 +257,12 @@ func getOptionBool(
 	var boolish string
 	err := json.Unmarshal(raw, &boolish)
 	if err != nil {
-		res.Diagnostics.AddAttributeError(
+		diagnostics.AddAttributeError(
 			attribute,
 			fmt.Sprintf("unable to parse option: %q", option),
 			err.Error(),
 		)
-		return ctx, result
+		return ctx, result, diagnostics
 	}
 
 	switch boolish {
@@ -260,16 +273,16 @@ func getOptionBool(
 		result = types.BoolValue(false)
 
 	default:
-		res.Diagnostics.AddAttributeError(
+		diagnostics.AddAttributeError(
 			attribute,
 			fmt.Sprintf("Unexpected value for option: %q", option),
 			fmt.Sprintf(`expected one of "1", "yes", "on", "true", "enabled", "0", "no", "off", "false", or "disabled"; got: %q`, boolish),
 		)
-		return ctx, result
+		return ctx, result, diagnostics
 	}
 
 	ctx = logSetFieldBool(ctx, fullTypeName, option, result)
-	return ctx, result
+	return ctx, result, diagnostics
 }
 
 func getOptionInt64(
@@ -278,12 +291,12 @@ func getOptionInt64(
 	section map[string]json.RawMessage,
 	attribute path.Path,
 	option string,
-	res *datasource.ReadResponse,
-) (context.Context, types.Int64) {
+) (context.Context, types.Int64, diag.Diagnostics) {
+	diagnostics := diag.Diagnostics{}
 	result := types.Int64Null()
 	raw, ok := section[option]
 	if !ok {
-		return ctx, result
+		return ctx, result, diagnostics
 	}
 
 	// Integers in UCI are stored as strtings.
@@ -291,27 +304,27 @@ func getOptionInt64(
 	var intish string
 	err := json.Unmarshal(raw, &intish)
 	if err != nil {
-		res.Diagnostics.AddAttributeError(
+		diagnostics.AddAttributeError(
 			attribute,
 			fmt.Sprintf("unable to parse option: %q", option),
 			err.Error(),
 		)
-		return ctx, result
+		return ctx, result, diagnostics
 	}
 
 	value, err := strconv.Atoi(intish)
 	if err != nil {
-		res.Diagnostics.AddAttributeError(
+		diagnostics.AddAttributeError(
 			attribute,
 			fmt.Sprintf("unable to convert option: %q to a string", option),
 			err.Error(),
 		)
-		return ctx, result
+		return ctx, result, diagnostics
 	}
 
 	result = types.Int64Value(int64(value))
 	ctx = logSetFieldInt64(ctx, fullTypeName, option, result)
-	return ctx, result
+	return ctx, result, diagnostics
 }
 
 func getOptionString(
@@ -320,45 +333,45 @@ func getOptionString(
 	section map[string]json.RawMessage,
 	attribute path.Path,
 	option string,
-	res *datasource.ReadResponse,
-) (context.Context, types.String) {
+) (context.Context, types.String, diag.Diagnostics) {
+	diagnostics := diag.Diagnostics{}
 	result := types.StringNull()
 	raw, ok := section[option]
 	if !ok {
-		return ctx, result
+		return ctx, result, diagnostics
 	}
 
 	var value string
 	err := json.Unmarshal(raw, &value)
 	if err != nil {
-		res.Diagnostics.AddAttributeError(
+		diagnostics.AddAttributeError(
 			attribute,
 			fmt.Sprintf("unable to parse option: %q", option),
 			err.Error(),
 		)
-		return ctx, result
+		return ctx, result, diagnostics
 	}
 
 	result = types.StringValue(value)
 	ctx = logSetFieldString(ctx, fullTypeName, option, result)
-	return ctx, result
+	return ctx, result, diagnostics
 }
 
 func getSection(
 	ctx context.Context,
 	client lucirpc.Client,
-	res *datasource.ReadResponse,
-) map[string]json.RawMessage {
+) (map[string]json.RawMessage, diag.Diagnostics) {
+	diagnostics := diag.Diagnostics{}
 	section, err := client.GetSection(ctx, systemUCIConfig, systemUCISection)
 	if err != nil {
-		res.Diagnostics.AddError(
+		diagnostics.AddError(
 			fmt.Sprintf("problem getting %s.%s section", systemUCIConfig, systemUCISection),
 			err.Error(),
 		)
-		return map[string]json.RawMessage{}
+		return map[string]json.RawMessage{}, diagnostics
 	}
 
-	return section
+	return section, diagnostics
 }
 
 func logSetFieldBool(
@@ -405,18 +418,18 @@ type logValueString interface {
 
 func newUCIClient(
 	req datasource.ConfigureRequest,
-	res *datasource.ConfigureResponse,
-) *lucirpc.Client {
+) (*lucirpc.Client, diag.Diagnostics) {
+	diagnostics := diag.Diagnostics{}
 	client, ok := req.ProviderData.(*lucirpc.Client)
 	if !ok {
-		res.Diagnostics.AddError(
+		diagnostics.AddError(
 			"OpenWrt provider not configured correctly",
 			"Expected UCI tree, but one was not provided. This is a problem with the provider implementation. Please report this to https://github.com/joneshf/terraform-provider-openwrt",
 		)
-		return nil
+		return nil, diagnostics
 	}
 
-	return client
+	return client, diagnostics
 }
 
 type systemModel struct {
