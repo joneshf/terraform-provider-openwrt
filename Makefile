@@ -27,7 +27,7 @@ install:
 
 .PHONY: release
 release:
-	goreleaser release --clean
+	goreleaser release --rm-dist
 
 .PHONY: start-acceptance-test-server
 start-acceptance-test-server:

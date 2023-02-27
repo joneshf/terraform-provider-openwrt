@@ -1,5 +1,9 @@
 on:
-  - push
+  push:
+    branches:
+      - "**"
+    tags-ignore:
+      - "**"
 
 jobs:
   test:
