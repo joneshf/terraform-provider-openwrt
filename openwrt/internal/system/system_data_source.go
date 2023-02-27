@@ -16,6 +16,8 @@ import (
 )
 
 const (
+	dataSourceTerraformType = "data_source"
+
 	systemConLogLevelAttribute = "conloglevel"
 	systemConLogLevelUCIOption = "conloglevel"
 
@@ -112,25 +114,25 @@ func (d *systemDataSource) Read(
 	}
 
 	var model systemModel
-	ctx, model.ConLogLevel, diagnostics = getOptionInt64(ctx, d.fullTypeName, section, path.Root(systemConLogLevelAttribute), systemConLogLevelUCIOption)
+	ctx, model.ConLogLevel, diagnostics = getOptionInt64(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemConLogLevelAttribute), systemConLogLevelUCIOption)
 	res.Diagnostics.Append(diagnostics...)
-	ctx, model.CronLogLevel, diagnostics = getOptionInt64(ctx, d.fullTypeName, section, path.Root(systemCronLogLevelAttribute), systemCronLogLevelUCIOption)
+	ctx, model.CronLogLevel, diagnostics = getOptionInt64(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemCronLogLevelAttribute), systemCronLogLevelUCIOption)
 	res.Diagnostics.Append(diagnostics...)
-	ctx, model.Description, diagnostics = getOptionString(ctx, d.fullTypeName, section, path.Root(systemDescriptionAttribute), systemDescriptionUCIOption)
+	ctx, model.Description, diagnostics = getOptionString(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemDescriptionAttribute), systemDescriptionUCIOption)
 	res.Diagnostics.Append(diagnostics...)
-	ctx, model.Hostname, diagnostics = getOptionString(ctx, d.fullTypeName, section, path.Root(systemHostnameAttribute), systemHostnameUCIOption)
+	ctx, model.Hostname, diagnostics = getOptionString(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemHostnameAttribute), systemHostnameUCIOption)
 	res.Diagnostics.Append(diagnostics...)
-	ctx, model.LogSize, diagnostics = getOptionInt64(ctx, d.fullTypeName, section, path.Root(systemLogSizeAttribute), systemLogSizeUCIOption)
+	ctx, model.LogSize, diagnostics = getOptionInt64(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemLogSizeAttribute), systemLogSizeUCIOption)
 	res.Diagnostics.Append(diagnostics...)
-	ctx, model.Notes, diagnostics = getOptionString(ctx, d.fullTypeName, section, path.Root(systemNotesAttribute), systemNotesUCIOption)
+	ctx, model.Notes, diagnostics = getOptionString(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemNotesAttribute), systemNotesUCIOption)
 	res.Diagnostics.Append(diagnostics...)
-	ctx, model.Timezone, diagnostics = getOptionString(ctx, d.fullTypeName, section, path.Root(systemTimezoneAttribute), systemTimezoneUCIOption)
+	ctx, model.Timezone, diagnostics = getOptionString(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemTimezoneAttribute), systemTimezoneUCIOption)
 	res.Diagnostics.Append(diagnostics...)
-	ctx, model.TTYLogin, diagnostics = getOptionBool(ctx, d.fullTypeName, section, path.Root(systemTTYLoginAttribute), systemTTYLoginUCIOption)
+	ctx, model.TTYLogin, diagnostics = getOptionBool(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemTTYLoginAttribute), systemTTYLoginUCIOption)
 	res.Diagnostics.Append(diagnostics...)
-	ctx, model.Zonename, diagnostics = getOptionString(ctx, d.fullTypeName, section, path.Root(systemZonenameAttribute), systemZonenameUCIOption)
+	ctx, model.Zonename, diagnostics = getOptionString(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemZonenameAttribute), systemZonenameUCIOption)
 	res.Diagnostics.Append(diagnostics...)
-	ctx, model.Id, diagnostics = getMetadataString(ctx, d.fullTypeName, section, systemIdUCISection)
+	ctx, model.Id, diagnostics = getMetadataString(ctx, d.fullTypeName, dataSourceTerraformType, section, systemIdUCISection)
 	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {
 		return
@@ -211,6 +213,7 @@ func (d *systemDataSource) Schema(
 func getMetadataString(
 	ctx context.Context,
 	fullTypeName string,
+	terraformType string,
 	section map[string]json.RawMessage,
 	key string,
 ) (context.Context, types.String, diag.Diagnostics) {
@@ -232,13 +235,14 @@ func getMetadataString(
 	}
 
 	result = types.StringValue(value)
-	ctx = logSetFieldString(ctx, fullTypeName, key, result)
+	ctx = logSetFieldString(ctx, fullTypeName, terraformType, key, result)
 	return ctx, result, diagnostics
 }
 
 func getOptionBool(
 	ctx context.Context,
 	fullTypeName string,
+	terraformType string,
 	section map[string]json.RawMessage,
 	attribute path.Path,
 	option string,
@@ -281,13 +285,14 @@ func getOptionBool(
 		return ctx, result, diagnostics
 	}
 
-	ctx = logSetFieldBool(ctx, fullTypeName, option, result)
+	ctx = logSetFieldBool(ctx, fullTypeName, terraformType, option, result)
 	return ctx, result, diagnostics
 }
 
 func getOptionInt64(
 	ctx context.Context,
 	fullTypeName string,
+	terraformType string,
 	section map[string]json.RawMessage,
 	attribute path.Path,
 	option string,
@@ -323,13 +328,14 @@ func getOptionInt64(
 	}
 
 	result = types.Int64Value(int64(value))
-	ctx = logSetFieldInt64(ctx, fullTypeName, option, result)
+	ctx = logSetFieldInt64(ctx, fullTypeName, terraformType, option, result)
 	return ctx, result, diagnostics
 }
 
 func getOptionString(
 	ctx context.Context,
 	fullTypeName string,
+	terraformType string,
 	section map[string]json.RawMessage,
 	attribute path.Path,
 	option string,
@@ -353,7 +359,7 @@ func getOptionString(
 	}
 
 	result = types.StringValue(value)
-	ctx = logSetFieldString(ctx, fullTypeName, option, result)
+	ctx = logSetFieldString(ctx, fullTypeName, terraformType, option, result)
 	return ctx, result, diagnostics
 }
 
@@ -377,30 +383,33 @@ func getSection(
 func logSetFieldBool(
 	ctx context.Context,
 	fullTypeName string,
+	terraformType string,
 	key string,
 	value logValueBool,
 ) context.Context {
-	ctx = tflog.SetField(ctx, fmt.Sprintf("%s_data_source_%s", fullTypeName, key), value.ValueBool())
+	ctx = tflog.SetField(ctx, fmt.Sprintf("%s_%s_%s", fullTypeName, terraformType, key), value.ValueBool())
 	return ctx
 }
 
 func logSetFieldInt64(
 	ctx context.Context,
 	fullTypeName string,
+	terraformType string,
 	key string,
 	value logValueInt64,
 ) context.Context {
-	ctx = tflog.SetField(ctx, fmt.Sprintf("%s_data_source_%s", fullTypeName, key), value.ValueInt64())
+	ctx = tflog.SetField(ctx, fmt.Sprintf("%s_%s_%s", fullTypeName, terraformType, key), value.ValueInt64())
 	return ctx
 }
 
 func logSetFieldString(
 	ctx context.Context,
 	fullTypeName string,
+	terraformType string,
 	key string,
 	value logValueString,
 ) context.Context {
-	ctx = tflog.SetField(ctx, fmt.Sprintf("%s_data_source_%s", fullTypeName, key), value.ValueString())
+	ctx = tflog.SetField(ctx, fmt.Sprintf("%s_%s_%s", fullTypeName, terraformType, key), value.ValueString())
 	return ctx
 }
 
