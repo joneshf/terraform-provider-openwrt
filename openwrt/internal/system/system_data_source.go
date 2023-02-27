@@ -17,46 +17,46 @@ import (
 const (
 	providerTypeName = "openwrt"
 
-	systemDataSourceConLogLevelAttribute = "conloglevel"
-	systemDataSourceConLogLevelUCIOption = "conloglevel"
+	systemConLogLevelAttribute = "conloglevel"
+	systemConLogLevelUCIOption = "conloglevel"
 
-	systemDataSourceCronLogLevelAttribute = "cronloglevel"
-	systemDataSourceCronLogLevelUCIOption = "cronloglevel"
+	systemCronLogLevelAttribute = "cronloglevel"
+	systemCronLogLevelUCIOption = "cronloglevel"
 
-	systemDataSourceDescriptionAttribute = "description"
-	systemDataSourceDescriptionUCIOption = "description"
+	systemDescriptionAttribute = "description"
+	systemDescriptionUCIOption = "description"
 
-	systemDataSourceHostnameAttribute = "hostname"
-	systemDataSourceHostnameUCIOption = "hostname"
+	systemHostnameAttribute = "hostname"
+	systemHostnameUCIOption = "hostname"
 
-	systemDataSourceIdAttribute  = "id"
-	systemDataSourceIdUCISection = ".name"
+	systemIdAttribute  = "id"
+	systemIdUCISection = ".name"
 
-	systemDataSourceLogSizeAttribute = "log_size"
-	systemDataSourceLogSizeUCIOption = "log_size"
+	systemLogSizeAttribute = "log_size"
+	systemLogSizeUCIOption = "log_size"
 
-	systemDataSourceNotesAttribute = "notes"
-	systemDataSourceNotesUCIOption = "notes"
+	systemNotesAttribute = "notes"
+	systemNotesUCIOption = "notes"
 
-	systemDataSourceTimezoneAttribute = "timezone"
-	systemDataSourceTimezoneUCIOption = "timezone"
+	systemTimezoneAttribute = "timezone"
+	systemTimezoneUCIOption = "timezone"
 
-	systemDataSourceTTYLoginAttribute = "ttylogin"
-	systemDataSourceTTYLoginUCIOption = "ttylogin"
+	systemTTYLoginAttribute = "ttylogin"
+	systemTTYLoginUCIOption = "ttylogin"
 
-	systemDataSourceTypeName   = "system_system"
-	systemDataSourceUCIConfig  = "system"
-	systemDataSourceUCISection = "@system[0]"
+	systemTypeName   = "system_system"
+	systemUCIConfig  = "system"
+	systemUCISection = "@system[0]"
 
-	systemDataSourceZonenameAttribute = "zonename"
-	systemDataSourceZonenameUCIOption = "zonename"
+	systemZonenameAttribute = "zonename"
+	systemZonenameUCIOption = "zonename"
 )
 
 var (
 	_ datasource.DataSource              = &systemDataSource{}
 	_ datasource.DataSourceWithConfigure = &systemDataSource{}
 
-	systemDataSourceFullTypeName = fmt.Sprintf("%s_%s", providerTypeName, systemDataSourceTypeName)
+	systemFullTypeName = fmt.Sprintf("%s_%s", providerTypeName, systemTypeName)
 )
 
 func NewSystemDataSource() datasource.DataSource {
@@ -73,7 +73,7 @@ func (d *systemDataSource) Configure(
 	req datasource.ConfigureRequest,
 	res *datasource.ConfigureResponse,
 ) {
-	tflog.Info(ctx, fmt.Sprintf("Configuring %s Data Source", systemDataSourceFullTypeName))
+	tflog.Info(ctx, fmt.Sprintf("Configuring %s Data Source", systemFullTypeName))
 	if req.ProviderData == nil {
 		tflog.Debug(ctx, "No provider data")
 		return
@@ -93,7 +93,7 @@ func (d *systemDataSource) Metadata(
 	req datasource.MetadataRequest,
 	res *datasource.MetadataResponse,
 ) {
-	res.TypeName = systemDataSourceFullTypeName
+	res.TypeName = systemFullTypeName
 }
 
 // Read prepares the data source.
@@ -102,29 +102,29 @@ func (d *systemDataSource) Read(
 	req datasource.ReadRequest,
 	res *datasource.ReadResponse,
 ) {
-	tflog.Info(ctx, fmt.Sprintf("Reading %s data source", systemDataSourceFullTypeName))
+	tflog.Info(ctx, fmt.Sprintf("Reading %s data source", systemFullTypeName))
 
 	section := getSection(ctx, d.client, res)
 	if res.Diagnostics.HasError() {
 		return
 	}
 
-	var model systemDataSourceModel
-	ctx, model.ConLogLevel = getOptionInt64(ctx, section, path.Root(systemDataSourceConLogLevelAttribute), systemDataSourceConLogLevelUCIOption, res)
-	ctx, model.CronLogLevel = getOptionInt64(ctx, section, path.Root(systemDataSourceCronLogLevelAttribute), systemDataSourceCronLogLevelUCIOption, res)
-	ctx, model.Description = getOptionString(ctx, section, path.Root(systemDataSourceDescriptionAttribute), systemDataSourceDescriptionUCIOption, res)
-	ctx, model.Hostname = getOptionString(ctx, section, path.Root(systemDataSourceHostnameAttribute), systemDataSourceHostnameUCIOption, res)
-	ctx, model.LogSize = getOptionInt64(ctx, section, path.Root(systemDataSourceLogSizeAttribute), systemDataSourceLogSizeUCIOption, res)
-	ctx, model.Notes = getOptionString(ctx, section, path.Root(systemDataSourceNotesAttribute), systemDataSourceNotesUCIOption, res)
-	ctx, model.Timezone = getOptionString(ctx, section, path.Root(systemDataSourceTimezoneAttribute), systemDataSourceTimezoneUCIOption, res)
-	ctx, model.TTYLogin = getOptionBool(ctx, section, path.Root(systemDataSourceTTYLoginAttribute), systemDataSourceTTYLoginUCIOption, res)
-	ctx, model.Zonename = getOptionString(ctx, section, path.Root(systemDataSourceZonenameAttribute), systemDataSourceZonenameUCIOption, res)
-	ctx, model.Id = getMetadataString(ctx, section, systemDataSourceIdUCISection, res)
+	var model systemModel
+	ctx, model.ConLogLevel = getOptionInt64(ctx, section, path.Root(systemConLogLevelAttribute), systemConLogLevelUCIOption, res)
+	ctx, model.CronLogLevel = getOptionInt64(ctx, section, path.Root(systemCronLogLevelAttribute), systemCronLogLevelUCIOption, res)
+	ctx, model.Description = getOptionString(ctx, section, path.Root(systemDescriptionAttribute), systemDescriptionUCIOption, res)
+	ctx, model.Hostname = getOptionString(ctx, section, path.Root(systemHostnameAttribute), systemHostnameUCIOption, res)
+	ctx, model.LogSize = getOptionInt64(ctx, section, path.Root(systemLogSizeAttribute), systemLogSizeUCIOption, res)
+	ctx, model.Notes = getOptionString(ctx, section, path.Root(systemNotesAttribute), systemNotesUCIOption, res)
+	ctx, model.Timezone = getOptionString(ctx, section, path.Root(systemTimezoneAttribute), systemTimezoneUCIOption, res)
+	ctx, model.TTYLogin = getOptionBool(ctx, section, path.Root(systemTTYLoginAttribute), systemTTYLoginUCIOption, res)
+	ctx, model.Zonename = getOptionString(ctx, section, path.Root(systemZonenameAttribute), systemZonenameUCIOption, res)
+	ctx, model.Id = getMetadataString(ctx, section, systemIdUCISection, res)
 	if res.Diagnostics.HasError() {
 		return
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Setting the %s data source state", systemDataSourceFullTypeName))
+	tflog.Debug(ctx, fmt.Sprintf("Setting the %s data source state", systemFullTypeName))
 	diagnostics := res.State.Set(ctx, model)
 	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {
@@ -181,16 +181,16 @@ func (d *systemDataSource) Schema(
 
 	res.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			systemDataSourceConLogLevelAttribute:  conLogLevel,
-			systemDataSourceCronLogLevelAttribute: cronLogLevel,
-			systemDataSourceDescriptionAttribute:  description,
-			systemDataSourceHostnameAttribute:     hostname,
-			systemDataSourceIdAttribute:           id,
-			systemDataSourceLogSizeAttribute:      logSize,
-			systemDataSourceNotesAttribute:        notes,
-			systemDataSourceTimezoneAttribute:     timezone,
-			systemDataSourceTTYLoginAttribute:     ttyLogin,
-			systemDataSourceZonenameAttribute:     zonename,
+			systemConLogLevelAttribute:  conLogLevel,
+			systemCronLogLevelAttribute: cronLogLevel,
+			systemDescriptionAttribute:  description,
+			systemHostnameAttribute:     hostname,
+			systemIdAttribute:           id,
+			systemLogSizeAttribute:      logSize,
+			systemNotesAttribute:        notes,
+			systemTimezoneAttribute:     timezone,
+			systemTTYLoginAttribute:     ttyLogin,
+			systemZonenameAttribute:     zonename,
 		},
 		Description: "Provides system data about an OpenWrt device",
 	}
@@ -346,10 +346,10 @@ func getSection(
 	client lucirpc.Client,
 	res *datasource.ReadResponse,
 ) map[string]json.RawMessage {
-	section, err := client.GetSection(ctx, systemDataSourceUCIConfig, systemDataSourceUCISection)
+	section, err := client.GetSection(ctx, systemUCIConfig, systemUCISection)
 	if err != nil {
 		res.Diagnostics.AddError(
-			fmt.Sprintf("problem getting %s.%s section", systemDataSourceUCIConfig, systemDataSourceUCISection),
+			fmt.Sprintf("problem getting %s.%s section", systemUCIConfig, systemUCISection),
 			err.Error(),
 		)
 		return map[string]json.RawMessage{}
@@ -363,7 +363,7 @@ func logSetFieldBool(
 	key string,
 	value logValueBool,
 ) context.Context {
-	ctx = tflog.SetField(ctx, fmt.Sprintf("%s_data_source_%s", systemDataSourceFullTypeName, key), value.ValueBool())
+	ctx = tflog.SetField(ctx, fmt.Sprintf("%s_data_source_%s", systemFullTypeName, key), value.ValueBool())
 	return ctx
 }
 
@@ -372,7 +372,7 @@ func logSetFieldInt64(
 	key string,
 	value logValueInt64,
 ) context.Context {
-	ctx = tflog.SetField(ctx, fmt.Sprintf("%s_data_source_%s", systemDataSourceFullTypeName, key), value.ValueInt64())
+	ctx = tflog.SetField(ctx, fmt.Sprintf("%s_data_source_%s", systemFullTypeName, key), value.ValueInt64())
 	return ctx
 }
 
@@ -381,7 +381,7 @@ func logSetFieldString(
 	key string,
 	value logValueString,
 ) context.Context {
-	ctx = tflog.SetField(ctx, fmt.Sprintf("%s_data_source_%s", systemDataSourceFullTypeName, key), value.ValueString())
+	ctx = tflog.SetField(ctx, fmt.Sprintf("%s_data_source_%s", systemFullTypeName, key), value.ValueString())
 	return ctx
 }
 
@@ -413,7 +413,7 @@ func newUCIClient(
 	return client
 }
 
-type systemDataSourceModel struct {
+type systemModel struct {
 	ConLogLevel  types.Int64  `tfsdk:"conloglevel"`
 	CronLogLevel types.Int64  `tfsdk:"cronloglevel"`
 	Description  types.String `tfsdk:"description"`
