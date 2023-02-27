@@ -49,7 +49,6 @@ signs:
     artifacts: checksum
 
 release:
-  draft: true
   extra_files:
     - glob: terraform-registry-manifest.json
       name_template: "{{ .ProjectName }}_{{ .Version }}_manifest.json"
