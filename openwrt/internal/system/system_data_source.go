@@ -15,8 +15,6 @@ import (
 )
 
 const (
-	providerTypeName = "openwrt"
-
 	systemConLogLevelAttribute = "conloglevel"
 	systemConLogLevelUCIOption = "conloglevel"
 
@@ -55,8 +53,6 @@ const (
 var (
 	_ datasource.DataSource              = &systemDataSource{}
 	_ datasource.DataSourceWithConfigure = &systemDataSource{}
-
-	systemFullTypeName = fmt.Sprintf("%s_%s", providerTypeName, systemTypeName)
 )
 
 func NewSystemDataSource() datasource.DataSource {
@@ -64,7 +60,8 @@ func NewSystemDataSource() datasource.DataSource {
 }
 
 type systemDataSource struct {
-	client lucirpc.Client
+	client       lucirpc.Client
+	fullTypeName string
 }
 
 // Configure prepares the data source.
@@ -73,7 +70,7 @@ func (d *systemDataSource) Configure(
 	req datasource.ConfigureRequest,
 	res *datasource.ConfigureResponse,
 ) {
-	tflog.Info(ctx, fmt.Sprintf("Configuring %s Data Source", systemFullTypeName))
+	tflog.Info(ctx, fmt.Sprintf("Configuring %s Data Source", d.fullTypeName))
 	if req.ProviderData == nil {
 		tflog.Debug(ctx, "No provider data")
 		return
@@ -93,7 +90,9 @@ func (d *systemDataSource) Metadata(
 	req datasource.MetadataRequest,
 	res *datasource.MetadataResponse,
 ) {
-	res.TypeName = systemFullTypeName
+	fullTypeName := fmt.Sprintf("%s_%s", req.ProviderTypeName, systemTypeName)
+	d.fullTypeName = fullTypeName
+	res.TypeName = fullTypeName
 }
 
 // Read prepares the data source.
@@ -102,7 +101,7 @@ func (d *systemDataSource) Read(
 	req datasource.ReadRequest,
 	res *datasource.ReadResponse,
 ) {
-	tflog.Info(ctx, fmt.Sprintf("Reading %s data source", systemFullTypeName))
+	tflog.Info(ctx, fmt.Sprintf("Reading %s data source", d.fullTypeName))
 
 	section := getSection(ctx, d.client, res)
 	if res.Diagnostics.HasError() {
@@ -110,21 +109,21 @@ func (d *systemDataSource) Read(
 	}
 
 	var model systemModel
-	ctx, model.ConLogLevel = getOptionInt64(ctx, section, path.Root(systemConLogLevelAttribute), systemConLogLevelUCIOption, res)
-	ctx, model.CronLogLevel = getOptionInt64(ctx, section, path.Root(systemCronLogLevelAttribute), systemCronLogLevelUCIOption, res)
-	ctx, model.Description = getOptionString(ctx, section, path.Root(systemDescriptionAttribute), systemDescriptionUCIOption, res)
-	ctx, model.Hostname = getOptionString(ctx, section, path.Root(systemHostnameAttribute), systemHostnameUCIOption, res)
-	ctx, model.LogSize = getOptionInt64(ctx, section, path.Root(systemLogSizeAttribute), systemLogSizeUCIOption, res)
-	ctx, model.Notes = getOptionString(ctx, section, path.Root(systemNotesAttribute), systemNotesUCIOption, res)
-	ctx, model.Timezone = getOptionString(ctx, section, path.Root(systemTimezoneAttribute), systemTimezoneUCIOption, res)
-	ctx, model.TTYLogin = getOptionBool(ctx, section, path.Root(systemTTYLoginAttribute), systemTTYLoginUCIOption, res)
-	ctx, model.Zonename = getOptionString(ctx, section, path.Root(systemZonenameAttribute), systemZonenameUCIOption, res)
-	ctx, model.Id = getMetadataString(ctx, section, systemIdUCISection, res)
+	ctx, model.ConLogLevel = getOptionInt64(ctx, d.fullTypeName, section, path.Root(systemConLogLevelAttribute), systemConLogLevelUCIOption, res)
+	ctx, model.CronLogLevel = getOptionInt64(ctx, d.fullTypeName, section, path.Root(systemCronLogLevelAttribute), systemCronLogLevelUCIOption, res)
+	ctx, model.Description = getOptionString(ctx, d.fullTypeName, section, path.Root(systemDescriptionAttribute), systemDescriptionUCIOption, res)
+	ctx, model.Hostname = getOptionString(ctx, d.fullTypeName, section, path.Root(systemHostnameAttribute), systemHostnameUCIOption, res)
+	ctx, model.LogSize = getOptionInt64(ctx, d.fullTypeName, section, path.Root(systemLogSizeAttribute), systemLogSizeUCIOption, res)
+	ctx, model.Notes = getOptionString(ctx, d.fullTypeName, section, path.Root(systemNotesAttribute), systemNotesUCIOption, res)
+	ctx, model.Timezone = getOptionString(ctx, d.fullTypeName, section, path.Root(systemTimezoneAttribute), systemTimezoneUCIOption, res)
+	ctx, model.TTYLogin = getOptionBool(ctx, d.fullTypeName, section, path.Root(systemTTYLoginAttribute), systemTTYLoginUCIOption, res)
+	ctx, model.Zonename = getOptionString(ctx, d.fullTypeName, section, path.Root(systemZonenameAttribute), systemZonenameUCIOption, res)
+	ctx, model.Id = getMetadataString(ctx, d.fullTypeName, section, systemIdUCISection, res)
 	if res.Diagnostics.HasError() {
 		return
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Setting the %s data source state", systemFullTypeName))
+	tflog.Debug(ctx, fmt.Sprintf("Setting the %s data source state", d.fullTypeName))
 	diagnostics := res.State.Set(ctx, model)
 	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {
@@ -198,6 +197,7 @@ func (d *systemDataSource) Schema(
 
 func getMetadataString(
 	ctx context.Context,
+	fullTypeName string,
 	section map[string]json.RawMessage,
 	key string,
 	res *datasource.ReadResponse,
@@ -219,12 +219,13 @@ func getMetadataString(
 	}
 
 	result = types.StringValue(value)
-	ctx = logSetFieldString(ctx, key, result)
+	ctx = logSetFieldString(ctx, fullTypeName, key, result)
 	return ctx, result
 }
 
 func getOptionBool(
 	ctx context.Context,
+	fullTypeName string,
 	section map[string]json.RawMessage,
 	attribute path.Path,
 	option string,
@@ -267,12 +268,13 @@ func getOptionBool(
 		return ctx, result
 	}
 
-	ctx = logSetFieldBool(ctx, option, result)
+	ctx = logSetFieldBool(ctx, fullTypeName, option, result)
 	return ctx, result
 }
 
 func getOptionInt64(
 	ctx context.Context,
+	fullTypeName string,
 	section map[string]json.RawMessage,
 	attribute path.Path,
 	option string,
@@ -308,12 +310,13 @@ func getOptionInt64(
 	}
 
 	result = types.Int64Value(int64(value))
-	ctx = logSetFieldInt64(ctx, option, result)
+	ctx = logSetFieldInt64(ctx, fullTypeName, option, result)
 	return ctx, result
 }
 
 func getOptionString(
 	ctx context.Context,
+	fullTypeName string,
 	section map[string]json.RawMessage,
 	attribute path.Path,
 	option string,
@@ -337,7 +340,7 @@ func getOptionString(
 	}
 
 	result = types.StringValue(value)
-	ctx = logSetFieldString(ctx, option, result)
+	ctx = logSetFieldString(ctx, fullTypeName, option, result)
 	return ctx, result
 }
 
@@ -360,28 +363,31 @@ func getSection(
 
 func logSetFieldBool(
 	ctx context.Context,
+	fullTypeName string,
 	key string,
 	value logValueBool,
 ) context.Context {
-	ctx = tflog.SetField(ctx, fmt.Sprintf("%s_data_source_%s", systemFullTypeName, key), value.ValueBool())
+	ctx = tflog.SetField(ctx, fmt.Sprintf("%s_data_source_%s", fullTypeName, key), value.ValueBool())
 	return ctx
 }
 
 func logSetFieldInt64(
 	ctx context.Context,
+	fullTypeName string,
 	key string,
 	value logValueInt64,
 ) context.Context {
-	ctx = tflog.SetField(ctx, fmt.Sprintf("%s_data_source_%s", systemFullTypeName, key), value.ValueInt64())
+	ctx = tflog.SetField(ctx, fmt.Sprintf("%s_data_source_%s", fullTypeName, key), value.ValueInt64())
 	return ctx
 }
 
 func logSetFieldString(
 	ctx context.Context,
+	fullTypeName string,
 	key string,
 	value logValueString,
 ) context.Context {
-	ctx = tflog.SetField(ctx, fmt.Sprintf("%s_data_source_%s", systemFullTypeName, key), value.ValueString())
+	ctx = tflog.SetField(ctx, fmt.Sprintf("%s_data_source_%s", fullTypeName, key), value.ValueString())
 	return ctx
 }
 
