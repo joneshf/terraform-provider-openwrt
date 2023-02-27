@@ -17,6 +17,12 @@ import (
 const (
 	providerTypeName = "openwrt"
 
+	systemDataSourceConLogLevelAttribute = "conloglevel"
+	systemDataSourceConLogLevelUCIOption = "conloglevel"
+
+	systemDataSourceCronLogLevelAttribute = "cronloglevel"
+	systemDataSourceCronLogLevelUCIOption = "cronloglevel"
+
 	systemDataSourceDescriptionAttribute = "description"
 	systemDataSourceDescriptionUCIOption = "description"
 
@@ -104,6 +110,8 @@ func (d *systemDataSource) Read(
 	}
 
 	var model systemDataSourceModel
+	ctx, model.ConLogLevel = getOptionInt64(ctx, section, path.Root(systemDataSourceConLogLevelAttribute), systemDataSourceConLogLevelUCIOption, res)
+	ctx, model.CronLogLevel = getOptionInt64(ctx, section, path.Root(systemDataSourceCronLogLevelAttribute), systemDataSourceCronLogLevelUCIOption, res)
 	ctx, model.Description = getOptionString(ctx, section, path.Root(systemDataSourceDescriptionAttribute), systemDataSourceDescriptionUCIOption, res)
 	ctx, model.Hostname = getOptionString(ctx, section, path.Root(systemDataSourceHostnameAttribute), systemDataSourceHostnameUCIOption, res)
 	ctx, model.LogSize = getOptionInt64(ctx, section, path.Root(systemDataSourceLogSizeAttribute), systemDataSourceLogSizeUCIOption, res)
@@ -130,6 +138,14 @@ func (d *systemDataSource) Schema(
 	req datasource.SchemaRequest,
 	res *datasource.SchemaResponse,
 ) {
+	conLogLevel := schema.Int64Attribute{
+		Description: "The maximum log level for kernel messages to be logged to the console.",
+		Optional:    true,
+	}
+	cronLogLevel := schema.Int64Attribute{
+		Description: "The minimum level for cron messages to be logged to syslog.",
+		Optional:    true,
+	}
 	description := schema.StringAttribute{
 		Description: "The hostname for the system.",
 		Optional:    true,
@@ -165,14 +181,16 @@ func (d *systemDataSource) Schema(
 
 	res.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			systemDataSourceDescriptionAttribute: description,
-			systemDataSourceHostnameAttribute:    hostname,
-			systemDataSourceIdAttribute:          id,
-			systemDataSourceLogSizeAttribute:     logSize,
-			systemDataSourceNotesAttribute:       notes,
-			systemDataSourceTimezoneAttribute:    timezone,
-			systemDataSourceTTYLoginAttribute:    ttyLogin,
-			systemDataSourceZonenameAttribute:    zonename,
+			systemDataSourceConLogLevelAttribute:  conLogLevel,
+			systemDataSourceCronLogLevelAttribute: cronLogLevel,
+			systemDataSourceDescriptionAttribute:  description,
+			systemDataSourceHostnameAttribute:     hostname,
+			systemDataSourceIdAttribute:           id,
+			systemDataSourceLogSizeAttribute:      logSize,
+			systemDataSourceNotesAttribute:        notes,
+			systemDataSourceTimezoneAttribute:     timezone,
+			systemDataSourceTTYLoginAttribute:     ttyLogin,
+			systemDataSourceZonenameAttribute:     zonename,
 		},
 		Description: "Provides system data about an OpenWrt device",
 	}
@@ -396,12 +414,14 @@ func newUCIClient(
 }
 
 type systemDataSourceModel struct {
-	Description types.String `tfsdk:"description"`
-	Hostname    types.String `tfsdk:"hostname"`
-	Id          types.String `tfsdk:"id"`
-	LogSize     types.Int64  `tfsdk:"log_size"`
-	Notes       types.String `tfsdk:"notes"`
-	Timezone    types.String `tfsdk:"timezone"`
-	TTYLogin    types.Bool   `tfsdk:"ttylogin"`
-	Zonename    types.String `tfsdk:"zonename"`
+	ConLogLevel  types.Int64  `tfsdk:"conloglevel"`
+	CronLogLevel types.Int64  `tfsdk:"cronloglevel"`
+	Description  types.String `tfsdk:"description"`
+	Hostname     types.String `tfsdk:"hostname"`
+	Id           types.String `tfsdk:"id"`
+	LogSize      types.Int64  `tfsdk:"log_size"`
+	Notes        types.String `tfsdk:"notes"`
+	Timezone     types.String `tfsdk:"timezone"`
+	TTYLogin     types.Bool   `tfsdk:"ttylogin"`
+	Zonename     types.String `tfsdk:"zonename"`
 }

@@ -31,6 +31,8 @@ output "system_system" {
 
 ### Optional
 
+- `conloglevel` (Number) The maximum log level for kernel messages to be logged to the console.
+- `cronloglevel` (Number) The minimum level for cron messages to be logged to syslog.
 - `description` (String) The hostname for the system.
 - `hostname` (String) A short single-line description for the system.
 - `log_size` (Number) Size of the file based log buffer in KiB.
