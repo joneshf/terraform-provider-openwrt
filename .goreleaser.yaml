@@ -27,7 +27,7 @@ builds:
     mod_timestamp: "{{ .CommitTimestamp }}"
 
 changelog:
-  skip: true
+  use: github-native
 
 checksum:
   algorithm: sha256
