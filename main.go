@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt"
 )
@@ -10,9 +11,15 @@ import (
 // Provider documentation generation.
 //go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name openwrt
 
+const (
+	version = "unknown"
+)
+
 func main() {
 	ctx := context.Background()
-	providerNew := openwrt.New
+	providerNew := func() provider.Provider {
+		return openwrt.New(version)
+	}
 	options := providerserver.ServeOpts{
 		Address: "registry.terraform.io/joneshf/openwrt",
 	}

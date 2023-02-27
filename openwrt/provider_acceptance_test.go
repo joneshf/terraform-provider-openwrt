@@ -17,7 +17,7 @@ import (
 func TestOpenWrtProviderConfigureConnectsWithoutError(t *testing.T) {
 	// Given
 	ctx := context.Background()
-	openWrtProvider := openwrt.New()
+	openWrtProvider := openwrt.New("test")
 	schemaReq := provider.SchemaRequest{}
 	schemaRes := &provider.SchemaResponse{}
 	openWrtProvider.Schema(ctx, schemaReq, schemaRes)

@@ -53,11 +53,14 @@ var (
 	_ provider.Provider = &openWrtProvider{}
 )
 
-func New() provider.Provider {
-	return &openWrtProvider{}
+func New(version string) provider.Provider {
+	return &openWrtProvider{
+		version: version,
+	}
 }
 
 type openWrtProvider struct {
+	version string
 }
 
 // Configure prepares an OpenWrt API client for data sources and resources.
@@ -148,6 +151,7 @@ func (p *openWrtProvider) Metadata(
 	res *provider.MetadataResponse,
 ) {
 	res.TypeName = providerTypeName
+	res.Version = p.version
 }
 
 // Resources defines the resources implemented in the provider.

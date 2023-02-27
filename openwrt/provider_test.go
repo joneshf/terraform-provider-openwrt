@@ -13,7 +13,7 @@ import (
 func TestOpenWrtProviderMetadataDoesNotSetVersion(t *testing.T) {
 	// Given
 	ctx := context.Background()
-	openWrtProvider := openwrt.New()
+	openWrtProvider := openwrt.New("test")
 	req := provider.MetadataRequest{}
 	res := &provider.MetadataResponse{}
 
@@ -21,13 +21,13 @@ func TestOpenWrtProviderMetadataDoesNotSetVersion(t *testing.T) {
 	openWrtProvider.Metadata(ctx, req, res)
 
 	// Then
-	assert.DeepEqual(t, res.Version, "")
+	assert.DeepEqual(t, res.Version, "test")
 }
 
 func TestOpenWrtProviderMetadataSetsTypeName(t *testing.T) {
 	// Given
 	ctx := context.Background()
-	openWrtProvider := openwrt.New()
+	openWrtProvider := openwrt.New("test")
 	req := provider.MetadataRequest{}
 	res := &provider.MetadataResponse{}
 
@@ -72,7 +72,7 @@ func TestOpenWrtProviderSchemaUsernameAttribute(t *testing.T) {
 func TestOpenWrtProviderSchemaDoesNotUseInvalidAttributes(t *testing.T) {
 	// Given
 	ctx := context.Background()
-	openWrtProvider := openwrt.New()
+	openWrtProvider := openwrt.New("test")
 	req := provider.SchemaRequest{}
 	res := &provider.SchemaResponse{}
 	openWrtProvider.Schema(ctx, req, res)
@@ -92,7 +92,7 @@ func schemaAttributeExists(
 
 		// Given
 		ctx := context.Background()
-		openWrtProvider := openwrt.New()
+		openWrtProvider := openwrt.New("test")
 		req := provider.SchemaRequest{}
 		res := &provider.SchemaResponse{}
 
@@ -113,7 +113,7 @@ func schemaAttributeIsOptional(
 
 		// Given
 		ctx := context.Background()
-		openWrtProvider := openwrt.New()
+		openWrtProvider := openwrt.New("test")
 		req := provider.SchemaRequest{}
 		res := &provider.SchemaResponse{}
 
@@ -134,7 +134,7 @@ func schemaAttributeIsSensitive(
 
 		// Given
 		ctx := context.Background()
-		openWrtProvider := openwrt.New()
+		openWrtProvider := openwrt.New("test")
 		req := provider.SchemaRequest{}
 		res := &provider.SchemaResponse{}
 
