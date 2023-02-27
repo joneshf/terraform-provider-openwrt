@@ -1,0 +1,55 @@
+archives:
+  - format: zip
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+builds:
+  - binary: "{{ .ProjectName }}_v{{ .Version }}"
+    env:
+      # goreleaser does not work with CGO.
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    goos:
+      - darwin
+      - freebsd
+      - linux
+      - windows
+    goarch:
+      - "386"
+      - amd64
+      - arm
+      - arm64
+    ignore:
+      - goarch: "386"
+        goos: darwin
+    ldflags:
+      - -s -w -X main.version={{ .Version }} -X main.commit={{ .Commit }}
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+changelog:
+  skip: true
+
+checksum:
+  algorithm: sha256
+  extra_files:
+    - glob: terraform-registry-manifest.json
+      name_template: "{{ .ProjectName }}_{{ .Version }}_manifest.json"
+  name_template: "{{ .ProjectName }}_{{ .Version }}_SHA256SUMS"
+
+signs:
+  - args:
+      - --batch
+      - --detach-sign
+      - ${artifact}
+      - --local-user
+      # This comes from the GitHub Action environment
+      - "{{ .Env.GPG_FINGERPRINT }}"
+      - --output
+      - ${signature}
+    artifacts: checksum
+
+release:
+  draft: true
+  extra_files:
+    - glob: terraform-registry-manifest.json
+      name_template: "{{ .ProjectName }}_{{ .Version }}_manifest.json"
