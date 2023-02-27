@@ -12,6 +12,7 @@ import (
 //go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name openwrt
 
 const (
+	// version is set by the linker flag `-X main.version=<some-version>`.
 	version = "unknown"
 )
 
