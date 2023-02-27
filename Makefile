@@ -25,6 +25,10 @@ docs: install
 install:
 	go install ./...
 
+.PHONY: release
+release:
+	goreleaser release --clean
+
 .PHONY: start-acceptance-test-server
 start-acceptance-test-server:
 	docker compose --file $(ACCEPTANCE_TEST_DOCKER_COMPOSE_FILE) up --build --remove-orphans --wait

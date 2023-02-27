@@ -18,9 +18,11 @@ pkgs.mkShell {
     pkgs.gh
     pkgs.git
     pkgs.gnumake
+    pkgs.gnupg
     pkgs.go
     pkgs.go-tools
     pkgs.gopls
+    pkgs.goreleaser
     pkgs.nixpkgs-fmt
     pkgs.terraform
   ];
