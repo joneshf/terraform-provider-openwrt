@@ -14,7 +14,7 @@ import (
 func TestSystemSystemDataSourceAcceptance(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){
-			"openwrt": providerserver.NewProtocol6WithError(openwrt.New()),
+			"openwrt": providerserver.NewProtocol6WithError(openwrt.New("test")),
 		},
 		Steps: []resource.TestStep{
 			{
