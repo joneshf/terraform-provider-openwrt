@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/lucirpcglue"
@@ -206,17 +205,4 @@ func (d *systemDataSource) Schema(
 		},
 		Description: "Provides system data about an OpenWrt device",
 	}
-}
-
-type systemModel struct {
-	ConLogLevel  types.Int64  `tfsdk:"conloglevel"`
-	CronLogLevel types.Int64  `tfsdk:"cronloglevel"`
-	Description  types.String `tfsdk:"description"`
-	Hostname     types.String `tfsdk:"hostname"`
-	Id           types.String `tfsdk:"id"`
-	LogSize      types.Int64  `tfsdk:"log_size"`
-	Notes        types.String `tfsdk:"notes"`
-	Timezone     types.String `tfsdk:"timezone"`
-	TTYLogin     types.Bool   `tfsdk:"ttylogin"`
-	Zonename     types.String `tfsdk:"zonename"`
 }
