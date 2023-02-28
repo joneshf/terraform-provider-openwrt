@@ -2,18 +2,15 @@ package system
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
-	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/logger"
+	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/lucirpcglue"
 )
 
 const (
@@ -80,7 +77,7 @@ func (d *systemDataSource) Configure(
 		return
 	}
 
-	client, diagnostics := newUCIClient(req)
+	client, diagnostics := lucirpcglue.NewClient(req)
 	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {
 		return
@@ -108,32 +105,32 @@ func (d *systemDataSource) Read(
 ) {
 	tflog.Info(ctx, fmt.Sprintf("Reading %s data source", d.fullTypeName))
 
-	section, diagnostics := getSection(ctx, d.client, systemUCIConfig, systemUCISection)
+	section, diagnostics := lucirpcglue.GetSection(ctx, d.client, systemUCIConfig, systemUCISection)
 	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {
 		return
 	}
 
 	var model systemModel
-	ctx, model.ConLogLevel, diagnostics = getOptionInt64(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemConLogLevelAttribute), systemConLogLevelUCIOption)
+	ctx, model.ConLogLevel, diagnostics = lucirpcglue.GetOptionInt64(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemConLogLevelAttribute), systemConLogLevelUCIOption)
 	res.Diagnostics.Append(diagnostics...)
-	ctx, model.CronLogLevel, diagnostics = getOptionInt64(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemCronLogLevelAttribute), systemCronLogLevelUCIOption)
+	ctx, model.CronLogLevel, diagnostics = lucirpcglue.GetOptionInt64(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemCronLogLevelAttribute), systemCronLogLevelUCIOption)
 	res.Diagnostics.Append(diagnostics...)
-	ctx, model.Description, diagnostics = getOptionString(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemDescriptionAttribute), systemDescriptionUCIOption)
+	ctx, model.Description, diagnostics = lucirpcglue.GetOptionString(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemDescriptionAttribute), systemDescriptionUCIOption)
 	res.Diagnostics.Append(diagnostics...)
-	ctx, model.Hostname, diagnostics = getOptionString(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemHostnameAttribute), systemHostnameUCIOption)
+	ctx, model.Hostname, diagnostics = lucirpcglue.GetOptionString(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemHostnameAttribute), systemHostnameUCIOption)
 	res.Diagnostics.Append(diagnostics...)
-	ctx, model.LogSize, diagnostics = getOptionInt64(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemLogSizeAttribute), systemLogSizeUCIOption)
+	ctx, model.LogSize, diagnostics = lucirpcglue.GetOptionInt64(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemLogSizeAttribute), systemLogSizeUCIOption)
 	res.Diagnostics.Append(diagnostics...)
-	ctx, model.Notes, diagnostics = getOptionString(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemNotesAttribute), systemNotesUCIOption)
+	ctx, model.Notes, diagnostics = lucirpcglue.GetOptionString(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemNotesAttribute), systemNotesUCIOption)
 	res.Diagnostics.Append(diagnostics...)
-	ctx, model.Timezone, diagnostics = getOptionString(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemTimezoneAttribute), systemTimezoneUCIOption)
+	ctx, model.Timezone, diagnostics = lucirpcglue.GetOptionString(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemTimezoneAttribute), systemTimezoneUCIOption)
 	res.Diagnostics.Append(diagnostics...)
-	ctx, model.TTYLogin, diagnostics = getOptionBool(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemTTYLoginAttribute), systemTTYLoginUCIOption)
+	ctx, model.TTYLogin, diagnostics = lucirpcglue.GetOptionBool(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemTTYLoginAttribute), systemTTYLoginUCIOption)
 	res.Diagnostics.Append(diagnostics...)
-	ctx, model.Zonename, diagnostics = getOptionString(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemZonenameAttribute), systemZonenameUCIOption)
+	ctx, model.Zonename, diagnostics = lucirpcglue.GetOptionString(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemZonenameAttribute), systemZonenameUCIOption)
 	res.Diagnostics.Append(diagnostics...)
-	ctx, model.Id, diagnostics = getMetadataString(ctx, d.fullTypeName, dataSourceTerraformType, section, systemIdUCISection)
+	ctx, model.Id, diagnostics = lucirpcglue.GetMetadataString(ctx, d.fullTypeName, dataSourceTerraformType, section, systemIdUCISection)
 	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {
 		return
@@ -209,194 +206,6 @@ func (d *systemDataSource) Schema(
 		},
 		Description: "Provides system data about an OpenWrt device",
 	}
-}
-
-func getMetadataString(
-	ctx context.Context,
-	fullTypeName string,
-	terraformType string,
-	section map[string]json.RawMessage,
-	key string,
-) (context.Context, types.String, diag.Diagnostics) {
-	diagnostics := diag.Diagnostics{}
-	result := types.StringNull()
-	raw, ok := section[key]
-	if !ok {
-		return ctx, result, diagnostics
-	}
-
-	var value string
-	err := json.Unmarshal(raw, &value)
-	if err != nil {
-		diagnostics.AddError(
-			fmt.Sprintf("unable to parse metadata: %q", key),
-			err.Error(),
-		)
-		return ctx, result, diagnostics
-	}
-
-	result = types.StringValue(value)
-	ctx = logger.SetFieldString(ctx, fullTypeName, terraformType, key, result)
-	return ctx, result, diagnostics
-}
-
-func getOptionBool(
-	ctx context.Context,
-	fullTypeName string,
-	terraformType string,
-	section map[string]json.RawMessage,
-	attribute path.Path,
-	option string,
-) (context.Context, types.Bool, diag.Diagnostics) {
-	diagnostics := diag.Diagnostics{}
-	result := types.BoolNull()
-	raw, ok := section[option]
-	if !ok {
-		return ctx, result, diagnostics
-	}
-
-	// Booleans in UCI can be any number of things:
-	// - True: "1", "yes", "on", "true", "enabled"
-	// - False: "0", "no", "off", "false", "disabled"
-	// We try to parse on of these out of the string.
-	var boolish string
-	err := json.Unmarshal(raw, &boolish)
-	if err != nil {
-		diagnostics.AddAttributeError(
-			attribute,
-			fmt.Sprintf("unable to parse option: %q", option),
-			err.Error(),
-		)
-		return ctx, result, diagnostics
-	}
-
-	switch boolish {
-	case "1", "yes", "on", "true", "enabled":
-		result = types.BoolValue(true)
-
-	case "0", "no", "off", "false", "disabled":
-		result = types.BoolValue(false)
-
-	default:
-		diagnostics.AddAttributeError(
-			attribute,
-			fmt.Sprintf("Unexpected value for option: %q", option),
-			fmt.Sprintf(`expected one of "1", "yes", "on", "true", "enabled", "0", "no", "off", "false", or "disabled"; got: %q`, boolish),
-		)
-		return ctx, result, diagnostics
-	}
-
-	ctx = logger.SetFieldBool(ctx, fullTypeName, terraformType, option, result)
-	return ctx, result, diagnostics
-}
-
-func getOptionInt64(
-	ctx context.Context,
-	fullTypeName string,
-	terraformType string,
-	section map[string]json.RawMessage,
-	attribute path.Path,
-	option string,
-) (context.Context, types.Int64, diag.Diagnostics) {
-	diagnostics := diag.Diagnostics{}
-	result := types.Int64Null()
-	raw, ok := section[option]
-	if !ok {
-		return ctx, result, diagnostics
-	}
-
-	// Integers in UCI are stored as strtings.
-	// We have to unmarshall first, then parse the string.
-	var intish string
-	err := json.Unmarshal(raw, &intish)
-	if err != nil {
-		diagnostics.AddAttributeError(
-			attribute,
-			fmt.Sprintf("unable to parse option: %q", option),
-			err.Error(),
-		)
-		return ctx, result, diagnostics
-	}
-
-	value, err := strconv.Atoi(intish)
-	if err != nil {
-		diagnostics.AddAttributeError(
-			attribute,
-			fmt.Sprintf("unable to convert option: %q to a string", option),
-			err.Error(),
-		)
-		return ctx, result, diagnostics
-	}
-
-	result = types.Int64Value(int64(value))
-	ctx = logger.SetFieldInt64(ctx, fullTypeName, terraformType, option, result)
-	return ctx, result, diagnostics
-}
-
-func getOptionString(
-	ctx context.Context,
-	fullTypeName string,
-	terraformType string,
-	section map[string]json.RawMessage,
-	attribute path.Path,
-	option string,
-) (context.Context, types.String, diag.Diagnostics) {
-	diagnostics := diag.Diagnostics{}
-	result := types.StringNull()
-	raw, ok := section[option]
-	if !ok {
-		return ctx, result, diagnostics
-	}
-
-	var value string
-	err := json.Unmarshal(raw, &value)
-	if err != nil {
-		diagnostics.AddAttributeError(
-			attribute,
-			fmt.Sprintf("unable to parse option: %q", option),
-			err.Error(),
-		)
-		return ctx, result, diagnostics
-	}
-
-	result = types.StringValue(value)
-	ctx = logger.SetFieldString(ctx, fullTypeName, terraformType, option, result)
-	return ctx, result, diagnostics
-}
-
-func getSection(
-	ctx context.Context,
-	client lucirpc.Client,
-	config string,
-	section string,
-) (map[string]json.RawMessage, diag.Diagnostics) {
-	diagnostics := diag.Diagnostics{}
-	result, err := client.GetSection(ctx, config, section)
-	if err != nil {
-		diagnostics.AddError(
-			fmt.Sprintf("problem getting %s.%s section", config, section),
-			err.Error(),
-		)
-		return map[string]json.RawMessage{}, diagnostics
-	}
-
-	return result, diagnostics
-}
-
-func newUCIClient(
-	req datasource.ConfigureRequest,
-) (*lucirpc.Client, diag.Diagnostics) {
-	diagnostics := diag.Diagnostics{}
-	client, ok := req.ProviderData.(*lucirpc.Client)
-	if !ok {
-		diagnostics.AddError(
-			"OpenWrt provider not configured correctly",
-			"Expected UCI tree, but one was not provided. This is a problem with the provider implementation. Please report this to https://github.com/joneshf/terraform-provider-openwrt",
-		)
-		return nil, diagnostics
-	}
-
-	return client, diagnostics
 }
 
 type systemModel struct {
