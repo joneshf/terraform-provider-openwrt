@@ -108,7 +108,7 @@ func (d *systemDataSource) Read(
 ) {
 	tflog.Info(ctx, fmt.Sprintf("Reading %s data source", d.fullTypeName))
 
-	section, diagnostics := getSection(ctx, d.client)
+	section, diagnostics := getSection(ctx, d.client, systemUCIConfig, systemUCISection)
 	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {
 		return
@@ -367,18 +367,20 @@ func getOptionString(
 func getSection(
 	ctx context.Context,
 	client lucirpc.Client,
+	config string,
+	section string,
 ) (map[string]json.RawMessage, diag.Diagnostics) {
 	diagnostics := diag.Diagnostics{}
-	section, err := client.GetSection(ctx, systemUCIConfig, systemUCISection)
+	result, err := client.GetSection(ctx, config, section)
 	if err != nil {
 		diagnostics.AddError(
-			fmt.Sprintf("problem getting %s.%s section", systemUCIConfig, systemUCISection),
+			fmt.Sprintf("problem getting %s.%s section", config, section),
 			err.Error(),
 		)
 		return map[string]json.RawMessage{}, diagnostics
 	}
 
-	return section, diagnostics
+	return result, diagnostics
 }
 
 func newUCIClient(
