@@ -14,40 +14,6 @@ import (
 
 const (
 	dataSourceTerraformType = "data_source"
-
-	systemConLogLevelAttribute = "conloglevel"
-	systemConLogLevelUCIOption = "conloglevel"
-
-	systemCronLogLevelAttribute = "cronloglevel"
-	systemCronLogLevelUCIOption = "cronloglevel"
-
-	systemDescriptionAttribute = "description"
-	systemDescriptionUCIOption = "description"
-
-	systemHostnameAttribute = "hostname"
-	systemHostnameUCIOption = "hostname"
-
-	systemIdAttribute  = "id"
-	systemIdUCISection = ".name"
-
-	systemLogSizeAttribute = "log_size"
-	systemLogSizeUCIOption = "log_size"
-
-	systemNotesAttribute = "notes"
-	systemNotesUCIOption = "notes"
-
-	systemTimezoneAttribute = "timezone"
-	systemTimezoneUCIOption = "timezone"
-
-	systemTTYLoginAttribute = "ttylogin"
-	systemTTYLoginUCIOption = "ttylogin"
-
-	systemTypeName   = "system_system"
-	systemUCIConfig  = "system"
-	systemUCISection = "@system[0]"
-
-	systemZonenameAttribute = "zonename"
-	systemZonenameUCIOption = "zonename"
 )
 
 var (
