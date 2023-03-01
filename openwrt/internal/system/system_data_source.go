@@ -68,7 +68,6 @@ func (d *systemDataSource) Read(
 	res *datasource.ReadResponse,
 ) {
 	tflog.Info(ctx, fmt.Sprintf("Reading %s data source", d.fullTypeName))
-
 	ctx, model, diagnostics := ReadModel(
 		ctx,
 		d.fullTypeName,
