@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/lucirpcglue"
@@ -69,33 +68,12 @@ func (d *systemDataSource) Read(
 	res *datasource.ReadResponse,
 ) {
 	tflog.Info(ctx, fmt.Sprintf("Reading %s data source", d.fullTypeName))
-
-	section, diagnostics := lucirpcglue.GetSection(ctx, d.client, systemUCIConfig, systemUCISection)
-	res.Diagnostics.Append(diagnostics...)
-	if res.Diagnostics.HasError() {
-		return
-	}
-
-	var model systemModel
-	ctx, model.ConLogLevel, diagnostics = lucirpcglue.GetOptionInt64(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemConLogLevelAttribute), systemConLogLevelUCIOption)
-	res.Diagnostics.Append(diagnostics...)
-	ctx, model.CronLogLevel, diagnostics = lucirpcglue.GetOptionInt64(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemCronLogLevelAttribute), systemCronLogLevelUCIOption)
-	res.Diagnostics.Append(diagnostics...)
-	ctx, model.Description, diagnostics = lucirpcglue.GetOptionString(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemDescriptionAttribute), systemDescriptionUCIOption)
-	res.Diagnostics.Append(diagnostics...)
-	ctx, model.Hostname, diagnostics = lucirpcglue.GetOptionString(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemHostnameAttribute), systemHostnameUCIOption)
-	res.Diagnostics.Append(diagnostics...)
-	ctx, model.LogSize, diagnostics = lucirpcglue.GetOptionInt64(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemLogSizeAttribute), systemLogSizeUCIOption)
-	res.Diagnostics.Append(diagnostics...)
-	ctx, model.Notes, diagnostics = lucirpcglue.GetOptionString(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemNotesAttribute), systemNotesUCIOption)
-	res.Diagnostics.Append(diagnostics...)
-	ctx, model.Timezone, diagnostics = lucirpcglue.GetOptionString(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemTimezoneAttribute), systemTimezoneUCIOption)
-	res.Diagnostics.Append(diagnostics...)
-	ctx, model.TTYLogin, diagnostics = lucirpcglue.GetOptionBool(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemTTYLoginAttribute), systemTTYLoginUCIOption)
-	res.Diagnostics.Append(diagnostics...)
-	ctx, model.Zonename, diagnostics = lucirpcglue.GetOptionString(ctx, d.fullTypeName, dataSourceTerraformType, section, path.Root(systemZonenameAttribute), systemZonenameUCIOption)
-	res.Diagnostics.Append(diagnostics...)
-	ctx, model.Id, diagnostics = lucirpcglue.GetMetadataString(ctx, d.fullTypeName, dataSourceTerraformType, section, systemIdUCISection)
+	ctx, model, diagnostics := ReadModel(
+		ctx,
+		d.fullTypeName,
+		dataSourceTerraformType,
+		d.client,
+	)
 	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {
 		return
