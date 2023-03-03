@@ -31,9 +31,22 @@ func (c *Client) GetSection(
 	config string,
 	section string,
 ) (map[string]json.RawMessage, error) {
+	marshalledConfig, err := json.Marshal(config)
+	if err != nil {
+		return nil, fmt.Errorf("unable to serialize config %q for %s: %w", config, humanReadableGetSection, err)
+	}
+
+	marshalledSection, err := json.Marshal(section)
+	if err != nil {
+		return nil, fmt.Errorf("unable to serialize section %q for %s: %w", section, humanReadableGetSection, err)
+	}
+
 	requestBody := jsonRPCRequestBody{
 		Method: methodGetAll,
-		Params: []string{config, section},
+		Params: []json.RawMessage{
+			marshalledConfig,
+			marshalledSection,
+		},
 	}
 	responseBody, err := c.jsonRPCClientUCI.Invoke(
 		ctx,
@@ -86,9 +99,22 @@ func NewClient(
 		Scheme: scheme,
 	}
 	httpClient := &http.Client{}
+	marshalledUsername, err := json.Marshal(username)
+	if err != nil {
+		return nil, fmt.Errorf("unable to serialize username for %s: %w", humanReadableLogin, err)
+	}
+
+	marshalledPassword, err := json.Marshal(password)
+	if err != nil {
+		return nil, fmt.Errorf("unable to serialize password for %s: %w", humanReadableLogin, err)
+	}
+
 	requestBody := jsonRPCRequestBody{
 		Method: methodLogin,
-		Params: []string{username, password},
+		Params: []json.RawMessage{
+			marshalledUsername,
+			marshalledPassword,
+		},
 	}
 	jsonRPCClient := jsonRPCNewClient(
 		*httpClient,
@@ -192,8 +218,8 @@ func jsonRPCNewClient(
 }
 
 type jsonRPCRequestBody struct {
-	Method string   `json:"method"`
-	Params []string `json:"params"`
+	Method string            `json:"method"`
+	Params []json.RawMessage `json:"params"`
 }
 
 type jsonRPCResponseBody struct {
