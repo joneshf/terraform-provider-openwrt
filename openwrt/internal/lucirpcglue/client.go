@@ -1,15 +1,18 @@
 package lucirpcglue
 
 import (
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
 )
 
+type ConfigureRequest struct {
+	ProviderData any
+}
+
 // NewClient attempts to construct a new [lucirpc.Client].
 // Any diagnostic information found in the process (including errors) is returned.
 func NewClient(
-	req datasource.ConfigureRequest,
+	req ConfigureRequest,
 ) (*lucirpc.Client, diag.Diagnostics) {
 	diagnostics := diag.Diagnostics{}
 	client, ok := req.ProviderData.(*lucirpc.Client)

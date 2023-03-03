@@ -41,7 +41,7 @@ func (d *systemDataSource) Configure(
 		return
 	}
 
-	client, diagnostics := lucirpcglue.NewClient(req)
+	client, diagnostics := lucirpcglue.NewClient(lucirpcglue.ConfigureRequest(req))
 	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {
 		return
