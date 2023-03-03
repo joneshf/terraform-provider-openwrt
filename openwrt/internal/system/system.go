@@ -3,8 +3,10 @@ package system
 import (
 	"context"
 
+	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
@@ -45,6 +47,61 @@ const (
 
 	systemZonenameAttribute = "zonename"
 	systemZonenameUCIOption = "zonename"
+)
+
+var (
+	systemConLogLevelSchemaAttribute = int64SchemaAttribute{
+		Description: "The maximum log level for kernel messages to be logged to the console.",
+	}
+
+	systemCronLogLevelSchemaAttribute = int64SchemaAttribute{
+		Description: "The minimum level for cron messages to be logged to syslog.",
+	}
+
+	systemDescriptionSchemaAttribute = stringSchemaAttribute{
+		Description: "The hostname for the system.",
+	}
+
+	systemHostnameSchemaAttribute = stringSchemaAttribute{
+		Description: "A short single-line description for the system.",
+	}
+
+	systemIdSchemaAttribute = stringSchemaAttribute{
+		Description: "Placeholder identifier attribute.",
+	}
+
+	systemLogSizeSchemaAttribute = int64SchemaAttribute{
+		Description: "Size of the file based log buffer in KiB.",
+	}
+
+	systemNotesSchemaAttribute = stringSchemaAttribute{
+		Description: "Multi-line free-form text about the system.",
+	}
+
+	systemSchemaAttributes = map[string]schemaAttribute{
+		systemConLogLevelAttribute:  systemConLogLevelSchemaAttribute,
+		systemCronLogLevelAttribute: systemCronLogLevelSchemaAttribute,
+		systemDescriptionAttribute:  systemDescriptionSchemaAttribute,
+		systemHostnameAttribute:     systemHostnameSchemaAttribute,
+		systemIdAttribute:           systemIdSchemaAttribute,
+		systemLogSizeAttribute:      systemLogSizeSchemaAttribute,
+		systemNotesAttribute:        systemNotesSchemaAttribute,
+		systemTimezoneAttribute:     systemTimezoneSchemaAttribute,
+		systemTTYLoginAttribute:     systemTtyLoginSchemaAttribute,
+		systemZonenameAttribute:     systemZonenameSchemaAttribute,
+	}
+
+	systemTimezoneSchemaAttribute = stringSchemaAttribute{
+		Description: "The POSIX.1 time zone string. This has no corresponding value in LuCI. See: https://github.com/openwrt/luci/blob/cd82ccacef78d3bb8b8af6b87dabb9e892e2b2aa/modules/luci-base/luasrc/sys/zoneinfo/tzdata.lua.",
+	}
+
+	systemTtyLoginSchemaAttribute = boolSchemaAttribute{
+		Description: "Require authentication for local users to log in the system.",
+	}
+
+	systemZonenameSchemaAttribute = stringSchemaAttribute{
+		Description: "The IANA/Olson time zone string. This corresponds to \"Timezone\" in LuCI. See: https://github.com/openwrt/luci/blob/cd82ccacef78d3bb8b8af6b87dabb9e892e2b2aa/modules/luci-base/luasrc/sys/zoneinfo/tzdata.lua.",
+	}
 )
 
 type systemModel struct {
@@ -100,4 +157,71 @@ func ReadModel(
 	allDiagnostics.Append(diagnostics...)
 
 	return ctx, model, diagnostics
+}
+
+type boolSchemaAttribute struct {
+	DataSourceRequired  bool
+	DeprecationMessage  string
+	Description         string
+	MarkdownDescription string
+	Sensitive           bool
+	Validators          []validator.Bool
+}
+
+func (a boolSchemaAttribute) ToDataSource() datasourceschema.Attribute {
+	return datasourceschema.BoolAttribute{
+		Computed:            !a.DataSourceRequired,
+		DeprecationMessage:  a.DeprecationMessage,
+		Description:         a.Description,
+		MarkdownDescription: a.MarkdownDescription,
+		Required:            a.DataSourceRequired,
+		Sensitive:           a.Sensitive,
+		Validators:          a.Validators,
+	}
+}
+
+type int64SchemaAttribute struct {
+	DataSourceRequired  bool
+	DeprecationMessage  string
+	Description         string
+	MarkdownDescription string
+	Sensitive           bool
+	Validators          []validator.Int64
+}
+
+func (a int64SchemaAttribute) ToDataSource() datasourceschema.Attribute {
+	return datasourceschema.Int64Attribute{
+		Computed:            !a.DataSourceRequired,
+		DeprecationMessage:  a.DeprecationMessage,
+		Description:         a.Description,
+		MarkdownDescription: a.MarkdownDescription,
+		Required:            a.DataSourceRequired,
+		Sensitive:           a.Sensitive,
+		Validators:          a.Validators,
+	}
+}
+
+type schemaAttribute interface {
+	ToDataSource() datasourceschema.Attribute
+}
+
+type stringSchemaAttribute struct {
+	DataSourceRequired  bool
+	DeprecationMessage  string
+	Description         string
+	MarkdownDescription string
+	Sensitive           bool
+	Validators          []validator.String
+}
+
+func (a stringSchemaAttribute) ToDataSource() datasourceschema.Attribute {
+	return datasourceschema.StringAttribute{
+		Computed:            !a.DataSourceRequired,
+		DeprecationMessage:  a.DeprecationMessage,
+		Description:         a.Description,
+		MarkdownDescription: a.MarkdownDescription,
+		Required:            a.DataSourceRequired,
+		Sensitive:           a.Sensitive,
+		Validators:          a.Validators,
+	}
 }
