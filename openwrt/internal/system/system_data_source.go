@@ -93,60 +93,13 @@ func (d *systemDataSource) Schema(
 	req datasource.SchemaRequest,
 	res *datasource.SchemaResponse,
 ) {
-	conLogLevel := schema.Int64Attribute{
-		Description: "The maximum log level for kernel messages to be logged to the console.",
-		Optional:    true,
-	}
-	cronLogLevel := schema.Int64Attribute{
-		Description: "The minimum level for cron messages to be logged to syslog.",
-		Optional:    true,
-	}
-	description := schema.StringAttribute{
-		Description: "The hostname for the system.",
-		Optional:    true,
-	}
-	hostname := schema.StringAttribute{
-		Description: "A short single-line description for the system.",
-		Optional:    true,
-	}
-	id := schema.StringAttribute{
-		Computed:    true,
-		Description: "Placeholder identifier attribute.",
-	}
-	logSize := schema.Int64Attribute{
-		Description: "Size of the file based log buffer in KiB.",
-		Optional:    true,
-	}
-	notes := schema.StringAttribute{
-		Description: "Multi-line free-form text about the system.",
-		Optional:    true,
-	}
-	timezone := schema.StringAttribute{
-		Description: "The POSIX.1 time zone string. This has no corresponding value in LuCI. See: https://github.com/openwrt/luci/blob/cd82ccacef78d3bb8b8af6b87dabb9e892e2b2aa/modules/luci-base/luasrc/sys/zoneinfo/tzdata.lua.",
-		Optional:    true,
-	}
-	ttyLogin := schema.BoolAttribute{
-		Description: "Require authentication for local users to log in the system.",
-		Optional:    true,
-	}
-	zonename := schema.StringAttribute{
-		Description: "The IANA/Olson time zone string. This corresponds to \"Timezone\" in LuCI. See: https://github.com/openwrt/luci/blob/cd82ccacef78d3bb8b8af6b87dabb9e892e2b2aa/modules/luci-base/luasrc/sys/zoneinfo/tzdata.lua.",
-		Optional:    true,
+	attributes := map[string]schema.Attribute{}
+	for k, v := range systemSchemaAttributes {
+		attributes[k] = v.ToDataSource()
 	}
 
 	res.Schema = schema.Schema{
-		Attributes: map[string]schema.Attribute{
-			systemConLogLevelAttribute:  conLogLevel,
-			systemCronLogLevelAttribute: cronLogLevel,
-			systemDescriptionAttribute:  description,
-			systemHostnameAttribute:     hostname,
-			systemIdAttribute:           id,
-			systemLogSizeAttribute:      logSize,
-			systemNotesAttribute:        notes,
-			systemTimezoneAttribute:     timezone,
-			systemTTYLoginAttribute:     ttyLogin,
-			systemZonenameAttribute:     zonename,
-		},
+		Attributes:  attributes,
 		Description: "Provides system data about an OpenWrt device",
 	}
 }
