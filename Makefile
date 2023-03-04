@@ -2,7 +2,7 @@
 Makefile:;
 
 ACCEPTANCE_TEST_BUILD_CONSTRAINT := acceptance.test
-ACCEPTANCE_TEST_DOCKER_COMPOSE_FILE := lucirpc/docker-compose.acceptance-test.yaml
+ACCEPTANCE_TEST_DOCKER_COMPOSE_FILE := ./docker-compose.acceptance-test.yaml
 
 .DEFAULT_GOAL := test
 
