@@ -4,19 +4,58 @@ package openwrt_test
 
 import (
 	"context"
+	"fmt"
+	"log"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
+	"github.com/joneshf/terraform-provider-openwrt/internal/acceptancetest"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt"
+	"github.com/ory/dockertest/v3"
 	"gotest.tools/v3/assert"
 )
 
+var (
+	dockerPool *dockertest.Pool
+)
+
+func TestMain(m *testing.M) {
+	var (
+		code     int
+		err      error
+		tearDown func()
+	)
+	ctx := context.Background()
+	tearDown, dockerPool, err = acceptancetest.Setup(ctx, m)
+	defer func() {
+		tearDown()
+		os.Exit(code)
+	}()
+	if err != nil {
+		fmt.Printf("Problem setting up tests: %s", err)
+		code = 1
+		return
+	}
+
+	log.Printf("Running tests")
+	code = m.Run()
+}
+
 func TestOpenWrtProviderConfigureConnectsWithoutError(t *testing.T) {
+	t.Parallel()
+
 	// Given
 	ctx := context.Background()
+	openWrt, hostname, port := acceptancetest.RunOpenWrtServer(
+		ctx,
+		*dockerPool,
+		t,
+	)
+	defer openWrt.Close()
 	openWrtProvider := openwrt.New("test")
 	schemaReq := provider.SchemaRequest{}
 	schemaRes := &provider.SchemaResponse{}
@@ -34,11 +73,11 @@ func TestOpenWrtProviderConfigureConnectsWithoutError(t *testing.T) {
 				},
 			},
 			map[string]tftypes.Value{
-				"hostname": tftypes.NewValue(tftypes.String, "localhost"),
-				"password": tftypes.NewValue(tftypes.String, ""),
-				"port":     tftypes.NewValue(tftypes.Number, 8080),
-				"scheme":   tftypes.NewValue(tftypes.String, "http"),
-				"username": tftypes.NewValue(tftypes.String, "root"),
+				"hostname": tftypes.NewValue(tftypes.String, hostname),
+				"password": tftypes.NewValue(tftypes.String, acceptancetest.Password),
+				"port":     tftypes.NewValue(tftypes.Number, port),
+				"scheme":   tftypes.NewValue(tftypes.String, acceptancetest.Scheme),
+				"username": tftypes.NewValue(tftypes.String, acceptancetest.Username),
 			},
 		),
 	}
