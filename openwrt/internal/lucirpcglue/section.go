@@ -39,6 +39,32 @@ func CreateSection(
 	return result, diagnostics
 }
 
+// DeleteSection attempts to delete an existing section.
+// The bool represents whether or not deleting was successful.
+// Any diagnostic information found in the process (including errors) is returned.
+func DeleteSection(
+	ctx context.Context,
+	client lucirpc.Client,
+	config string,
+	section string,
+) (bool, diag.Diagnostics) {
+	diagnostics := diag.Diagnostics{}
+	result, err := client.DeleteSection(
+		ctx,
+		config,
+		section,
+	)
+	if err != nil {
+		diagnostics.AddError(
+			fmt.Sprintf("problem deleting %s.%s section", config, section),
+			err.Error(),
+		)
+		return false, diagnostics
+	}
+
+	return result, diagnostics
+}
+
 // GetMetadataString attempts to parse the given metadata key from the section.
 // Any diagnostic information found in the process (including errors) is returned.
 func GetSection(
