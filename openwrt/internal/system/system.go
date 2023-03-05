@@ -6,6 +6,7 @@ import (
 	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
+	resourceschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -56,32 +57,39 @@ const (
 
 var (
 	systemConLogLevelSchemaAttribute = int64SchemaAttribute{
-		Description: "The maximum log level for kernel messages to be logged to the console.",
+		Description:       "The maximum log level for kernel messages to be logged to the console.",
+		ResourceExistence: NoValidation,
 	}
 
 	systemCronLogLevelSchemaAttribute = int64SchemaAttribute{
-		Description: "The minimum level for cron messages to be logged to syslog.",
+		Description:       "The minimum level for cron messages to be logged to syslog.",
+		ResourceExistence: NoValidation,
 	}
 
 	systemDescriptionSchemaAttribute = stringSchemaAttribute{
-		Description: "The hostname for the system.",
+		Description:       "The hostname for the system.",
+		ResourceExistence: NoValidation,
 	}
 
 	systemHostnameSchemaAttribute = stringSchemaAttribute{
-		Description: "A short single-line description for the system.",
+		Description:       "A short single-line description for the system.",
+		ResourceExistence: NoValidation,
 	}
 
 	systemIdSchemaAttribute = stringSchemaAttribute{
 		DataSourceExistence: Required,
 		Description:         "Placeholder identifier attribute.",
+		ResourceExistence:   Required,
 	}
 
 	systemLogSizeSchemaAttribute = int64SchemaAttribute{
-		Description: "Size of the file based log buffer in KiB.",
+		Description:       "Size of the file based log buffer in KiB.",
+		ResourceExistence: NoValidation,
 	}
 
 	systemNotesSchemaAttribute = stringSchemaAttribute{
-		Description: "Multi-line free-form text about the system.",
+		Description:       "Multi-line free-form text about the system.",
+		ResourceExistence: NoValidation,
 	}
 
 	systemSchemaAttributes = map[string]schemaAttribute{
@@ -98,15 +106,18 @@ var (
 	}
 
 	systemTimezoneSchemaAttribute = stringSchemaAttribute{
-		Description: "The POSIX.1 time zone string. This has no corresponding value in LuCI. See: https://github.com/openwrt/luci/blob/cd82ccacef78d3bb8b8af6b87dabb9e892e2b2aa/modules/luci-base/luasrc/sys/zoneinfo/tzdata.lua.",
+		Description:       "The POSIX.1 time zone string. This has no corresponding value in LuCI. See: https://github.com/openwrt/luci/blob/cd82ccacef78d3bb8b8af6b87dabb9e892e2b2aa/modules/luci-base/luasrc/sys/zoneinfo/tzdata.lua.",
+		ResourceExistence: NoValidation,
 	}
 
 	systemTtyLoginSchemaAttribute = boolSchemaAttribute{
-		Description: "Require authentication for local users to log in the system.",
+		Description:       "Require authentication for local users to log in the system.",
+		ResourceExistence: NoValidation,
 	}
 
 	systemZonenameSchemaAttribute = stringSchemaAttribute{
-		Description: "The IANA/Olson time zone string. This corresponds to \"Timezone\" in LuCI. See: https://github.com/openwrt/luci/blob/cd82ccacef78d3bb8b8af6b87dabb9e892e2b2aa/modules/luci-base/luasrc/sys/zoneinfo/tzdata.lua.",
+		Description:       "The IANA/Olson time zone string. This corresponds to \"Timezone\" in LuCI. See: https://github.com/openwrt/luci/blob/cd82ccacef78d3bb8b8af6b87dabb9e892e2b2aa/modules/luci-base/luasrc/sys/zoneinfo/tzdata.lua.",
+		ResourceExistence: NoValidation,
 	}
 )
 
@@ -185,6 +196,7 @@ type boolSchemaAttribute struct {
 	DeprecationMessage  string
 	Description         string
 	MarkdownDescription string
+	ResourceExistence   AttributeExistence
 	Sensitive           bool
 	Validators          []validator.Bool
 }
@@ -202,11 +214,25 @@ func (a boolSchemaAttribute) ToDataSource() datasourceschema.Attribute {
 	}
 }
 
+func (a boolSchemaAttribute) ToResource() resourceschema.Attribute {
+	return resourceschema.BoolAttribute{
+		Computed:            a.ResourceExistence.ToComputed(),
+		DeprecationMessage:  a.DeprecationMessage,
+		Description:         a.Description,
+		MarkdownDescription: a.MarkdownDescription,
+		Optional:            a.ResourceExistence.ToOptional(),
+		Required:            a.ResourceExistence.ToRequired(),
+		Sensitive:           a.Sensitive,
+		Validators:          a.Validators,
+	}
+}
+
 type int64SchemaAttribute struct {
 	DataSourceExistence AttributeExistence
 	DeprecationMessage  string
 	Description         string
 	MarkdownDescription string
+	ResourceExistence   AttributeExistence
 	Sensitive           bool
 	Validators          []validator.Int64
 }
@@ -224,8 +250,22 @@ func (a int64SchemaAttribute) ToDataSource() datasourceschema.Attribute {
 	}
 }
 
+func (a int64SchemaAttribute) ToResource() resourceschema.Attribute {
+	return resourceschema.Int64Attribute{
+		Computed:            a.ResourceExistence.ToComputed(),
+		DeprecationMessage:  a.DeprecationMessage,
+		Description:         a.Description,
+		MarkdownDescription: a.MarkdownDescription,
+		Optional:            a.ResourceExistence.ToOptional(),
+		Required:            a.ResourceExistence.ToRequired(),
+		Sensitive:           a.Sensitive,
+		Validators:          a.Validators,
+	}
+}
+
 type schemaAttribute interface {
 	ToDataSource() datasourceschema.Attribute
+	ToResource() resourceschema.Attribute
 }
 
 type stringSchemaAttribute struct {
@@ -233,6 +273,7 @@ type stringSchemaAttribute struct {
 	DeprecationMessage  string
 	Description         string
 	MarkdownDescription string
+	ResourceExistence   AttributeExistence
 	Sensitive           bool
 	Validators          []validator.String
 }
@@ -245,6 +286,19 @@ func (a stringSchemaAttribute) ToDataSource() datasourceschema.Attribute {
 		MarkdownDescription: a.MarkdownDescription,
 		Optional:            a.DataSourceExistence.ToOptional(),
 		Required:            a.DataSourceExistence.ToRequired(),
+		Sensitive:           a.Sensitive,
+		Validators:          a.Validators,
+	}
+}
+
+func (a stringSchemaAttribute) ToResource() resourceschema.Attribute {
+	return resourceschema.StringAttribute{
+		Computed:            a.ResourceExistence.ToComputed(),
+		DeprecationMessage:  a.DeprecationMessage,
+		Description:         a.Description,
+		MarkdownDescription: a.MarkdownDescription,
+		Optional:            a.ResourceExistence.ToOptional(),
+		Required:            a.ResourceExistence.ToRequired(),
 		Sensitive:           a.Sensitive,
 		Validators:          a.Validators,
 	}
