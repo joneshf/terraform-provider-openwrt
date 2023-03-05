@@ -73,6 +73,7 @@ func (d *systemDataSource) Read(
 		d.fullTypeName,
 		dataSourceTerraformType,
 		d.client,
+		systemUCISection,
 	)
 	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {

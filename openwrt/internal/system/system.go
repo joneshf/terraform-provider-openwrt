@@ -72,7 +72,8 @@ var (
 	}
 
 	systemIdSchemaAttribute = stringSchemaAttribute{
-		Description: "Placeholder identifier attribute.",
+		DataSourceExistence: Required,
+		Description:         "Placeholder identifier attribute.",
 	}
 
 	systemLogSizeSchemaAttribute = int64SchemaAttribute{
@@ -141,6 +142,7 @@ func ReadModel(
 	fullTypeName string,
 	terraformType string,
 	client lucirpc.Client,
+	sectionName string,
 ) (context.Context, systemModel, diag.Diagnostics) {
 	tflog.Info(ctx, "Reading system model")
 	var (
@@ -148,7 +150,7 @@ func ReadModel(
 		model          systemModel
 	)
 
-	section, diagnostics := lucirpcglue.GetSection(ctx, client, systemUCIConfig, systemUCISection)
+	section, diagnostics := lucirpcglue.GetSection(ctx, client, systemUCIConfig, sectionName)
 	allDiagnostics.Append(diagnostics...)
 	if allDiagnostics.HasError() {
 		return ctx, model, allDiagnostics
