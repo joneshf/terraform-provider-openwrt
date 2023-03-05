@@ -675,6 +675,243 @@ func TestNewClient(t *testing.T) {
 	})
 }
 
+func TestClientUpdateSection(t *testing.T) {
+	t.Run("handles server not existing", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		handle := func(w http.ResponseWriter, r *http.Request) {
+		}
+		client, close := authenticatedClient(
+			t,
+			ctx,
+			http.HandlerFunc(handle),
+		)
+		close()
+
+		// When
+		_, err := client.UpdateSection(
+			ctx,
+			"",
+			"",
+			map[string]json.RawMessage{},
+		)
+
+		// Then
+		assert.ErrorContains(t, err, "problem sending request to update section")
+	})
+
+	t.Run("makes a request to correct endpoint", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		handle := func(w http.ResponseWriter, r *http.Request) {
+			switch r.URL.Path {
+			case "/cgi-bin/luci/rpc/uci":
+				fmt.Fprintf(w, `{
+					"result": true
+				}`)
+
+			default:
+				w.WriteHeader(http.StatusNotFound)
+			}
+		}
+		client, close := authenticatedClient(
+			t,
+			ctx,
+			http.HandlerFunc(handle),
+		)
+		defer close()
+
+		// When
+		_, err := client.UpdateSection(
+			ctx,
+			"",
+			"",
+			map[string]json.RawMessage{},
+		)
+
+		// Then
+		assert.NilError(t, err)
+	})
+
+	t.Run("expects a 200 response", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		handle := func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusAccepted)
+		}
+		client, close := authenticatedClient(
+			t,
+			ctx,
+			http.HandlerFunc(handle),
+		)
+		defer close()
+
+		// When
+		_, err := client.UpdateSection(
+			ctx,
+			"",
+			"",
+			map[string]json.RawMessage{},
+		)
+
+		// Then
+		assert.ErrorContains(t, err, "expected update section to respond with a 200")
+	})
+
+	t.Run("expects a valid JSON-RPC response", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		handle := func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, `[]`)
+		}
+		client, close := authenticatedClient(
+			t,
+			ctx,
+			http.HandlerFunc(handle),
+		)
+		defer close()
+
+		// When
+		_, err := client.UpdateSection(
+			ctx,
+			"",
+			"",
+			map[string]json.RawMessage{},
+		)
+
+		// Then
+		assert.ErrorContains(t, err, "unable to parse update section response")
+	})
+
+	t.Run("returns error when get section fails", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		handle := func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, `{
+				"error": ""
+			}`)
+		}
+		client, close := authenticatedClient(
+			t,
+			ctx,
+			http.HandlerFunc(handle),
+		)
+		defer close()
+
+		// When
+		_, err := client.UpdateSection(
+			ctx,
+			"",
+			"",
+			map[string]json.RawMessage{},
+		)
+
+		// Then
+		assert.ErrorContains(t, err, "unable to update section")
+	})
+
+	t.Run("does not handle unknown stuff in result", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		handle := func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, `{
+				"result": 31
+			}`)
+		}
+		client, close := authenticatedClient(
+			t,
+			ctx,
+			http.HandlerFunc(handle),
+		)
+		defer close()
+
+		// When
+		_, err := client.UpdateSection(
+			ctx,
+			"",
+			"",
+			map[string]json.RawMessage{},
+		)
+
+		// Then
+		assert.ErrorContains(t, err, "unable to parse update section response")
+	})
+
+	t.Run("returns true when successful", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		handle := func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, `{
+				"result": true
+			}`)
+		}
+		client, close := authenticatedClient(
+			t,
+			ctx,
+			http.HandlerFunc(handle),
+		)
+		defer close()
+
+		// When
+		got, err := client.UpdateSection(
+			ctx,
+			"",
+			"",
+			map[string]json.RawMessage{},
+		)
+
+		// Then
+		assert.NilError(t, err)
+		want := true
+		assert.DeepEqual(t, got, want)
+	})
+
+	t.Run("commits changes", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		var committed bool
+		handle := func(w http.ResponseWriter, r *http.Request) {
+			switch r.URL.Path {
+			case "/cgi-bin/luci/rpc/uci":
+				decoder := json.NewDecoder(r.Body)
+				var body map[string]json.RawMessage
+				err := decoder.Decode(&body)
+				assert.NilError(t, err)
+				method, ok := body["method"]
+				assert.Check(t, ok)
+				switch string(method) {
+				case `"commit"`:
+					committed = true
+				}
+
+				fmt.Fprintf(w, `{
+					"result": true
+				}`)
+
+			default:
+				w.WriteHeader(http.StatusNotFound)
+			}
+		}
+		client, close := authenticatedClient(
+			t,
+			ctx,
+			http.HandlerFunc(handle),
+		)
+		defer close()
+
+		// When
+		client.UpdateSection(
+			ctx,
+			"",
+			"",
+			map[string]json.RawMessage{},
+		)
+
+		// Then
+		assert.Check(t, committed)
+	})
+}
+
 func authenticatedClient(
 	t *testing.T,
 	ctx context.Context,

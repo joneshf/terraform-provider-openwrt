@@ -258,3 +258,192 @@ func TestNewClientAcceptance(t *testing.T) {
 		assert.NilError(t, err)
 	})
 }
+
+func TestClientUpdateSectionAcceptance(t *testing.T) {
+	t.Parallel()
+
+	t.Run("returns false when unsuccessful", func(t *testing.T) {
+		t.Parallel()
+
+		// Given
+		ctx := context.Background()
+		openWrt, client := acceptancetest.AuthenticatedClient(
+			ctx,
+			*dockerPool,
+			t,
+		)
+		defer openWrt.Close()
+
+		// When
+		got, err := client.UpdateSection(
+			ctx,
+			"",
+			"",
+			map[string]json.RawMessage{},
+		)
+
+		// Then
+		assert.NilError(t, err)
+		assert.Check(t, !got)
+	})
+
+	t.Run("fails with no options", func(t *testing.T) {
+		t.Parallel()
+
+		// Given
+		ctx := context.Background()
+		openWrt, client := acceptancetest.AuthenticatedClient(
+			ctx,
+			*dockerPool,
+			t,
+		)
+		defer openWrt.Close()
+		_, err := client.CreateSection(
+			ctx,
+			"network",
+			"interface",
+			"testing",
+			map[string]json.RawMessage{},
+		)
+		assert.NilError(t, err)
+
+		// When
+		got, err := client.UpdateSection(
+			ctx,
+			"network",
+			"testing",
+			map[string]json.RawMessage{},
+		)
+
+		// Then
+		assert.NilError(t, err)
+		assert.Check(t, !got)
+	})
+
+	t.Run("returns true when successful", func(t *testing.T) {
+		t.Parallel()
+
+		// Given
+		ctx := context.Background()
+		openWrt, client := acceptancetest.AuthenticatedClient(
+			ctx,
+			*dockerPool,
+			t,
+		)
+		defer openWrt.Close()
+		_, err := client.CreateSection(
+			ctx,
+			"network",
+			"interface",
+			"testing",
+			map[string]json.RawMessage{},
+		)
+		assert.NilError(t, err)
+
+		// When
+		got, err := client.UpdateSection(
+			ctx,
+			"network",
+			"testing",
+			map[string]json.RawMessage{
+				"foo": json.RawMessage("true"),
+			},
+		)
+
+		// Then
+		assert.NilError(t, err)
+		assert.Check(t, got)
+	})
+
+	t.Run("updates the section", func(t *testing.T) {
+		t.Parallel()
+
+		// Given
+		ctx := context.Background()
+		openWrt, client := acceptancetest.AuthenticatedClient(
+			ctx,
+			*dockerPool,
+			t,
+		)
+		defer openWrt.Close()
+		_, err := client.CreateSection(
+			ctx,
+			"network",
+			"interface",
+			"testing",
+			map[string]json.RawMessage{},
+		)
+		assert.NilError(t, err)
+
+		// When
+		_, err = client.UpdateSection(
+			ctx,
+			"network",
+			"testing",
+			map[string]json.RawMessage{
+				"option_1": json.RawMessage("true"),
+				"option_2": json.RawMessage("31"),
+				"option_3": json.RawMessage(`["foo", "bar", "baz"]`),
+			},
+		)
+
+		// Then
+		assert.NilError(t, err)
+		got, err := client.GetSection(
+			ctx,
+			"network",
+			"testing",
+		)
+		assert.NilError(t, err)
+		assert.DeepEqual(t, got, map[string]json.RawMessage{
+			".anonymous": json.RawMessage("false"),
+			".name":      json.RawMessage(`"testing"`),
+			".type":      json.RawMessage(`"interface"`),
+			"option_1":   json.RawMessage(`"1"`),
+			"option_2":   json.RawMessage(`"31"`),
+			"option_3":   json.RawMessage(`["foo","bar","baz"]`),
+		})
+	})
+
+	t.Run("does not leave pending changes when successful", func(t *testing.T) {
+		t.Parallel()
+
+		// Given
+		ctx := context.Background()
+		openWrt, client := acceptancetest.AuthenticatedClient(
+			ctx,
+			*dockerPool,
+			t,
+		)
+		defer openWrt.Close()
+		_, err := client.CreateSection(
+			ctx,
+			"network",
+			"interface",
+			"testing",
+			map[string]json.RawMessage{},
+		)
+		assert.NilError(t, err)
+
+		// When
+		_, err = client.UpdateSection(
+			ctx,
+			"network",
+			"testing",
+			map[string]json.RawMessage{
+				"option_1": json.RawMessage("true"),
+				"option_2": json.RawMessage("31"),
+				"option_3": json.RawMessage(`["foo", "bar", "baz"]`),
+			},
+		)
+
+		// Then
+		assert.NilError(t, err)
+		got, err := client.ShowChanges(
+			ctx,
+			"network",
+		)
+		assert.NilError(t, err)
+		assert.DeepEqual(t, got, [][]string{})
+	})
+}
