@@ -47,9 +47,10 @@ const (
 	systemTTYLoginAttribute = "ttylogin"
 	systemTTYLoginUCIOption = "ttylogin"
 
-	systemTypeName   = "system_system"
-	systemUCIConfig  = "system"
-	systemUCISection = "@system[0]"
+	systemTypeName      = "system_system"
+	systemUCIConfig     = "system"
+	systemUCISection    = "@system[0]"
+	systemUCISystemType = "system"
 
 	systemZonenameAttribute = "zonename"
 	systemZonenameUCIOption = "zonename"
