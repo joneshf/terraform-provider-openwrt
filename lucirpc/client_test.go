@@ -220,7 +220,7 @@ func TestClientGetSection(t *testing.T) {
 		)
 
 		// Then
-		assert.ErrorContains(t, err, "invalid get section response")
+		assert.ErrorContains(t, err, "could not find section")
 	})
 
 	t.Run("returns section data when successful", func(t *testing.T) {

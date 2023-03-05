@@ -48,7 +48,7 @@ func (c *Client) GetSection(
 			marshalledSection,
 		},
 	}
-	responseBody, err := c.jsonRPCClientUCI.InvokeNotNull(
+	responseBody, err := c.jsonRPCClientUCI.Invoke(
 		ctx,
 		humanReadableGetSection,
 		requestBody,
@@ -57,22 +57,26 @@ func (c *Client) GetSection(
 		return nil, fmt.Errorf("unable to %s: %w", humanReadableGetSection, err)
 	}
 
+	if responseBody == nil {
+		return nil, fmt.Errorf("could not find section %s.%s", config, section)
+	}
+
 	// Depending on the `config` and `section`,
 	// this method can return a response that is an array instead of an object.
 	// We have to handle that case as well.
 	var unknownResult any
-	err = json.Unmarshal(responseBody, &unknownResult)
+	err = json.Unmarshal(*responseBody, &unknownResult)
 	if err != nil {
 		return nil, fmt.Errorf("unable to determine type of %s response: %w", humanReadableGetSection, err)
 	}
 
 	_, ok := unknownResult.([]any)
 	if ok {
-		return nil, fmt.Errorf("incorrect config (%q) and/or section (%q): result from LuCI: %s", config, section, responseBody)
+		return nil, fmt.Errorf("incorrect config (%q) and/or section (%q): result from LuCI: %s", config, section, *responseBody)
 	}
 
 	var result map[string]json.RawMessage
-	err = json.Unmarshal(responseBody, &result)
+	err = json.Unmarshal(*responseBody, &result)
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse %s response: %w", humanReadableGetSection, err)
 	}
