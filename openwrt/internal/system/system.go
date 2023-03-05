@@ -14,6 +14,11 @@ import (
 )
 
 const (
+	ReadOnly AttributeExistence = iota
+	NoValidation
+	Optional
+	Required
+
 	systemConLogLevelAttribute = "conloglevel"
 	systemConLogLevelUCIOption = "conloglevel"
 
@@ -104,6 +109,20 @@ var (
 	}
 )
 
+type AttributeExistence int
+
+func (e AttributeExistence) ToComputed() bool {
+	return e == NoValidation || e == ReadOnly
+}
+
+func (e AttributeExistence) ToOptional() bool {
+	return e == NoValidation || e == Optional
+}
+
+func (e AttributeExistence) ToRequired() bool {
+	return e == Required
+}
+
 type systemModel struct {
 	ConLogLevel  types.Int64  `tfsdk:"conloglevel"`
 	CronLogLevel types.Int64  `tfsdk:"cronloglevel"`
@@ -160,7 +179,7 @@ func ReadModel(
 }
 
 type boolSchemaAttribute struct {
-	DataSourceRequired  bool
+	DataSourceExistence AttributeExistence
 	DeprecationMessage  string
 	Description         string
 	MarkdownDescription string
@@ -170,18 +189,19 @@ type boolSchemaAttribute struct {
 
 func (a boolSchemaAttribute) ToDataSource() datasourceschema.Attribute {
 	return datasourceschema.BoolAttribute{
-		Computed:            !a.DataSourceRequired,
+		Computed:            a.DataSourceExistence.ToComputed(),
 		DeprecationMessage:  a.DeprecationMessage,
 		Description:         a.Description,
 		MarkdownDescription: a.MarkdownDescription,
-		Required:            a.DataSourceRequired,
+		Optional:            a.DataSourceExistence.ToOptional(),
+		Required:            a.DataSourceExistence.ToRequired(),
 		Sensitive:           a.Sensitive,
 		Validators:          a.Validators,
 	}
 }
 
 type int64SchemaAttribute struct {
-	DataSourceRequired  bool
+	DataSourceExistence AttributeExistence
 	DeprecationMessage  string
 	Description         string
 	MarkdownDescription string
@@ -191,11 +211,12 @@ type int64SchemaAttribute struct {
 
 func (a int64SchemaAttribute) ToDataSource() datasourceschema.Attribute {
 	return datasourceschema.Int64Attribute{
-		Computed:            !a.DataSourceRequired,
+		Computed:            a.DataSourceExistence.ToComputed(),
 		DeprecationMessage:  a.DeprecationMessage,
 		Description:         a.Description,
 		MarkdownDescription: a.MarkdownDescription,
-		Required:            a.DataSourceRequired,
+		Optional:            a.DataSourceExistence.ToOptional(),
+		Required:            a.DataSourceExistence.ToRequired(),
 		Sensitive:           a.Sensitive,
 		Validators:          a.Validators,
 	}
@@ -206,7 +227,7 @@ type schemaAttribute interface {
 }
 
 type stringSchemaAttribute struct {
-	DataSourceRequired  bool
+	DataSourceExistence AttributeExistence
 	DeprecationMessage  string
 	Description         string
 	MarkdownDescription string
@@ -216,11 +237,12 @@ type stringSchemaAttribute struct {
 
 func (a stringSchemaAttribute) ToDataSource() datasourceschema.Attribute {
 	return datasourceschema.StringAttribute{
-		Computed:            !a.DataSourceRequired,
+		Computed:            a.DataSourceExistence.ToComputed(),
 		DeprecationMessage:  a.DeprecationMessage,
 		Description:         a.Description,
 		MarkdownDescription: a.MarkdownDescription,
-		Required:            a.DataSourceRequired,
+		Optional:            a.DataSourceExistence.ToOptional(),
+		Required:            a.DataSourceExistence.ToRequired(),
 		Sensitive:           a.Sensitive,
 		Validators:          a.Validators,
 	}
