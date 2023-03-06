@@ -60,147 +60,31 @@ const (
 
 var (
 	systemConLogLevelSchemaAttribute = int64SchemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
-		Description: "The maximum log level for kernel messages to be logged to the console.",
-		ReadResponse: func(
-			ctx context.Context,
-			fullTypeName string,
-			terraformType string,
-			section map[string]json.RawMessage,
-			model systemModel,
-		) (context.Context, systemModel, diag.Diagnostics) {
-			ctx, value, diagnostics := lucirpcglue.GetOptionInt64(ctx, fullTypeName, terraformType, section, path.Root(systemConLogLevelAttribute), systemConLogLevelUCIOption)
-			model.ConLogLevel = value
-			return ctx, model, diagnostics
-		},
+		Description:       "The maximum log level for kernel messages to be logged to the console.",
+		ReadResponse:      ReadResponseOptionInt64(systemModelSetConLogLevel, systemConLogLevelAttribute, systemConLogLevelUCIOption),
 		ResourceExistence: NoValidation,
-		UpsertRequest: func(
-			ctx context.Context,
-			fullTypeName string,
-			terraformType string,
-			options map[string]json.RawMessage,
-			model systemModel,
-		) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
-			if !hasValue(model.ConLogLevel) {
-				return ctx, options, diag.Diagnostics{}
-			}
-
-			value, diagnostics := serializeInt64(model.ConLogLevel, path.Root(systemConLogLevelAttribute))
-			if diagnostics.HasError() {
-				return ctx, options, diagnostics
-			}
-
-			ctx = logger.SetFieldInt64(ctx, fullTypeName, resourceTerraformType, systemConLogLevelAttribute, model.ConLogLevel)
-			options[systemConLogLevelUCIOption] = value
-			return ctx, options, diag.Diagnostics{}
-		},
+		UpsertRequest:     UpsertRequestOptionInt64(systemModelGetConLogLevel, systemConLogLevelAttribute, systemConLogLevelUCIOption),
 	}
 
 	systemCronLogLevelSchemaAttribute = int64SchemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
-		Description: "The minimum level for cron messages to be logged to syslog.",
-		ReadResponse: func(
-			ctx context.Context,
-			fullTypeName string,
-			terraformType string,
-			section map[string]json.RawMessage,
-			model systemModel,
-		) (context.Context, systemModel, diag.Diagnostics) {
-			ctx, value, diagnostics := lucirpcglue.GetOptionInt64(ctx, fullTypeName, terraformType, section, path.Root(systemCronLogLevelAttribute), systemCronLogLevelUCIOption)
-			model.CronLogLevel = value
-			return ctx, model, diagnostics
-		},
+		Description:       "The minimum level for cron messages to be logged to syslog.",
+		ReadResponse:      ReadResponseOptionInt64(systemModelSetCronLogLevel, systemCronLogLevelAttribute, systemCronLogLevelUCIOption),
 		ResourceExistence: NoValidation,
-		UpsertRequest: func(
-			ctx context.Context,
-			fullTypeName string,
-			terraformType string,
-			options map[string]json.RawMessage,
-			model systemModel,
-		) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
-			if !hasValue(model.CronLogLevel) {
-				return ctx, options, diag.Diagnostics{}
-			}
-
-			value, diagnostics := serializeInt64(model.CronLogLevel, path.Root(systemCronLogLevelAttribute))
-			if diagnostics.HasError() {
-				return ctx, options, diagnostics
-			}
-
-			ctx = logger.SetFieldInt64(ctx, fullTypeName, resourceTerraformType, systemCronLogLevelAttribute, model.CronLogLevel)
-			options[systemCronLogLevelUCIOption] = value
-			return ctx, options, diag.Diagnostics{}
-		},
+		UpsertRequest:     UpsertRequestOptionInt64(systemModelGetCronLogLevel, systemCronLogLevelAttribute, systemCronLogLevelUCIOption),
 	}
 
 	systemDescriptionSchemaAttribute = stringSchemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
-		Description: "The hostname for the system.",
-		ReadResponse: func(
-			ctx context.Context,
-			fullTypeName string,
-			terraformType string,
-			section map[string]json.RawMessage,
-			model systemModel,
-		) (context.Context, systemModel, diag.Diagnostics) {
-			ctx, value, diagnostics := lucirpcglue.GetOptionString(ctx, fullTypeName, terraformType, section, path.Root(systemDescriptionAttribute), systemDescriptionUCIOption)
-			model.Description = value
-			return ctx, model, diagnostics
-		},
+		Description:       "The hostname for the system.",
+		ReadResponse:      ReadResponseOptionString(systemModelSetDescription, systemDescriptionAttribute, systemDescriptionUCIOption),
 		ResourceExistence: NoValidation,
-		UpsertRequest: func(
-			ctx context.Context,
-			fullTypeName string,
-			terraformType string,
-			options map[string]json.RawMessage,
-			model systemModel,
-		) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
-			if !hasValue(model.Description) {
-				return ctx, options, diag.Diagnostics{}
-			}
-
-			value, diagnostics := serializeString(model.Description, path.Root(systemDescriptionAttribute))
-			if diagnostics.HasError() {
-				return ctx, options, diagnostics
-			}
-
-			ctx = logger.SetFieldString(ctx, fullTypeName, resourceTerraformType, systemDescriptionAttribute, model.Description)
-			options[systemDescriptionUCIOption] = value
-			return ctx, options, diag.Diagnostics{}
-		},
+		UpsertRequest:     UpsertRequestOptionString(systemModelGetDescription, systemDescriptionAttribute, systemDescriptionUCIOption),
 	}
 
 	systemHostnameSchemaAttribute = stringSchemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
-		Description: "A short single-line description for the system.",
-		ReadResponse: func(
-			ctx context.Context,
-			fullTypeName string,
-			terraformType string,
-			section map[string]json.RawMessage,
-			model systemModel,
-		) (context.Context, systemModel, diag.Diagnostics) {
-			ctx, value, diagnostics := lucirpcglue.GetOptionString(ctx, fullTypeName, terraformType, section, path.Root(systemHostnameAttribute), systemHostnameUCIOption)
-			model.Hostname = value
-			return ctx, model, diagnostics
-		},
+		Description:       "A short single-line description for the system.",
+		ReadResponse:      ReadResponseOptionString(systemModelSetHostname, systemHostnameAttribute, systemHostnameUCIOption),
 		ResourceExistence: NoValidation,
-		UpsertRequest: func(
-			ctx context.Context,
-			fullTypeName string,
-			terraformType string,
-			options map[string]json.RawMessage,
-			model systemModel,
-		) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
-			if !hasValue(model.Hostname) {
-				return ctx, options, diag.Diagnostics{}
-			}
-
-			value, diagnostics := serializeString(model.Hostname, path.Root(systemHostnameAttribute))
-			if diagnostics.HasError() {
-				return ctx, options, diagnostics
-			}
-
-			ctx = logger.SetFieldString(ctx, fullTypeName, resourceTerraformType, systemHostnameAttribute, model.Hostname)
-			options[systemHostnameUCIOption] = value
-			return ctx, options, diag.Diagnostics{}
-		},
+		UpsertRequest:     UpsertRequestOptionString(systemModelGetHostname, systemHostnameAttribute, systemHostnameUCIOption),
 	}
 
 	systemIdSchemaAttribute = stringSchemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
@@ -231,75 +115,17 @@ var (
 	}
 
 	systemLogSizeSchemaAttribute = int64SchemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
-		Description: "Size of the file based log buffer in KiB.",
-		ReadResponse: func(
-			ctx context.Context,
-			fullTypeName string,
-			terraformType string,
-			section map[string]json.RawMessage,
-			model systemModel,
-		) (context.Context, systemModel, diag.Diagnostics) {
-			ctx, value, diagnostics := lucirpcglue.GetOptionInt64(ctx, fullTypeName, terraformType, section, path.Root(systemLogSizeAttribute), systemLogSizeUCIOption)
-			model.LogSize = value
-			return ctx, model, diagnostics
-		},
+		Description:       "Size of the file based log buffer in KiB.",
+		ReadResponse:      ReadResponseOptionInt64(systemModelSetLogSize, systemLogSizeAttribute, systemLogSizeUCIOption),
 		ResourceExistence: NoValidation,
-		UpsertRequest: func(
-			ctx context.Context,
-			fullTypeName string,
-			terraformType string,
-			options map[string]json.RawMessage,
-			model systemModel,
-		) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
-			if !hasValue(model.LogSize) {
-				return ctx, options, diag.Diagnostics{}
-			}
-
-			value, diagnostics := serializeInt64(model.LogSize, path.Root(systemLogSizeAttribute))
-			if diagnostics.HasError() {
-				return ctx, options, diagnostics
-			}
-
-			ctx = logger.SetFieldInt64(ctx, fullTypeName, resourceTerraformType, systemLogSizeAttribute, model.LogSize)
-			options[systemLogSizeUCIOption] = value
-			return ctx, options, diag.Diagnostics{}
-		},
+		UpsertRequest:     UpsertRequestOptionInt64(systemModelGetLogSize, systemLogSizeAttribute, systemLogSizeUCIOption),
 	}
 
 	systemNotesSchemaAttribute = stringSchemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
-		Description: "Multi-line free-form text about the system.",
-		ReadResponse: func(
-			ctx context.Context,
-			fullTypeName string,
-			terraformType string,
-			section map[string]json.RawMessage,
-			model systemModel,
-		) (context.Context, systemModel, diag.Diagnostics) {
-			ctx, value, diagnostics := lucirpcglue.GetOptionString(ctx, fullTypeName, terraformType, section, path.Root(systemNotesAttribute), systemNotesUCIOption)
-			model.Notes = value
-			return ctx, model, diagnostics
-		},
+		Description:       "Multi-line free-form text about the system.",
+		ReadResponse:      ReadResponseOptionString(systemModelSetNotes, systemNotesAttribute, systemNotesUCIOption),
 		ResourceExistence: NoValidation,
-		UpsertRequest: func(
-			ctx context.Context,
-			fullTypeName string,
-			terraformType string,
-			options map[string]json.RawMessage,
-			model systemModel,
-		) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
-			if !hasValue(model.Notes) {
-				return ctx, options, diag.Diagnostics{}
-			}
-
-			value, diagnostics := serializeString(model.Notes, path.Root(systemNotesAttribute))
-			if diagnostics.HasError() {
-				return ctx, options, diagnostics
-			}
-
-			ctx = logger.SetFieldString(ctx, fullTypeName, resourceTerraformType, systemNotesAttribute, model.Notes)
-			options[systemNotesUCIOption] = value
-			return ctx, options, diag.Diagnostics{}
-		},
+		UpsertRequest:     UpsertRequestOptionString(systemModelGetNotes, systemNotesAttribute, systemNotesUCIOption),
 	}
 
 	systemSchemaAttributes = map[string]schemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
@@ -316,111 +142,24 @@ var (
 	}
 
 	systemTimezoneSchemaAttribute = stringSchemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
-		Description: "The POSIX.1 time zone string. This has no corresponding value in LuCI. See: https://github.com/openwrt/luci/blob/cd82ccacef78d3bb8b8af6b87dabb9e892e2b2aa/modules/luci-base/luasrc/sys/zoneinfo/tzdata.lua.",
-		ReadResponse: func(
-			ctx context.Context,
-			fullTypeName string,
-			terraformType string,
-			section map[string]json.RawMessage,
-			model systemModel,
-		) (context.Context, systemModel, diag.Diagnostics) {
-			ctx, value, diagnostics := lucirpcglue.GetOptionString(ctx, fullTypeName, terraformType, section, path.Root(systemTimezoneAttribute), systemTimezoneUCIOption)
-			model.Timezone = value
-			return ctx, model, diagnostics
-		},
+		Description:       "The POSIX.1 time zone string. This has no corresponding value in LuCI. See: https://github.com/openwrt/luci/blob/cd82ccacef78d3bb8b8af6b87dabb9e892e2b2aa/modules/luci-base/luasrc/sys/zoneinfo/tzdata.lua.",
+		ReadResponse:      ReadResponseOptionString(systemModelSetTimezone, systemTimezoneAttribute, systemTimezoneUCIOption),
 		ResourceExistence: NoValidation,
-		UpsertRequest: func(
-			ctx context.Context,
-			fullTypeName string,
-			terraformType string,
-			options map[string]json.RawMessage,
-			model systemModel,
-		) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
-			if !hasValue(model.Timezone) {
-				return ctx, options, diag.Diagnostics{}
-			}
-
-			value, diagnostics := serializeString(model.Timezone, path.Root(systemTimezoneAttribute))
-			if diagnostics.HasError() {
-				return ctx, options, diagnostics
-			}
-
-			ctx = logger.SetFieldString(ctx, fullTypeName, resourceTerraformType, systemTimezoneAttribute, model.Timezone)
-			options[systemTimezoneUCIOption] = value
-			return ctx, options, diag.Diagnostics{}
-		},
+		UpsertRequest:     UpsertRequestOptionString(systemModelGetTimezone, systemTimezoneAttribute, systemTimezoneUCIOption),
 	}
 
 	systemTtyLoginSchemaAttribute = boolSchemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
-		Description: "Require authentication for local users to log in the system.",
-		ReadResponse: func(
-			ctx context.Context,
-			fullTypeName string,
-			terraformType string,
-			section map[string]json.RawMessage,
-			model systemModel,
-		) (context.Context, systemModel, diag.Diagnostics) {
-			ctx, value, diagnostics := lucirpcglue.GetOptionBool(ctx, fullTypeName, terraformType, section, path.Root(systemTTYLoginAttribute), systemTTYLoginUCIOption)
-			model.TTYLogin = value
-			return ctx, model, diagnostics
-		},
+		Description:       "Require authentication for local users to log in the system.",
+		ReadResponse:      ReadResponseOptionBool(systemModelSetTTYLogin, systemTTYLoginAttribute, systemTTYLoginUCIOption),
 		ResourceExistence: NoValidation,
-		UpsertRequest: func(
-			ctx context.Context,
-			fullTypeName string,
-			terraformType string,
-			options map[string]json.RawMessage,
-			model systemModel,
-		) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
-			if !hasValue(model.TTYLogin) {
-				return ctx, options, diag.Diagnostics{}
-			}
-
-			value, diagnostics := serializeBool(model.TTYLogin, path.Root(systemTTYLoginAttribute))
-			if diagnostics.HasError() {
-				return ctx, options, diagnostics
-			}
-
-			ctx = logger.SetFieldBool(ctx, fullTypeName, resourceTerraformType, systemTTYLoginAttribute, model.TTYLogin)
-			options[systemTTYLoginUCIOption] = value
-			return ctx, options, diag.Diagnostics{}
-		},
+		UpsertRequest:     UpsertRequestOptionBool(systemModelGetTTYLogin, systemTTYLoginAttribute, systemTTYLoginUCIOption),
 	}
 
 	systemZonenameSchemaAttribute = stringSchemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
-		Description: "The IANA/Olson time zone string. This corresponds to \"Timezone\" in LuCI. See: https://github.com/openwrt/luci/blob/cd82ccacef78d3bb8b8af6b87dabb9e892e2b2aa/modules/luci-base/luasrc/sys/zoneinfo/tzdata.lua.",
-		ReadResponse: func(
-			ctx context.Context,
-			fullTypeName string,
-			terraformType string,
-			section map[string]json.RawMessage,
-			model systemModel,
-		) (context.Context, systemModel, diag.Diagnostics) {
-			ctx, value, diagnostics := lucirpcglue.GetOptionString(ctx, fullTypeName, terraformType, section, path.Root(systemZonenameAttribute), systemZonenameUCIOption)
-			model.Zonename = value
-			return ctx, model, diagnostics
-		},
+		Description:       "The IANA/Olson time zone string. This corresponds to \"Timezone\" in LuCI. See: https://github.com/openwrt/luci/blob/cd82ccacef78d3bb8b8af6b87dabb9e892e2b2aa/modules/luci-base/luasrc/sys/zoneinfo/tzdata.lua.",
+		ReadResponse:      ReadResponseOptionString(systemModelSetZonename, systemZonenameAttribute, systemZonenameUCIOption),
 		ResourceExistence: NoValidation,
-		UpsertRequest: func(
-			ctx context.Context,
-			fullTypeName string,
-			terraformType string,
-			options map[string]json.RawMessage,
-			model systemModel,
-		) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
-			if !hasValue(model.Zonename) {
-				return ctx, options, diag.Diagnostics{}
-			}
-
-			value, diagnostics := serializeString(model.Zonename, path.Root(systemZonenameAttribute))
-			if diagnostics.HasError() {
-				return ctx, options, diagnostics
-			}
-
-			ctx = logger.SetFieldString(ctx, fullTypeName, resourceTerraformType, systemZonenameAttribute, model.Zonename)
-			options[systemZonenameUCIOption] = value
-			return ctx, options, diag.Diagnostics{}
-		},
+		UpsertRequest:     UpsertRequestOptionString(systemModelGetZonename, systemZonenameAttribute, systemZonenameUCIOption),
 	}
 )
 
@@ -476,6 +215,144 @@ func ReadModel(
 	}
 
 	return ctx, model, diagnostics
+}
+
+func ReadResponseOptionBool[Model any](
+	set func(Model, types.Bool) Model,
+	attribute string,
+	option string,
+) func(context.Context, string, string, map[string]json.RawMessage, Model) (context.Context, Model, diag.Diagnostics) {
+	return func(
+		ctx context.Context,
+		fullTypeName string,
+		terraformType string,
+		section map[string]json.RawMessage,
+		model Model,
+	) (context.Context, Model, diag.Diagnostics) {
+		ctx, value, diagnostics := lucirpcglue.GetOptionBool(ctx, fullTypeName, terraformType, section, path.Root(attribute), option)
+		model = set(model, value)
+		return ctx, model, diagnostics
+	}
+}
+
+func ReadResponseOptionInt64[Model any](
+	set func(Model, types.Int64) Model,
+	attribute string,
+	option string,
+) func(context.Context, string, string, map[string]json.RawMessage, Model) (context.Context, Model, diag.Diagnostics) {
+	return func(
+		ctx context.Context,
+		fullTypeName string,
+		terraformType string,
+		section map[string]json.RawMessage,
+		model Model,
+	) (context.Context, Model, diag.Diagnostics) {
+		ctx, value, diagnostics := lucirpcglue.GetOptionInt64(ctx, fullTypeName, terraformType, section, path.Root(attribute), option)
+		model = set(model, value)
+		return ctx, model, diagnostics
+	}
+}
+
+func ReadResponseOptionString[Model any](
+	set func(Model, types.String) Model,
+	attribute string,
+	option string,
+) func(context.Context, string, string, map[string]json.RawMessage, Model) (context.Context, Model, diag.Diagnostics) {
+	return func(
+		ctx context.Context,
+		fullTypeName string,
+		terraformType string,
+		section map[string]json.RawMessage,
+		model Model,
+	) (context.Context, Model, diag.Diagnostics) {
+		ctx, value, diagnostics := lucirpcglue.GetOptionString(ctx, fullTypeName, terraformType, section, path.Root(attribute), option)
+		model = set(model, value)
+		return ctx, model, diagnostics
+	}
+}
+
+func UpsertRequestOptionBool[Model any](
+	get func(Model) types.Bool,
+	attribute string,
+	option string,
+) func(context.Context, string, string, map[string]json.RawMessage, Model) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+	return func(
+		ctx context.Context,
+		fullTypeName string,
+		terraformType string,
+		options map[string]json.RawMessage,
+		model Model,
+	) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+		str := get(model)
+		if !hasValue(str) {
+			return ctx, options, diag.Diagnostics{}
+		}
+
+		value, diagnostics := serializeBool(str, path.Root(attribute))
+		if diagnostics.HasError() {
+			return ctx, options, diagnostics
+		}
+
+		ctx = logger.SetFieldBool(ctx, fullTypeName, terraformType, attribute, str)
+		options[option] = value
+		return ctx, options, diag.Diagnostics{}
+	}
+}
+
+func UpsertRequestOptionInt64[Model any](
+	get func(Model) types.Int64,
+	attribute string,
+	option string,
+) func(context.Context, string, string, map[string]json.RawMessage, Model) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+	return func(
+		ctx context.Context,
+		fullTypeName string,
+		terraformType string,
+		options map[string]json.RawMessage,
+		model Model,
+	) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+		str := get(model)
+		if !hasValue(str) {
+			return ctx, options, diag.Diagnostics{}
+		}
+
+		value, diagnostics := serializeInt64(str, path.Root(attribute))
+		if diagnostics.HasError() {
+			return ctx, options, diagnostics
+		}
+
+		ctx = logger.SetFieldInt64(ctx, fullTypeName, terraformType, attribute, str)
+		options[option] = value
+		return ctx, options, diag.Diagnostics{}
+	}
+}
+
+func UpsertRequestOptionString[Model any](
+	get func(Model) types.String,
+	attribute string,
+	option string,
+) func(context.Context, string, string, map[string]json.RawMessage, Model) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+	return func(
+		ctx context.Context,
+		fullTypeName string,
+		terraformType string,
+		options map[string]json.RawMessage,
+		model Model,
+	) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+		str := get(model)
+		if !hasValue(str) {
+			return ctx, options, diag.Diagnostics{}
+		}
+
+		value, diagnostics := serializeString(str, path.Root(attribute))
+		if diagnostics.HasError() {
+			return ctx, options, diagnostics
+		}
+
+		ctx = logger.SetFieldString(ctx, fullTypeName, terraformType, attribute, str)
+		options[option] = value
+		return ctx, options, diag.Diagnostics{}
+	}
 }
 
 type attributeHasValue interface {
@@ -746,4 +623,59 @@ func (a stringSchemaAttribute[Model, Request, Response]) Upsert(
 	}
 
 	return a.UpsertRequest(ctx, fullTypeName, terraformType, request, model)
+}
+
+func systemModelGetConLogLevel(model systemModel) types.Int64  { return model.ConLogLevel }
+func systemModelGetCronLogLevel(model systemModel) types.Int64 { return model.CronLogLevel }
+func systemModelGetDescription(model systemModel) types.String { return model.Description }
+func systemModelGetHostname(model systemModel) types.String    { return model.Hostname }
+func systemModelGetLogSize(model systemModel) types.Int64      { return model.LogSize }
+func systemModelGetNotes(model systemModel) types.String       { return model.Notes }
+func systemModelGetTimezone(model systemModel) types.String    { return model.Timezone }
+func systemModelGetTTYLogin(model systemModel) types.Bool      { return model.TTYLogin }
+func systemModelGetZonename(model systemModel) types.String    { return model.Zonename }
+
+func systemModelSetConLogLevel(model systemModel, value types.Int64) systemModel {
+	model.ConLogLevel = value
+	return model
+}
+
+func systemModelSetCronLogLevel(model systemModel, value types.Int64) systemModel {
+	model.CronLogLevel = value
+	return model
+}
+
+func systemModelSetDescription(model systemModel, value types.String) systemModel {
+	model.Description = value
+	return model
+}
+
+func systemModelSetHostname(model systemModel, value types.String) systemModel {
+	model.Hostname = value
+	return model
+}
+
+func systemModelSetLogSize(model systemModel, value types.Int64) systemModel {
+	model.LogSize = value
+	return model
+}
+
+func systemModelSetNotes(model systemModel, value types.String) systemModel {
+	model.Notes = value
+	return model
+}
+
+func systemModelSetTimezone(model systemModel, value types.String) systemModel {
+	model.Timezone = value
+	return model
+}
+
+func systemModelSetTTYLogin(model systemModel, value types.Bool) systemModel {
+	model.TTYLogin = value
+	return model
+}
+
+func systemModelSetZonename(model systemModel, value types.String) systemModel {
+	model.Zonename = value
+	return model
 }
