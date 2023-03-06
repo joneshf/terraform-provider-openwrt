@@ -59,3 +59,31 @@ func GetSection(
 
 	return result, diagnostics
 }
+
+// UpdateSection attempts to update an existing section.
+// The bool represents whether or not updating was successful.
+// Any diagnostic information found in the process (including errors) is returned.
+func UpdateSection(
+	ctx context.Context,
+	client lucirpc.Client,
+	config string,
+	section string,
+	options map[string]json.RawMessage,
+) (bool, diag.Diagnostics) {
+	diagnostics := diag.Diagnostics{}
+	result, err := client.UpdateSection(
+		ctx,
+		config,
+		section,
+		options,
+	)
+	if err != nil {
+		diagnostics.AddError(
+			fmt.Sprintf("problem updating %s.%s section", config, section),
+			err.Error(),
+		)
+		return false, diagnostics
+	}
+
+	return result, diagnostics
+}
