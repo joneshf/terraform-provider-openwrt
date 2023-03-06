@@ -293,93 +293,15 @@ func generateAPIBody(
 	fullTypeName string,
 ) (context.Context, string, map[string]json.RawMessage, diag.Diagnostics) {
 	tflog.Info(ctx, "Generating API request body")
+	var diagnostics diag.Diagnostics
 	allDiagnostics := diag.Diagnostics{}
 	options := map[string]json.RawMessage{}
 
-	tflog.Debug(ctx, "Handling required attributes")
-	ctx = logger.SetFieldString(ctx, fullTypeName, resourceTerraformType, systemIdAttribute, model.Id)
+	tflog.Debug(ctx, "Handling attributes")
 	id := model.Id.ValueString()
-
-	tflog.Debug(ctx, "Handling optional attributes")
-	if hasValue(model.ConLogLevel) {
-		value, diagnostics := serializeInt64(model.ConLogLevel, path.Root(systemConLogLevelAttribute))
+	for _, attribute := range systemSchemaAttributes {
+		ctx, options, diagnostics = attribute.Upsert(ctx, fullTypeName, resourceTerraformType, options, model)
 		allDiagnostics.Append(diagnostics...)
-		if !allDiagnostics.HasError() {
-			ctx = logger.SetFieldInt64(ctx, fullTypeName, resourceTerraformType, systemConLogLevelAttribute, model.ConLogLevel)
-			options[systemConLogLevelUCIOption] = value
-		}
-	}
-
-	if hasValue(model.CronLogLevel) {
-		value, diagnostics := serializeInt64(model.CronLogLevel, path.Root(systemCronLogLevelAttribute))
-		allDiagnostics.Append(diagnostics...)
-		if !allDiagnostics.HasError() {
-			ctx = logger.SetFieldInt64(ctx, fullTypeName, resourceTerraformType, systemCronLogLevelAttribute, model.CronLogLevel)
-			options[systemCronLogLevelUCIOption] = value
-		}
-	}
-
-	if hasValue(model.Description) {
-		value, diagnostics := serializeString(model.Description, path.Root(systemDescriptionAttribute))
-		allDiagnostics.Append(diagnostics...)
-		if !allDiagnostics.HasError() {
-			ctx = logger.SetFieldString(ctx, fullTypeName, resourceTerraformType, systemDescriptionAttribute, model.Description)
-			options[systemDescriptionUCIOption] = value
-		}
-	}
-
-	if hasValue(model.Hostname) {
-		value, diagnostics := serializeString(model.Hostname, path.Root(systemHostnameAttribute))
-		allDiagnostics.Append(diagnostics...)
-		if !allDiagnostics.HasError() {
-			ctx = logger.SetFieldString(ctx, fullTypeName, resourceTerraformType, systemHostnameAttribute, model.Hostname)
-			options[systemHostnameUCIOption] = value
-		}
-	}
-
-	if hasValue(model.LogSize) {
-		value, diagnostics := serializeInt64(model.LogSize, path.Root(systemLogSizeAttribute))
-		allDiagnostics.Append(diagnostics...)
-		if !allDiagnostics.HasError() {
-			ctx = logger.SetFieldInt64(ctx, fullTypeName, resourceTerraformType, systemLogSizeAttribute, model.LogSize)
-			options[systemLogSizeUCIOption] = value
-		}
-	}
-
-	if hasValue(model.Notes) {
-		value, diagnostics := serializeString(model.Notes, path.Root(systemNotesAttribute))
-		allDiagnostics.Append(diagnostics...)
-		if !allDiagnostics.HasError() {
-			ctx = logger.SetFieldString(ctx, fullTypeName, resourceTerraformType, systemNotesAttribute, model.Notes)
-			options[systemNotesUCIOption] = value
-		}
-	}
-
-	if hasValue(model.Timezone) {
-		value, diagnostics := serializeString(model.Timezone, path.Root(systemTimezoneAttribute))
-		allDiagnostics.Append(diagnostics...)
-		if !allDiagnostics.HasError() {
-			ctx = logger.SetFieldString(ctx, fullTypeName, resourceTerraformType, systemTimezoneAttribute, model.Timezone)
-			options[systemTimezoneUCIOption] = value
-		}
-	}
-
-	if hasValue(model.TTYLogin) {
-		value, diagnostics := serializeBool(model.TTYLogin, path.Root(systemTTYLoginAttribute))
-		allDiagnostics.Append(diagnostics...)
-		if !allDiagnostics.HasError() {
-			ctx = logger.SetFieldBool(ctx, fullTypeName, resourceTerraformType, systemTTYLoginAttribute, model.TTYLogin)
-			options[systemTTYLoginUCIOption] = value
-		}
-	}
-
-	if hasValue(model.Zonename) {
-		value, diagnostics := serializeString(model.Zonename, path.Root(systemZonenameAttribute))
-		allDiagnostics.Append(diagnostics...)
-		if !allDiagnostics.HasError() {
-			ctx = logger.SetFieldString(ctx, fullTypeName, resourceTerraformType, systemZonenameAttribute, model.Zonename)
-			options[systemZonenameUCIOption] = value
-		}
 	}
 
 	return ctx, id, options, allDiagnostics
