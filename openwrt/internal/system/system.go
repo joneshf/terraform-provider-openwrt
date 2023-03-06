@@ -293,7 +293,7 @@ func UpsertRequestOptionBool[Model any](
 			return ctx, options, diagnostics
 		}
 
-		ctx = logger.SetFieldBool(ctx, fullTypeName, resourceTerraformType, attribute, str)
+		ctx = logger.SetFieldBool(ctx, fullTypeName, terraformType, attribute, str)
 		options[option] = value
 		return ctx, options, diag.Diagnostics{}
 	}
@@ -321,7 +321,7 @@ func UpsertRequestOptionInt64[Model any](
 			return ctx, options, diagnostics
 		}
 
-		ctx = logger.SetFieldInt64(ctx, fullTypeName, resourceTerraformType, attribute, str)
+		ctx = logger.SetFieldInt64(ctx, fullTypeName, terraformType, attribute, str)
 		options[option] = value
 		return ctx, options, diag.Diagnostics{}
 	}
@@ -349,7 +349,7 @@ func UpsertRequestOptionString[Model any](
 			return ctx, options, diagnostics
 		}
 
-		ctx = logger.SetFieldString(ctx, fullTypeName, resourceTerraformType, attribute, str)
+		ctx = logger.SetFieldString(ctx, fullTypeName, terraformType, attribute, str)
 		options[option] = value
 		return ctx, options, diag.Diagnostics{}
 	}
