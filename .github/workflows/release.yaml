@@ -14,6 +14,11 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+        with:
+          # We need to fetch more history (all of it, currently) so we can compare previous tags.
+          fetch-depth: 0
+      - name: Fetch tags
+        run: git fetch --force --tags
       - name: Install Nix
         uses: cachix/install-nix-action@v19
       - name: Import GPG
