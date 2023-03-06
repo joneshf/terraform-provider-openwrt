@@ -150,6 +150,140 @@ func TestClientCreateSectionAcceptance(t *testing.T) {
 	})
 }
 
+func TestClientDeleteSectionAcceptance(t *testing.T) {
+	t.Parallel()
+
+	t.Run("returns false when unsuccessful", func(t *testing.T) {
+		t.Parallel()
+
+		// Given
+		ctx := context.Background()
+		openWrt, client := acceptancetest.AuthenticatedClient(
+			ctx,
+			*dockerPool,
+			t,
+		)
+		defer openWrt.Close()
+
+		// When
+		got, err := client.DeleteSection(
+			ctx,
+			"",
+			"",
+		)
+
+		// Then
+		assert.NilError(t, err)
+		assert.Check(t, !got)
+	})
+
+	t.Run("returns true when successful", func(t *testing.T) {
+		t.Parallel()
+
+		// Given
+		ctx := context.Background()
+		openWrt, client := acceptancetest.AuthenticatedClient(
+			ctx,
+			*dockerPool,
+			t,
+		)
+		defer openWrt.Close()
+		_, err := client.CreateSection(
+			ctx,
+			"network",
+			"interface",
+			"testing",
+			map[string]json.RawMessage{},
+		)
+		assert.NilError(t, err)
+
+		// When
+		got, err := client.DeleteSection(
+			ctx,
+			"network",
+			"testing",
+		)
+
+		// Then
+		assert.NilError(t, err)
+		assert.Check(t, got)
+	})
+
+	t.Run("deletes the section", func(t *testing.T) {
+		t.Parallel()
+
+		// Given
+		ctx := context.Background()
+		openWrt, client := acceptancetest.AuthenticatedClient(
+			ctx,
+			*dockerPool,
+			t,
+		)
+		defer openWrt.Close()
+		_, err := client.CreateSection(
+			ctx,
+			"network",
+			"interface",
+			"testing",
+			map[string]json.RawMessage{},
+		)
+		assert.NilError(t, err)
+
+		// When
+		_, err = client.DeleteSection(
+			ctx,
+			"network",
+			"testing",
+		)
+
+		// Then
+		assert.NilError(t, err)
+		_, err = client.GetSection(
+			ctx,
+			"network",
+			"testing",
+		)
+		assert.ErrorContains(t, err, "")
+	})
+
+	t.Run("does not leave pending changes when successful", func(t *testing.T) {
+		t.Parallel()
+
+		// Given
+		ctx := context.Background()
+		openWrt, client := acceptancetest.AuthenticatedClient(
+			ctx,
+			*dockerPool,
+			t,
+		)
+		defer openWrt.Close()
+		_, err := client.CreateSection(
+			ctx,
+			"network",
+			"interface",
+			"testing",
+			map[string]json.RawMessage{},
+		)
+		assert.NilError(t, err)
+
+		// When
+		_, err = client.DeleteSection(
+			ctx,
+			"network",
+			"testing",
+		)
+
+		// Then
+		assert.NilError(t, err)
+		got, err := client.ShowChanges(
+			ctx,
+			"network",
+		)
+		assert.NilError(t, err)
+		assert.DeepEqual(t, got, [][]string{})
+	})
+}
+
 func TestClientGetSectionAcceptance(t *testing.T) {
 	t.Parallel()
 

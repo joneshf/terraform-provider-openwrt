@@ -12,6 +12,7 @@ import (
 const (
 	humanReadableCommitChanges = "commit changes"
 	humanReadableCreateSection = "create section"
+	humanReadableDeleteSection = "delete section"
 	humanReadableGetSection    = "get section"
 	humanReadableLogin         = "login"
 	humanReadableShowChanges   = "show changes"
@@ -19,6 +20,7 @@ const (
 
 	methodChanges = "changes"
 	methodCommit  = "commit"
+	methodDelete  = "delete"
 	methodGetAll  = "get_all"
 	methodLogin   = "login"
 	methodSection = "section"
@@ -140,6 +142,64 @@ func (c *Client) CreateSection(
 	)
 	if err != nil {
 		return false, fmt.Errorf("was able to %s, but could not %s: %w", humanReadableCreateSection, humanReadableCommitChanges, err)
+	}
+
+	return result, nil
+}
+
+func (c *Client) DeleteSection(
+	ctx context.Context,
+	config string,
+	section string,
+) (bool, error) {
+	marshalledConfig, err := json.Marshal(config)
+	if err != nil {
+		return false, fmt.Errorf("unable to serialize config %q for %s: %w", config, humanReadableDeleteSection, err)
+	}
+
+	marshalledSection, err := json.Marshal(section)
+	if err != nil {
+		return false, fmt.Errorf("unable to serialize section %q for %s: %w", section, humanReadableDeleteSection, err)
+	}
+
+	requestBody := jsonRPCRequestBody{
+		Method: methodDelete,
+		Params: []json.RawMessage{
+			marshalledConfig,
+			marshalledSection,
+		},
+	}
+	responseBody, err := c.jsonRPCClientUCI.Invoke(
+		ctx,
+		humanReadableDeleteSection,
+		requestBody,
+	)
+	if err != nil {
+		return false, fmt.Errorf("unable to %s: %w", humanReadableDeleteSection, err)
+	}
+
+	// The result can be `true` to indicate success,
+	// or `null` to indicate failure.
+	var result bool
+	if responseBody == nil {
+		return false, nil
+	}
+
+	err = json.Unmarshal(*responseBody, &result)
+	if err != nil {
+		return false, fmt.Errorf("unable to parse %s response: %w", humanReadableDeleteSection, err)
+	}
+
+	if !result {
+		return false, fmt.Errorf("unable to %s: it is not clear why this happened", humanReadableDeleteSection)
+	}
+
+	result, err = c.CommitChanges(
+		ctx,
+		config,
+	)
+	if err != nil {
+		return false, fmt.Errorf("was able to %s, but could not %s: %w", humanReadableDeleteSection, humanReadableCommitChanges, err)
 	}
 
 	return result, nil
