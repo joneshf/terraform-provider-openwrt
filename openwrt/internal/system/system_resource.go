@@ -160,6 +160,10 @@ func (d *systemResource) Create(
 		}
 	}
 
+	if res.Diagnostics.HasError() {
+		return
+	}
+
 	ctx = tflog.SetField(ctx, "section", fmt.Sprintf("%s.%s", systemUCIConfig, systemUCISection))
 	ok, diagnostics := lucirpcglue.CreateSection(
 		ctx,
@@ -420,6 +424,10 @@ func (d *systemResource) Update(
 			ctx = logger.SetFieldString(ctx, d.fullTypeName, resourceTerraformType, systemZonenameAttribute, model.Zonename)
 			options[systemZonenameUCIOption] = value
 		}
+	}
+
+	if res.Diagnostics.HasError() {
+		return
 	}
 
 	ctx = tflog.SetField(ctx, "section", fmt.Sprintf("%s.%s", systemUCIConfig, systemUCISection))
