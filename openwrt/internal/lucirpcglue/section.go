@@ -9,6 +9,36 @@ import (
 	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
 )
 
+// CreateSection attempts to create a new section.
+// The bool represents whether or not creation was successful.
+// Any diagnostic information found in the process (including errors) is returned.
+func CreateSection(
+	ctx context.Context,
+	client lucirpc.Client,
+	config string,
+	sectionType string,
+	section string,
+	options map[string]json.RawMessage,
+) (bool, diag.Diagnostics) {
+	diagnostics := diag.Diagnostics{}
+	result, err := client.CreateSection(
+		ctx,
+		config,
+		sectionType,
+		section,
+		options,
+	)
+	if err != nil {
+		diagnostics.AddError(
+			fmt.Sprintf("problem creating %s.%s section", config, section),
+			err.Error(),
+		)
+		return false, diagnostics
+	}
+
+	return result, diagnostics
+}
+
 // GetMetadataString attempts to parse the given metadata key from the section.
 // Any diagnostic information found in the process (including errors) is returned.
 func GetSection(
