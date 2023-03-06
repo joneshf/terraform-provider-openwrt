@@ -82,7 +82,7 @@ func (d *systemResource) Create(
 	}
 
 	ctx = tflog.SetField(ctx, "section", fmt.Sprintf("%s.%s", systemUCIConfig, systemUCISection))
-	ok, diagnostics := lucirpcglue.CreateSection(
+	diagnostics = lucirpcglue.CreateSection(
 		ctx,
 		d.client,
 		systemUCIConfig,
@@ -92,14 +92,6 @@ func (d *systemResource) Create(
 	)
 	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {
-		return
-	}
-
-	if !ok {
-		res.Diagnostics.AddError(
-			fmt.Sprintf("Could not create %s.%s section", systemUCIConfig, systemUCISection),
-			"It is not currently known why this happens. It is unclear if this is a problem with the provider. Please double check the values provided are acceptable.",
-		)
 		return
 	}
 
@@ -144,7 +136,7 @@ func (d *systemResource) Delete(
 	id := model.Id.ValueString()
 	ctx = tflog.SetField(ctx, "section", fmt.Sprintf("%s.%s", systemUCIConfig, id))
 	tflog.Debug(ctx, "Deleting existing section")
-	ok, diagnostics := lucirpcglue.DeleteSection(
+	diagnostics = lucirpcglue.DeleteSection(
 		ctx,
 		d.client,
 		systemUCIConfig,
@@ -152,14 +144,6 @@ func (d *systemResource) Delete(
 	)
 	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {
-		return
-	}
-
-	if !ok {
-		res.Diagnostics.AddError(
-			fmt.Sprintf("Could not delete %s.%s section", systemUCIConfig, systemUCISection),
-			"It is not currently known why this happens. It is unclear if this is a problem with the provider. Please double check the values provided are acceptable.",
-		)
 		return
 	}
 }
@@ -265,7 +249,7 @@ func (d *systemResource) Update(
 	}
 
 	ctx = tflog.SetField(ctx, "section", fmt.Sprintf("%s.%s", systemUCIConfig, systemUCISection))
-	ok, diagnostics := lucirpcglue.UpdateSection(
+	diagnostics = lucirpcglue.UpdateSection(
 		ctx,
 		d.client,
 		systemUCIConfig,
@@ -274,14 +258,6 @@ func (d *systemResource) Update(
 	)
 	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {
-		return
-	}
-
-	if !ok {
-		res.Diagnostics.AddError(
-			fmt.Sprintf("Could not create %s.%s section", systemUCIConfig, systemUCISection),
-			"It is not currently known why this happens. It is unclear if this is a problem with the provider. Please double check the values provided are acceptable.",
-		)
 		return
 	}
 
