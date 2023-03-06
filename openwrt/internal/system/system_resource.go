@@ -71,95 +71,12 @@ func (d *systemResource) Create(
 		return
 	}
 
-	tflog.Debug(ctx, "Generating API request body")
-	options := map[string]json.RawMessage{}
-
-	tflog.Debug(ctx, "Handling required attributes")
-	ctx = logger.SetFieldString(ctx, d.fullTypeName, resourceTerraformType, systemIdAttribute, model.Id)
-	id := model.Id.ValueString()
-
-	tflog.Debug(ctx, "Handling optional attributes")
-	if hasValue(model.ConLogLevel) {
-		value, diagnostics := serializeInt64(model.ConLogLevel, path.Root(systemConLogLevelAttribute))
-		res.Diagnostics.Append(diagnostics...)
-		if !res.Diagnostics.HasError() {
-			ctx = logger.SetFieldInt64(ctx, d.fullTypeName, resourceTerraformType, systemConLogLevelAttribute, model.ConLogLevel)
-			options[systemConLogLevelUCIOption] = value
-		}
-	}
-
-	if hasValue(model.CronLogLevel) {
-		value, diagnostics := serializeInt64(model.CronLogLevel, path.Root(systemCronLogLevelAttribute))
-		res.Diagnostics.Append(diagnostics...)
-		if !res.Diagnostics.HasError() {
-			ctx = logger.SetFieldInt64(ctx, d.fullTypeName, resourceTerraformType, systemCronLogLevelAttribute, model.CronLogLevel)
-			options[systemCronLogLevelUCIOption] = value
-		}
-	}
-
-	if hasValue(model.Description) {
-		value, diagnostics := serializeString(model.Description, path.Root(systemDescriptionAttribute))
-		res.Diagnostics.Append(diagnostics...)
-		if !res.Diagnostics.HasError() {
-			ctx = logger.SetFieldString(ctx, d.fullTypeName, resourceTerraformType, systemDescriptionAttribute, model.Description)
-			options[systemDescriptionUCIOption] = value
-		}
-	}
-
-	if hasValue(model.Hostname) {
-		value, diagnostics := serializeString(model.Hostname, path.Root(systemHostnameAttribute))
-		res.Diagnostics.Append(diagnostics...)
-		if !res.Diagnostics.HasError() {
-			ctx = logger.SetFieldString(ctx, d.fullTypeName, resourceTerraformType, systemHostnameAttribute, model.Hostname)
-			options[systemHostnameUCIOption] = value
-		}
-	}
-
-	if hasValue(model.LogSize) {
-		value, diagnostics := serializeInt64(model.LogSize, path.Root(systemLogSizeAttribute))
-		res.Diagnostics.Append(diagnostics...)
-		if !res.Diagnostics.HasError() {
-			ctx = logger.SetFieldInt64(ctx, d.fullTypeName, resourceTerraformType, systemLogSizeAttribute, model.LogSize)
-			options[systemLogSizeUCIOption] = value
-		}
-	}
-
-	if hasValue(model.Notes) {
-		value, diagnostics := serializeString(model.Notes, path.Root(systemNotesAttribute))
-		res.Diagnostics.Append(diagnostics...)
-		if !res.Diagnostics.HasError() {
-			ctx = logger.SetFieldString(ctx, d.fullTypeName, resourceTerraformType, systemNotesAttribute, model.Notes)
-			options[systemNotesUCIOption] = value
-		}
-	}
-
-	if hasValue(model.Timezone) {
-		value, diagnostics := serializeString(model.Timezone, path.Root(systemTimezoneAttribute))
-		res.Diagnostics.Append(diagnostics...)
-		if !res.Diagnostics.HasError() {
-			ctx = logger.SetFieldString(ctx, d.fullTypeName, resourceTerraformType, systemTimezoneAttribute, model.Timezone)
-			options[systemTimezoneUCIOption] = value
-		}
-	}
-
-	if hasValue(model.TTYLogin) {
-		value, diagnostics := serializeBool(model.TTYLogin, path.Root(systemTTYLoginAttribute))
-		res.Diagnostics.Append(diagnostics...)
-		if !res.Diagnostics.HasError() {
-			ctx = logger.SetFieldBool(ctx, d.fullTypeName, resourceTerraformType, systemTTYLoginAttribute, model.TTYLogin)
-			options[systemTTYLoginUCIOption] = value
-		}
-	}
-
-	if hasValue(model.Zonename) {
-		value, diagnostics := serializeString(model.Zonename, path.Root(systemZonenameAttribute))
-		res.Diagnostics.Append(diagnostics...)
-		if !res.Diagnostics.HasError() {
-			ctx = logger.SetFieldString(ctx, d.fullTypeName, resourceTerraformType, systemZonenameAttribute, model.Zonename)
-			options[systemZonenameUCIOption] = value
-		}
-	}
-
+	ctx, id, options, diagnostics := generateAPIBody(
+		ctx,
+		model,
+		d.fullTypeName,
+	)
+	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {
 		return
 	}
@@ -337,95 +254,12 @@ func (d *systemResource) Update(
 		return
 	}
 
-	tflog.Debug(ctx, "Generating API request body")
-	options := map[string]json.RawMessage{}
-
-	tflog.Debug(ctx, "Handling required attributes")
-	ctx = logger.SetFieldString(ctx, d.fullTypeName, resourceTerraformType, systemIdAttribute, model.Id)
-	id := model.Id.ValueString()
-
-	tflog.Debug(ctx, "Handling optional attributes")
-	if hasValue(model.ConLogLevel) {
-		value, diagnostics := serializeInt64(model.ConLogLevel, path.Root(systemConLogLevelAttribute))
-		res.Diagnostics.Append(diagnostics...)
-		if !res.Diagnostics.HasError() {
-			ctx = logger.SetFieldInt64(ctx, d.fullTypeName, resourceTerraformType, systemConLogLevelAttribute, model.ConLogLevel)
-			options[systemConLogLevelUCIOption] = value
-		}
-	}
-
-	if hasValue(model.CronLogLevel) {
-		value, diagnostics := serializeInt64(model.CronLogLevel, path.Root(systemCronLogLevelAttribute))
-		res.Diagnostics.Append(diagnostics...)
-		if !res.Diagnostics.HasError() {
-			ctx = logger.SetFieldInt64(ctx, d.fullTypeName, resourceTerraformType, systemCronLogLevelAttribute, model.CronLogLevel)
-			options[systemCronLogLevelUCIOption] = value
-		}
-	}
-
-	if hasValue(model.Description) {
-		value, diagnostics := serializeString(model.Description, path.Root(systemDescriptionAttribute))
-		res.Diagnostics.Append(diagnostics...)
-		if !res.Diagnostics.HasError() {
-			ctx = logger.SetFieldString(ctx, d.fullTypeName, resourceTerraformType, systemDescriptionAttribute, model.Description)
-			options[systemDescriptionUCIOption] = value
-		}
-	}
-
-	if hasValue(model.Hostname) {
-		value, diagnostics := serializeString(model.Hostname, path.Root(systemHostnameAttribute))
-		res.Diagnostics.Append(diagnostics...)
-		if !res.Diagnostics.HasError() {
-			ctx = logger.SetFieldString(ctx, d.fullTypeName, resourceTerraformType, systemHostnameAttribute, model.Hostname)
-			options[systemHostnameUCIOption] = value
-		}
-	}
-
-	if hasValue(model.LogSize) {
-		value, diagnostics := serializeInt64(model.LogSize, path.Root(systemLogSizeAttribute))
-		res.Diagnostics.Append(diagnostics...)
-		if !res.Diagnostics.HasError() {
-			ctx = logger.SetFieldInt64(ctx, d.fullTypeName, resourceTerraformType, systemLogSizeAttribute, model.LogSize)
-			options[systemLogSizeUCIOption] = value
-		}
-	}
-
-	if hasValue(model.Notes) {
-		value, diagnostics := serializeString(model.Notes, path.Root(systemNotesAttribute))
-		res.Diagnostics.Append(diagnostics...)
-		if !res.Diagnostics.HasError() {
-			ctx = logger.SetFieldString(ctx, d.fullTypeName, resourceTerraformType, systemNotesAttribute, model.Notes)
-			options[systemNotesUCIOption] = value
-		}
-	}
-
-	if hasValue(model.Timezone) {
-		value, diagnostics := serializeString(model.Timezone, path.Root(systemTimezoneAttribute))
-		res.Diagnostics.Append(diagnostics...)
-		if !res.Diagnostics.HasError() {
-			ctx = logger.SetFieldString(ctx, d.fullTypeName, resourceTerraformType, systemTimezoneAttribute, model.Timezone)
-			options[systemTimezoneUCIOption] = value
-		}
-	}
-
-	if hasValue(model.TTYLogin) {
-		value, diagnostics := serializeBool(model.TTYLogin, path.Root(systemTTYLoginAttribute))
-		res.Diagnostics.Append(diagnostics...)
-		if !res.Diagnostics.HasError() {
-			ctx = logger.SetFieldBool(ctx, d.fullTypeName, resourceTerraformType, systemTTYLoginAttribute, model.TTYLogin)
-			options[systemTTYLoginUCIOption] = value
-		}
-	}
-
-	if hasValue(model.Zonename) {
-		value, diagnostics := serializeString(model.Zonename, path.Root(systemZonenameAttribute))
-		res.Diagnostics.Append(diagnostics...)
-		if !res.Diagnostics.HasError() {
-			ctx = logger.SetFieldString(ctx, d.fullTypeName, resourceTerraformType, systemZonenameAttribute, model.Zonename)
-			options[systemZonenameUCIOption] = value
-		}
-	}
-
+	ctx, id, options, diagnostics := generateAPIBody(
+		ctx,
+		model,
+		d.fullTypeName,
+	)
+	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {
 		return
 	}
@@ -475,6 +309,104 @@ func (d *systemResource) Update(
 type attributeHasValue interface {
 	IsNull() bool
 	IsUnknown() bool
+}
+
+func generateAPIBody(
+	ctx context.Context,
+	model systemModel,
+	fullTypeName string,
+) (context.Context, string, map[string]json.RawMessage, diag.Diagnostics) {
+	tflog.Info(ctx, "Generating API request body")
+	allDiagnostics := diag.Diagnostics{}
+	options := map[string]json.RawMessage{}
+
+	tflog.Debug(ctx, "Handling required attributes")
+	ctx = logger.SetFieldString(ctx, fullTypeName, resourceTerraformType, systemIdAttribute, model.Id)
+	id := model.Id.ValueString()
+
+	tflog.Debug(ctx, "Handling optional attributes")
+	if hasValue(model.ConLogLevel) {
+		value, diagnostics := serializeInt64(model.ConLogLevel, path.Root(systemConLogLevelAttribute))
+		allDiagnostics.Append(diagnostics...)
+		if !allDiagnostics.HasError() {
+			ctx = logger.SetFieldInt64(ctx, fullTypeName, resourceTerraformType, systemConLogLevelAttribute, model.ConLogLevel)
+			options[systemConLogLevelUCIOption] = value
+		}
+	}
+
+	if hasValue(model.CronLogLevel) {
+		value, diagnostics := serializeInt64(model.CronLogLevel, path.Root(systemCronLogLevelAttribute))
+		allDiagnostics.Append(diagnostics...)
+		if !allDiagnostics.HasError() {
+			ctx = logger.SetFieldInt64(ctx, fullTypeName, resourceTerraformType, systemCronLogLevelAttribute, model.CronLogLevel)
+			options[systemCronLogLevelUCIOption] = value
+		}
+	}
+
+	if hasValue(model.Description) {
+		value, diagnostics := serializeString(model.Description, path.Root(systemDescriptionAttribute))
+		allDiagnostics.Append(diagnostics...)
+		if !allDiagnostics.HasError() {
+			ctx = logger.SetFieldString(ctx, fullTypeName, resourceTerraformType, systemDescriptionAttribute, model.Description)
+			options[systemDescriptionUCIOption] = value
+		}
+	}
+
+	if hasValue(model.Hostname) {
+		value, diagnostics := serializeString(model.Hostname, path.Root(systemHostnameAttribute))
+		allDiagnostics.Append(diagnostics...)
+		if !allDiagnostics.HasError() {
+			ctx = logger.SetFieldString(ctx, fullTypeName, resourceTerraformType, systemHostnameAttribute, model.Hostname)
+			options[systemHostnameUCIOption] = value
+		}
+	}
+
+	if hasValue(model.LogSize) {
+		value, diagnostics := serializeInt64(model.LogSize, path.Root(systemLogSizeAttribute))
+		allDiagnostics.Append(diagnostics...)
+		if !allDiagnostics.HasError() {
+			ctx = logger.SetFieldInt64(ctx, fullTypeName, resourceTerraformType, systemLogSizeAttribute, model.LogSize)
+			options[systemLogSizeUCIOption] = value
+		}
+	}
+
+	if hasValue(model.Notes) {
+		value, diagnostics := serializeString(model.Notes, path.Root(systemNotesAttribute))
+		allDiagnostics.Append(diagnostics...)
+		if !allDiagnostics.HasError() {
+			ctx = logger.SetFieldString(ctx, fullTypeName, resourceTerraformType, systemNotesAttribute, model.Notes)
+			options[systemNotesUCIOption] = value
+		}
+	}
+
+	if hasValue(model.Timezone) {
+		value, diagnostics := serializeString(model.Timezone, path.Root(systemTimezoneAttribute))
+		allDiagnostics.Append(diagnostics...)
+		if !allDiagnostics.HasError() {
+			ctx = logger.SetFieldString(ctx, fullTypeName, resourceTerraformType, systemTimezoneAttribute, model.Timezone)
+			options[systemTimezoneUCIOption] = value
+		}
+	}
+
+	if hasValue(model.TTYLogin) {
+		value, diagnostics := serializeBool(model.TTYLogin, path.Root(systemTTYLoginAttribute))
+		allDiagnostics.Append(diagnostics...)
+		if !allDiagnostics.HasError() {
+			ctx = logger.SetFieldBool(ctx, fullTypeName, resourceTerraformType, systemTTYLoginAttribute, model.TTYLogin)
+			options[systemTTYLoginUCIOption] = value
+		}
+	}
+
+	if hasValue(model.Zonename) {
+		value, diagnostics := serializeString(model.Zonename, path.Root(systemZonenameAttribute))
+		allDiagnostics.Append(diagnostics...)
+		if !allDiagnostics.HasError() {
+			ctx = logger.SetFieldString(ctx, fullTypeName, resourceTerraformType, systemZonenameAttribute, model.Zonename)
+			options[systemZonenameUCIOption] = value
+		}
+	}
+
+	return ctx, id, options, allDiagnostics
 }
 
 func hasValue(
