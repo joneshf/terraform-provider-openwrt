@@ -158,7 +158,9 @@ func (p *openWrtProvider) Metadata(
 func (p *openWrtProvider) Resources(
 	ctx context.Context,
 ) []func() resource.Resource {
-	return []func() resource.Resource{}
+	return []func() resource.Resource{
+		system.NewSystemResource,
+	}
 }
 
 // Schema defines the provider-level schema for configuration data.
