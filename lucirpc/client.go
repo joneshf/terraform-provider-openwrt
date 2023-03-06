@@ -48,7 +48,7 @@ func (c *Client) GetSection(
 			marshalledSection,
 		},
 	}
-	responseBody, err := c.jsonRPCClientUCI.Invoke(
+	responseBody, err := c.jsonRPCClientUCI.InvokeNotNull(
 		ctx,
 		humanReadableGetSection,
 		requestBody,
@@ -120,7 +120,7 @@ func NewClient(
 		*httpClient,
 		address,
 	)
-	responseBody, err := jsonRPCClient.Invoke(
+	responseBody, err := jsonRPCClient.InvokeNotNull(
 		ctx,
 		humanReadableLogin,
 		requestBody,
@@ -158,11 +158,32 @@ type jsonRPCClient struct {
 	client  http.Client
 }
 
-func (c jsonRPCClient) Invoke(
+func (c jsonRPCClient) InvokeNotNull(
 	ctx context.Context,
 	humanReadableMethod string,
 	requestBody jsonRPCRequestBody,
 ) (json.RawMessage, error) {
+	result, err := c.Invoke(
+		ctx,
+		humanReadableMethod,
+		requestBody,
+	)
+	if err != nil {
+		return json.RawMessage{}, err
+	}
+
+	if result == nil {
+		return nil, fmt.Errorf("invalid %s response: expected either an error or a result, got neither", humanReadableMethod)
+	}
+
+	return *result, nil
+}
+
+func (c jsonRPCClient) Invoke(
+	ctx context.Context,
+	humanReadableMethod string,
+	requestBody jsonRPCRequestBody,
+) (*json.RawMessage, error) {
 	buffer := bytes.Buffer{}
 	encoder := json.NewEncoder(&buffer)
 	err := encoder.Encode(requestBody)
@@ -196,15 +217,11 @@ func (c jsonRPCClient) Invoke(
 		return nil, fmt.Errorf("unable to parse %s response: %w", humanReadableMethod, err)
 	}
 
-	if responseBody.Error == nil && responseBody.Result == nil {
-		return nil, fmt.Errorf("invalid %s response: expected either an error or a result, got neither", humanReadableMethod)
-	}
-
 	if responseBody.Error != nil {
 		return nil, fmt.Errorf("%s error: %s", humanReadableMethod, *responseBody.Error)
 	}
 
-	return *responseBody.Result, nil
+	return responseBody.Result, nil
 }
 
 func jsonRPCNewClient(
