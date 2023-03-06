@@ -282,11 +282,6 @@ func (d *systemResource) Update(
 	}
 }
 
-type attributeHasValue interface {
-	IsNull() bool
-	IsUnknown() bool
-}
-
 func generateAPIBody(
 	ctx context.Context,
 	model systemModel,
@@ -305,64 +300,4 @@ func generateAPIBody(
 	}
 
 	return ctx, id, options, allDiagnostics
-}
-
-func hasValue(
-	attribute attributeHasValue,
-) bool {
-	return !attribute.IsNull() && !attribute.IsUnknown()
-}
-
-func serializeBool(
-	attribute interface{ ValueBool() bool },
-	attributePath path.Path,
-) (json.RawMessage, diag.Diagnostics) {
-	diagnostics := diag.Diagnostics{}
-	value, err := json.Marshal(attribute.ValueBool())
-	if err != nil {
-		diagnostics.AddAttributeError(
-			attributePath,
-			"Could not serialize",
-			err.Error(),
-		)
-		return nil, diagnostics
-	}
-
-	return json.RawMessage(value), diagnostics
-}
-
-func serializeInt64(
-	attribute interface{ ValueInt64() int64 },
-	attributePath path.Path,
-) (json.RawMessage, diag.Diagnostics) {
-	diagnostics := diag.Diagnostics{}
-	value, err := json.Marshal(attribute.ValueInt64())
-	if err != nil {
-		diagnostics.AddAttributeError(
-			attributePath,
-			"Could not serialize",
-			err.Error(),
-		)
-		return nil, diagnostics
-	}
-
-	return json.RawMessage(value), diagnostics
-}
-
-func serializeString(
-	attribute interface{ ValueString() string },
-	attributePath path.Path,
-) (json.RawMessage, diag.Diagnostics) {
-	diagnostics := diag.Diagnostics{}
-	value, err := json.Marshal(attribute.ValueString())
-	if err != nil {
-		diagnostics.AddAttributeError(
-			attributePath,
-			"Could not serialize",
-			err.Error(),
-		)
-		return nil, diagnostics
-	}
-
-	return json.RawMessage(value), diagnostics
 }

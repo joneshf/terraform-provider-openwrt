@@ -478,6 +478,11 @@ func ReadModel(
 	return ctx, model, diagnostics
 }
 
+type attributeHasValue interface {
+	IsNull() bool
+	IsUnknown() bool
+}
+
 type boolSchemaAttribute[Model any, Request any, Response any] struct {
 	DataSourceExistence AttributeExistence
 	DeprecationMessage  string
@@ -542,6 +547,12 @@ func (a boolSchemaAttribute[Model, Request, Response]) Upsert(
 	}
 
 	return a.UpsertRequest(ctx, fullTypeName, terraformType, request, model)
+}
+
+func hasValue(
+	attribute attributeHasValue,
+) bool {
+	return !attribute.IsNull() && !attribute.IsUnknown()
 }
 
 type int64SchemaAttribute[Model any, Request any, Response any] struct {
@@ -615,6 +626,60 @@ type schemaAttribute[Model any, Request any, Response any] interface {
 	ToDataSource() datasourceschema.Attribute
 	ToResource() resourceschema.Attribute
 	Upsert(context.Context, string, string, Request, Model) (context.Context, Request, diag.Diagnostics)
+}
+
+func serializeBool(
+	attribute interface{ ValueBool() bool },
+	attributePath path.Path,
+) (json.RawMessage, diag.Diagnostics) {
+	diagnostics := diag.Diagnostics{}
+	value, err := json.Marshal(attribute.ValueBool())
+	if err != nil {
+		diagnostics.AddAttributeError(
+			attributePath,
+			"Could not serialize",
+			err.Error(),
+		)
+		return nil, diagnostics
+	}
+
+	return json.RawMessage(value), diagnostics
+}
+
+func serializeInt64(
+	attribute interface{ ValueInt64() int64 },
+	attributePath path.Path,
+) (json.RawMessage, diag.Diagnostics) {
+	diagnostics := diag.Diagnostics{}
+	value, err := json.Marshal(attribute.ValueInt64())
+	if err != nil {
+		diagnostics.AddAttributeError(
+			attributePath,
+			"Could not serialize",
+			err.Error(),
+		)
+		return nil, diagnostics
+	}
+
+	return json.RawMessage(value), diagnostics
+}
+
+func serializeString(
+	attribute interface{ ValueString() string },
+	attributePath path.Path,
+) (json.RawMessage, diag.Diagnostics) {
+	diagnostics := diag.Diagnostics{}
+	value, err := json.Marshal(attribute.ValueString())
+	if err != nil {
+		diagnostics.AddAttributeError(
+			attributePath,
+			"Could not serialize",
+			err.Error(),
+		)
+		return nil, diagnostics
+	}
+
+	return json.RawMessage(value), diagnostics
 }
 
 type stringSchemaAttribute[Model any, Request any, Response any] struct {
