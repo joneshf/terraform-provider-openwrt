@@ -194,6 +194,25 @@ type systemModel struct {
 	Zonename     types.String `tfsdk:"zonename"`
 }
 
+func (m systemModel) generateAPIBody(
+	ctx context.Context,
+	fullTypeName string,
+) (context.Context, string, map[string]json.RawMessage, diag.Diagnostics) {
+	tflog.Info(ctx, "Generating API request body")
+	var diagnostics diag.Diagnostics
+	allDiagnostics := diag.Diagnostics{}
+	options := map[string]json.RawMessage{}
+
+	tflog.Debug(ctx, "Handling attributes")
+	id := m.Id.ValueString()
+	for _, attribute := range systemSchemaAttributes {
+		ctx, options, diagnostics = attribute.Upsert(ctx, fullTypeName, lucirpcglue.ResourceTerraformType, options, m)
+		allDiagnostics.Append(diagnostics...)
+	}
+
+	return ctx, id, options, allDiagnostics
+}
+
 func systemModelGetConLogLevel(model systemModel) types.Int64  { return model.ConLogLevel }
 func systemModelGetCronLogLevel(model systemModel) types.Int64 { return model.CronLogLevel }
 func systemModelGetDescription(model systemModel) types.String { return model.Description }
