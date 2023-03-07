@@ -167,7 +167,7 @@ func (a Int64SchemaAttribute[Model, Request, Response]) Upsert(
 }
 
 func ReadResponseOptionBool[Model any](
-	set func(Model, types.Bool) Model,
+	set func(*Model, types.Bool),
 	attribute string,
 	option string,
 ) func(context.Context, string, string, map[string]json.RawMessage, Model) (context.Context, Model, diag.Diagnostics) {
@@ -179,13 +179,13 @@ func ReadResponseOptionBool[Model any](
 		model Model,
 	) (context.Context, Model, diag.Diagnostics) {
 		ctx, value, diagnostics := GetOptionBool(ctx, fullTypeName, terraformType, section, path.Root(attribute), option)
-		model = set(model, value)
+		set(&model, value)
 		return ctx, model, diagnostics
 	}
 }
 
 func ReadResponseOptionInt64[Model any](
-	set func(Model, types.Int64) Model,
+	set func(*Model, types.Int64),
 	attribute string,
 	option string,
 ) func(context.Context, string, string, map[string]json.RawMessage, Model) (context.Context, Model, diag.Diagnostics) {
@@ -197,13 +197,13 @@ func ReadResponseOptionInt64[Model any](
 		model Model,
 	) (context.Context, Model, diag.Diagnostics) {
 		ctx, value, diagnostics := GetOptionInt64(ctx, fullTypeName, terraformType, section, path.Root(attribute), option)
-		model = set(model, value)
+		set(&model, value)
 		return ctx, model, diagnostics
 	}
 }
 
 func ReadResponseOptionString[Model any](
-	set func(Model, types.String) Model,
+	set func(*Model, types.String),
 	attribute string,
 	option string,
 ) func(context.Context, string, string, map[string]json.RawMessage, Model) (context.Context, Model, diag.Diagnostics) {
@@ -215,7 +215,7 @@ func ReadResponseOptionString[Model any](
 		model Model,
 	) (context.Context, Model, diag.Diagnostics) {
 		ctx, value, diagnostics := GetOptionString(ctx, fullTypeName, terraformType, section, path.Root(attribute), option)
-		model = set(model, value)
+		set(&model, value)
 		return ctx, model, diagnostics
 	}
 }
