@@ -11,10 +11,6 @@ import (
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/lucirpcglue"
 )
 
-const (
-	dataSourceTerraformType = "data_source"
-)
-
 var (
 	_ datasource.DataSource              = &systemDataSource{}
 	_ datasource.DataSourceWithConfigure = &systemDataSource{}
@@ -71,7 +67,7 @@ func (d *systemDataSource) Read(
 	ctx, model, diagnostics := readSystemModel(
 		ctx,
 		d.fullTypeName,
-		dataSourceTerraformType,
+		lucirpcglue.DataSourceTerraformType,
 		d.client,
 		systemUCISection,
 	)

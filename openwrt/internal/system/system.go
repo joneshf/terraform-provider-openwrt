@@ -100,7 +100,7 @@ var (
 			options map[string]json.RawMessage,
 			model systemModel,
 		) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
-			ctx = logger.SetFieldString(ctx, fullTypeName, resourceTerraformType, systemIdAttribute, model.Id)
+			ctx = logger.SetFieldString(ctx, fullTypeName, lucirpcglue.ResourceTerraformType, systemIdAttribute, model.Id)
 			return ctx, options, diag.Diagnostics{}
 		},
 	}
