@@ -2,10 +2,8 @@ package system
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -67,9 +65,8 @@ func (d *systemResource) Create(
 		return
 	}
 
-	ctx, id, options, diagnostics := generateAPIBody(
+	ctx, id, options, diagnostics := model.generateAPIBody(
 		ctx,
-		model,
 		d.fullTypeName,
 	)
 	res.Diagnostics.Append(diagnostics...)
@@ -234,9 +231,8 @@ func (d *systemResource) Update(
 		return
 	}
 
-	ctx, id, options, diagnostics := generateAPIBody(
+	ctx, id, options, diagnostics := model.generateAPIBody(
 		ctx,
-		model,
 		d.fullTypeName,
 	)
 	res.Diagnostics.Append(diagnostics...)
@@ -276,24 +272,4 @@ func (d *systemResource) Update(
 	if res.Diagnostics.HasError() {
 		return
 	}
-}
-
-func generateAPIBody(
-	ctx context.Context,
-	model systemModel,
-	fullTypeName string,
-) (context.Context, string, map[string]json.RawMessage, diag.Diagnostics) {
-	tflog.Info(ctx, "Generating API request body")
-	var diagnostics diag.Diagnostics
-	allDiagnostics := diag.Diagnostics{}
-	options := map[string]json.RawMessage{}
-
-	tflog.Debug(ctx, "Handling attributes")
-	id := model.Id.ValueString()
-	for _, attribute := range systemSchemaAttributes {
-		ctx, options, diagnostics = attribute.Upsert(ctx, fullTypeName, lucirpcglue.ResourceTerraformType, options, model)
-		allDiagnostics.Append(diagnostics...)
-	}
-
-	return ctx, id, options, allDiagnostics
 }
