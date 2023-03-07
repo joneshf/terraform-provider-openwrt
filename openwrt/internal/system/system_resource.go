@@ -24,8 +24,9 @@ func NewSystemResource() resource.Resource {
 }
 
 type systemResource struct {
-	client       lucirpc.Client
-	fullTypeName string
+	client        lucirpc.Client
+	fullTypeName  string
+	terraformType string
 }
 
 // Configure adds the provider configured client to the resource.
@@ -92,7 +93,7 @@ func (d *systemResource) Create(
 	ctx, model, diagnostics = readSystemModel(
 		ctx,
 		d.fullTypeName,
-		lucirpcglue.ResourceTerraformType,
+		d.terraformType,
 		d.client,
 		id,
 	)
@@ -125,7 +126,7 @@ func (d *systemResource) Delete(
 		return
 	}
 
-	ctx = logger.SetFieldString(ctx, d.fullTypeName, lucirpcglue.ResourceTerraformType, systemIdAttribute, model.Id)
+	ctx = logger.SetFieldString(ctx, d.fullTypeName, d.terraformType, systemIdAttribute, model.Id)
 	id := model.Id.ValueString()
 	ctx = tflog.SetField(ctx, "section", fmt.Sprintf("%s.%s", systemUCIConfig, id))
 	tflog.Debug(ctx, "Deleting existing section")
@@ -159,6 +160,7 @@ func (d *systemResource) Metadata(
 ) {
 	fullTypeName := fmt.Sprintf("%s_%s", req.ProviderTypeName, systemTypeName)
 	d.fullTypeName = fullTypeName
+	d.terraformType = lucirpcglue.ResourceTerraformType
 	res.TypeName = fullTypeName
 }
 
@@ -181,7 +183,7 @@ func (d *systemResource) Read(
 	ctx, model, diagnostics = readSystemModel(
 		ctx,
 		d.fullTypeName,
-		lucirpcglue.ResourceTerraformType,
+		d.terraformType,
 		d.client,
 		model.Id.ValueString(),
 	)
@@ -257,7 +259,7 @@ func (d *systemResource) Update(
 	ctx, model, diagnostics = readSystemModel(
 		ctx,
 		d.fullTypeName,
-		lucirpcglue.ResourceTerraformType,
+		d.terraformType,
 		d.client,
 		id,
 	)

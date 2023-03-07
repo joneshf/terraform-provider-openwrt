@@ -21,8 +21,9 @@ func NewSystemDataSource() datasource.DataSource {
 }
 
 type systemDataSource struct {
-	client       lucirpc.Client
-	fullTypeName string
+	client        lucirpc.Client
+	fullTypeName  string
+	terraformType string
 }
 
 // Configure prepares the data source.
@@ -54,6 +55,7 @@ func (d *systemDataSource) Metadata(
 ) {
 	fullTypeName := fmt.Sprintf("%s_%s", req.ProviderTypeName, systemTypeName)
 	d.fullTypeName = fullTypeName
+	d.terraformType = lucirpcglue.DataSourceTerraformType
 	res.TypeName = fullTypeName
 }
 
@@ -67,7 +69,7 @@ func (d *systemDataSource) Read(
 	ctx, model, diagnostics := readSystemModel(
 		ctx,
 		d.fullTypeName,
-		lucirpcglue.DataSourceTerraformType,
+		d.terraformType,
 		d.client,
 		systemUCISection,
 	)
