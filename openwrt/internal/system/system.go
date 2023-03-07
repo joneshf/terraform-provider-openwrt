@@ -154,19 +154,6 @@ var (
 	}
 )
 
-type systemModel struct {
-	ConLogLevel  types.Int64  `tfsdk:"conloglevel"`
-	CronLogLevel types.Int64  `tfsdk:"cronloglevel"`
-	Description  types.String `tfsdk:"description"`
-	Hostname     types.String `tfsdk:"hostname"`
-	Id           types.String `tfsdk:"id"`
-	LogSize      types.Int64  `tfsdk:"log_size"`
-	Notes        types.String `tfsdk:"notes"`
-	Timezone     types.String `tfsdk:"timezone"`
-	TTYLogin     types.Bool   `tfsdk:"ttylogin"`
-	Zonename     types.String `tfsdk:"zonename"`
-}
-
 func ReadModel(
 	ctx context.Context,
 	fullTypeName string,
@@ -192,6 +179,19 @@ func ReadModel(
 	}
 
 	return ctx, model, diagnostics
+}
+
+type systemModel struct {
+	ConLogLevel  types.Int64  `tfsdk:"conloglevel"`
+	CronLogLevel types.Int64  `tfsdk:"cronloglevel"`
+	Description  types.String `tfsdk:"description"`
+	Hostname     types.String `tfsdk:"hostname"`
+	Id           types.String `tfsdk:"id"`
+	LogSize      types.Int64  `tfsdk:"log_size"`
+	Notes        types.String `tfsdk:"notes"`
+	Timezone     types.String `tfsdk:"timezone"`
+	TTYLogin     types.Bool   `tfsdk:"ttylogin"`
+	Zonename     types.String `tfsdk:"zonename"`
 }
 
 func systemModelGetConLogLevel(model systemModel) types.Int64  { return model.ConLogLevel }
