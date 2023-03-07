@@ -15,10 +15,6 @@ import (
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/lucirpcglue"
 )
 
-const (
-	resourceTerraformType = "resource"
-)
-
 var (
 	_ resource.Resource                = &systemResource{}
 	_ resource.ResourceWithConfigure   = &systemResource{}
@@ -99,7 +95,7 @@ func (d *systemResource) Create(
 	ctx, model, diagnostics = readSystemModel(
 		ctx,
 		d.fullTypeName,
-		resourceTerraformType,
+		lucirpcglue.ResourceTerraformType,
 		d.client,
 		id,
 	)
@@ -132,7 +128,7 @@ func (d *systemResource) Delete(
 		return
 	}
 
-	ctx = logger.SetFieldString(ctx, d.fullTypeName, resourceTerraformType, systemIdAttribute, model.Id)
+	ctx = logger.SetFieldString(ctx, d.fullTypeName, lucirpcglue.ResourceTerraformType, systemIdAttribute, model.Id)
 	id := model.Id.ValueString()
 	ctx = tflog.SetField(ctx, "section", fmt.Sprintf("%s.%s", systemUCIConfig, id))
 	tflog.Debug(ctx, "Deleting existing section")
@@ -188,7 +184,7 @@ func (d *systemResource) Read(
 	ctx, model, diagnostics = readSystemModel(
 		ctx,
 		d.fullTypeName,
-		resourceTerraformType,
+		lucirpcglue.ResourceTerraformType,
 		d.client,
 		model.Id.ValueString(),
 	)
@@ -265,7 +261,7 @@ func (d *systemResource) Update(
 	ctx, model, diagnostics = readSystemModel(
 		ctx,
 		d.fullTypeName,
-		resourceTerraformType,
+		lucirpcglue.ResourceTerraformType,
 		d.client,
 		id,
 	)
@@ -295,7 +291,7 @@ func generateAPIBody(
 	tflog.Debug(ctx, "Handling attributes")
 	id := model.Id.ValueString()
 	for _, attribute := range systemSchemaAttributes {
-		ctx, options, diagnostics = attribute.Upsert(ctx, fullTypeName, resourceTerraformType, options, model)
+		ctx, options, diagnostics = attribute.Upsert(ctx, fullTypeName, lucirpcglue.ResourceTerraformType, options, model)
 		allDiagnostics.Append(diagnostics...)
 	}
 
