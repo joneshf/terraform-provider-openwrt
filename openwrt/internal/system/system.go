@@ -204,47 +204,12 @@ func systemModelGetTimezone(model systemModel) types.String    { return model.Ti
 func systemModelGetTTYLogin(model systemModel) types.Bool      { return model.TTYLogin }
 func systemModelGetZonename(model systemModel) types.String    { return model.Zonename }
 
-func systemModelSetConLogLevel(model systemModel, value types.Int64) systemModel {
-	model.ConLogLevel = value
-	return model
-}
-
-func systemModelSetCronLogLevel(model systemModel, value types.Int64) systemModel {
-	model.CronLogLevel = value
-	return model
-}
-
-func systemModelSetDescription(model systemModel, value types.String) systemModel {
-	model.Description = value
-	return model
-}
-
-func systemModelSetHostname(model systemModel, value types.String) systemModel {
-	model.Hostname = value
-	return model
-}
-
-func systemModelSetLogSize(model systemModel, value types.Int64) systemModel {
-	model.LogSize = value
-	return model
-}
-
-func systemModelSetNotes(model systemModel, value types.String) systemModel {
-	model.Notes = value
-	return model
-}
-
-func systemModelSetTimezone(model systemModel, value types.String) systemModel {
-	model.Timezone = value
-	return model
-}
-
-func systemModelSetTTYLogin(model systemModel, value types.Bool) systemModel {
-	model.TTYLogin = value
-	return model
-}
-
-func systemModelSetZonename(model systemModel, value types.String) systemModel {
-	model.Zonename = value
-	return model
-}
+func systemModelSetConLogLevel(model *systemModel, value types.Int64)  { model.ConLogLevel = value }
+func systemModelSetCronLogLevel(model *systemModel, value types.Int64) { model.CronLogLevel = value }
+func systemModelSetDescription(model *systemModel, value types.String) { model.Description = value }
+func systemModelSetHostname(model *systemModel, value types.String)    { model.Hostname = value }
+func systemModelSetLogSize(model *systemModel, value types.Int64)      { model.LogSize = value }
+func systemModelSetNotes(model *systemModel, value types.String)       { model.Notes = value }
+func systemModelSetTimezone(model *systemModel, value types.String)    { model.Timezone = value }
+func systemModelSetTTYLogin(model *systemModel, value types.Bool)      { model.TTYLogin = value }
+func systemModelSetZonename(model *systemModel, value types.String)    { model.Zonename = value }
