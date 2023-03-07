@@ -154,7 +154,7 @@ var (
 	}
 )
 
-func ReadModel(
+func readSystemModel(
 	ctx context.Context,
 	fullTypeName string,
 	terraformType string,
