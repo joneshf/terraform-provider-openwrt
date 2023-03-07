@@ -96,7 +96,7 @@ func (d *systemResource) Create(
 	}
 
 	tflog.Debug(ctx, "Reading updated section")
-	ctx, model, diagnostics = ReadModel(
+	ctx, model, diagnostics = readSystemModel(
 		ctx,
 		d.fullTypeName,
 		resourceTerraformType,
@@ -185,7 +185,7 @@ func (d *systemResource) Read(
 		return
 	}
 
-	ctx, model, diagnostics = ReadModel(
+	ctx, model, diagnostics = readSystemModel(
 		ctx,
 		d.fullTypeName,
 		resourceTerraformType,
@@ -262,7 +262,7 @@ func (d *systemResource) Update(
 	}
 
 	tflog.Debug(ctx, "Reading updated section")
-	ctx, model, diagnostics = ReadModel(
+	ctx, model, diagnostics = readSystemModel(
 		ctx,
 		d.fullTypeName,
 		resourceTerraformType,
