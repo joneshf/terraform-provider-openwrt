@@ -34,6 +34,8 @@ const (
 	systemNotesAttribute = "notes"
 	systemNotesUCIOption = "notes"
 
+	systemSchemaDescription = "Provides system data about an OpenWrt device"
+
 	systemTimezoneAttribute = "timezone"
 	systemTimezoneUCIOption = "timezone"
 
