@@ -99,6 +99,6 @@ func (d *systemDataSource) Schema(
 
 	res.Schema = schema.Schema{
 		Attributes:  attributes,
-		Description: "Provides system data about an OpenWrt device",
+		Description: systemSchemaDescription,
 	}
 }
