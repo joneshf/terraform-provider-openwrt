@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
+	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/network"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/system"
 )
 
@@ -140,6 +141,7 @@ func (p *openWrtProvider) DataSources(
 	ctx context.Context,
 ) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		network.NewGlobalsDataSource,
 		system.NewSystemDataSource,
 	}
 }
@@ -159,6 +161,7 @@ func (p *openWrtProvider) Resources(
 	ctx context.Context,
 ) []func() resource.Resource {
 	return []func() resource.Resource{
+		network.NewGlobalsResource,
 		system.NewSystemResource,
 	}
 }
