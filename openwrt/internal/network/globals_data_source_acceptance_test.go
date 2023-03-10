@@ -6,8 +6,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
@@ -16,35 +14,8 @@ import (
 	"github.com/joneshf/terraform-provider-openwrt/internal/acceptancetest"
 	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt"
-	"github.com/ory/dockertest/v3"
 	"gotest.tools/v3/assert"
 )
-
-var (
-	dockerPool *dockertest.Pool
-)
-
-func TestMain(m *testing.M) {
-	var (
-		code     int
-		err      error
-		tearDown func()
-	)
-	ctx := context.Background()
-	tearDown, dockerPool, err = acceptancetest.Setup(ctx, m)
-	defer func() {
-		tearDown()
-		os.Exit(code)
-	}()
-	if err != nil {
-		fmt.Printf("Problem setting up tests: %s", err)
-		code = 1
-		return
-	}
-
-	log.Printf("Running tests")
-	code = m.Run()
-}
 
 func TestNetworkGlobalsDataSourceAcceptance(t *testing.T) {
 	t.Parallel()
