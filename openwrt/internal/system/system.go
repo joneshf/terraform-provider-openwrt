@@ -42,7 +42,6 @@ const (
 
 	systemTypeName      = "system_system"
 	systemUCIConfig     = "system"
-	systemUCISection    = "@system[0]"
 	systemUCISystemType = "system"
 
 	systemZonenameAttribute = "zonename"
