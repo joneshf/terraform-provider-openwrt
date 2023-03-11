@@ -53,7 +53,7 @@ type BoolSchemaAttribute[Model any, Request any, Response any] struct {
 	ReadResponse        func(context.Context, string, string, Response, Model) (context.Context, Model, diag.Diagnostics)
 	ResourceExistence   AttributeExistence
 	Sensitive           bool
-	UpsertRequest       func(context.Context, string, string, Request, Model) (context.Context, Request, diag.Diagnostics)
+	UpsertRequest       func(context.Context, string, Request, Model) (context.Context, Request, diag.Diagnostics)
 	Validators          []validator.Bool
 }
 
@@ -100,7 +100,6 @@ func (a BoolSchemaAttribute[Model, Request, Response]) ToResource() resourcesche
 func (a BoolSchemaAttribute[Model, Request, Response]) Upsert(
 	ctx context.Context,
 	fullTypeName string,
-	terraformType string,
 	request Request,
 	model Model,
 ) (context.Context, Request, diag.Diagnostics) {
@@ -108,7 +107,7 @@ func (a BoolSchemaAttribute[Model, Request, Response]) Upsert(
 		return ctx, request, diag.Diagnostics{}
 	}
 
-	return a.UpsertRequest(ctx, fullTypeName, terraformType, request, model)
+	return a.UpsertRequest(ctx, fullTypeName, request, model)
 }
 
 type Int64SchemaAttribute[Model any, Request any, Response any] struct {
@@ -119,7 +118,7 @@ type Int64SchemaAttribute[Model any, Request any, Response any] struct {
 	ReadResponse        func(context.Context, string, string, Response, Model) (context.Context, Model, diag.Diagnostics)
 	ResourceExistence   AttributeExistence
 	Sensitive           bool
-	UpsertRequest       func(context.Context, string, string, Request, Model) (context.Context, Request, diag.Diagnostics)
+	UpsertRequest       func(context.Context, string, Request, Model) (context.Context, Request, diag.Diagnostics)
 	Validators          []validator.Int64
 }
 
@@ -166,7 +165,6 @@ func (a Int64SchemaAttribute[Model, Request, Response]) ToResource() resourcesch
 func (a Int64SchemaAttribute[Model, Request, Response]) Upsert(
 	ctx context.Context,
 	fullTypeName string,
-	terraformType string,
 	request Request,
 	model Model,
 ) (context.Context, Request, diag.Diagnostics) {
@@ -174,7 +172,7 @@ func (a Int64SchemaAttribute[Model, Request, Response]) Upsert(
 		return ctx, request, diag.Diagnostics{}
 	}
 
-	return a.UpsertRequest(ctx, fullTypeName, terraformType, request, model)
+	return a.UpsertRequest(ctx, fullTypeName, request, model)
 }
 
 func ReadResponseOptionBool[Model any](
@@ -274,7 +272,7 @@ type SchemaAttribute[Model any, Request any, Response any] interface {
 	Read(context.Context, string, string, Response, Model) (context.Context, Model, diag.Diagnostics)
 	ToDataSource() datasourceschema.Attribute
 	ToResource() resourceschema.Attribute
-	Upsert(context.Context, string, string, Request, Model) (context.Context, Request, diag.Diagnostics)
+	Upsert(context.Context, string, Request, Model) (context.Context, Request, diag.Diagnostics)
 }
 
 type SetStringSchemaAttribute[Model any, Request any, Response any] struct {
@@ -285,7 +283,7 @@ type SetStringSchemaAttribute[Model any, Request any, Response any] struct {
 	ReadResponse        func(context.Context, string, string, Response, Model) (context.Context, Model, diag.Diagnostics)
 	ResourceExistence   AttributeExistence
 	Sensitive           bool
-	UpsertRequest       func(context.Context, string, string, Request, Model) (context.Context, Request, diag.Diagnostics)
+	UpsertRequest       func(context.Context, string, Request, Model) (context.Context, Request, diag.Diagnostics)
 	Validators          []validator.Set
 }
 
@@ -334,7 +332,6 @@ func (a SetStringSchemaAttribute[Model, Request, Response]) ToResource() resourc
 func (a SetStringSchemaAttribute[Model, Request, Response]) Upsert(
 	ctx context.Context,
 	fullTypeName string,
-	terraformType string,
 	request Request,
 	model Model,
 ) (context.Context, Request, diag.Diagnostics) {
@@ -342,7 +339,7 @@ func (a SetStringSchemaAttribute[Model, Request, Response]) Upsert(
 		return ctx, request, diag.Diagnostics{}
 	}
 
-	return a.UpsertRequest(ctx, fullTypeName, terraformType, request, model)
+	return a.UpsertRequest(ctx, fullTypeName, request, model)
 }
 
 type StringSchemaAttribute[Model any, Request any, Response any] struct {
@@ -353,7 +350,7 @@ type StringSchemaAttribute[Model any, Request any, Response any] struct {
 	ReadResponse        func(context.Context, string, string, Response, Model) (context.Context, Model, diag.Diagnostics)
 	ResourceExistence   AttributeExistence
 	Sensitive           bool
-	UpsertRequest       func(context.Context, string, string, Request, Model) (context.Context, Request, diag.Diagnostics)
+	UpsertRequest       func(context.Context, string, Request, Model) (context.Context, Request, diag.Diagnostics)
 	Validators          []validator.String
 }
 
@@ -400,7 +397,6 @@ func (a StringSchemaAttribute[Model, Request, Response]) ToResource() resourcesc
 func (a StringSchemaAttribute[Model, Request, Response]) Upsert(
 	ctx context.Context,
 	fullTypeName string,
-	terraformType string,
 	request Request,
 	model Model,
 ) (context.Context, Request, diag.Diagnostics) {
@@ -408,18 +404,17 @@ func (a StringSchemaAttribute[Model, Request, Response]) Upsert(
 		return ctx, request, diag.Diagnostics{}
 	}
 
-	return a.UpsertRequest(ctx, fullTypeName, terraformType, request, model)
+	return a.UpsertRequest(ctx, fullTypeName, request, model)
 }
 
 func UpsertRequestOptionBool[Model any](
 	get func(Model) types.Bool,
 	attribute string,
 	option string,
-) func(context.Context, string, string, map[string]json.RawMessage, Model) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+) func(context.Context, string, map[string]json.RawMessage, Model) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
 	return func(
 		ctx context.Context,
 		fullTypeName string,
-		terraformType string,
 		options map[string]json.RawMessage,
 		model Model,
 	) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
@@ -433,7 +428,7 @@ func UpsertRequestOptionBool[Model any](
 			return ctx, options, diagnostics
 		}
 
-		ctx = logger.SetFieldBool(ctx, fullTypeName, terraformType, attribute, str)
+		ctx = logger.SetFieldBool(ctx, fullTypeName, ResourceTerraformType, attribute, str)
 		options[option] = value
 		return ctx, options, diag.Diagnostics{}
 	}
@@ -443,11 +438,10 @@ func UpsertRequestOptionInt64[Model any](
 	get func(Model) types.Int64,
 	attribute string,
 	option string,
-) func(context.Context, string, string, map[string]json.RawMessage, Model) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+) func(context.Context, string, map[string]json.RawMessage, Model) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
 	return func(
 		ctx context.Context,
 		fullTypeName string,
-		terraformType string,
 		options map[string]json.RawMessage,
 		model Model,
 	) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
@@ -461,7 +455,7 @@ func UpsertRequestOptionInt64[Model any](
 			return ctx, options, diagnostics
 		}
 
-		ctx = logger.SetFieldInt64(ctx, fullTypeName, terraformType, attribute, str)
+		ctx = logger.SetFieldInt64(ctx, fullTypeName, ResourceTerraformType, attribute, str)
 		options[option] = value
 		return ctx, options, diag.Diagnostics{}
 	}
@@ -471,11 +465,10 @@ func UpsertRequestOptionSetString[Model any](
 	get func(Model) types.Set,
 	attribute string,
 	option string,
-) func(context.Context, string, string, map[string]json.RawMessage, Model) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+) func(context.Context, string, map[string]json.RawMessage, Model) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
 	return func(
 		ctx context.Context,
 		fullTypeName string,
-		terraformType string,
 		options map[string]json.RawMessage,
 		model Model,
 	) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
@@ -489,7 +482,7 @@ func UpsertRequestOptionSetString[Model any](
 			return ctx, options, diagnostics
 		}
 
-		ctx = logger.SetFieldSetString(ctx, fullTypeName, terraformType, attribute, str)
+		ctx = logger.SetFieldSetString(ctx, fullTypeName, ResourceTerraformType, attribute, str)
 		options[option] = value
 		return ctx, options, diag.Diagnostics{}
 	}
@@ -499,11 +492,10 @@ func UpsertRequestOptionString[Model any](
 	get func(Model) types.String,
 	attribute string,
 	option string,
-) func(context.Context, string, string, map[string]json.RawMessage, Model) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+) func(context.Context, string, map[string]json.RawMessage, Model) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
 	return func(
 		ctx context.Context,
 		fullTypeName string,
-		terraformType string,
 		options map[string]json.RawMessage,
 		model Model,
 	) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
@@ -517,7 +509,7 @@ func UpsertRequestOptionString[Model any](
 			return ctx, options, diagnostics
 		}
 
-		ctx = logger.SetFieldString(ctx, fullTypeName, terraformType, attribute, str)
+		ctx = logger.SetFieldString(ctx, fullTypeName, ResourceTerraformType, attribute, str)
 		options[option] = value
 		return ctx, options, diag.Diagnostics{}
 	}
