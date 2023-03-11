@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/logger"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/lucirpcglue"
 )
@@ -238,24 +237,6 @@ type deviceModel struct {
 	Name               types.String `tfsdk:"name"`
 	TXQueueLength      types.Int64  `tfsdk:"txqueuelen"`
 	Type               types.String `tfsdk:"type"`
-}
-
-func (m deviceModel) generateAPIBody(
-	ctx context.Context,
-	fullTypeName string,
-) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
-	tflog.Info(ctx, "Generating API request body")
-	var diagnostics diag.Diagnostics
-	allDiagnostics := diag.Diagnostics{}
-	options := map[string]json.RawMessage{}
-
-	tflog.Debug(ctx, "Handling attributes")
-	for _, attribute := range deviceSchemaAttributes {
-		ctx, options, diagnostics = attribute.Upsert(ctx, fullTypeName, options, m)
-		allDiagnostics.Append(diagnostics...)
-	}
-
-	return ctx, options, allDiagnostics
 }
 
 func deviceModelGetBridgePorts(model deviceModel) types.Set         { return model.BridgePorts }

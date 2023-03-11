@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/logger"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/lucirpcglue"
 )
@@ -165,24 +164,6 @@ type systemModel struct {
 	Timezone     types.String `tfsdk:"timezone"`
 	TTYLogin     types.Bool   `tfsdk:"ttylogin"`
 	Zonename     types.String `tfsdk:"zonename"`
-}
-
-func (m systemModel) generateAPIBody(
-	ctx context.Context,
-	fullTypeName string,
-) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
-	tflog.Info(ctx, "Generating API request body")
-	var diagnostics diag.Diagnostics
-	allDiagnostics := diag.Diagnostics{}
-	options := map[string]json.RawMessage{}
-
-	tflog.Debug(ctx, "Handling attributes")
-	for _, attribute := range systemSchemaAttributes {
-		ctx, options, diagnostics = attribute.Upsert(ctx, fullTypeName, options, m)
-		allDiagnostics.Append(diagnostics...)
-	}
-
-	return ctx, options, allDiagnostics
 }
 
 func systemModelGetConLogLevel(model systemModel) types.Int64  { return model.ConLogLevel }

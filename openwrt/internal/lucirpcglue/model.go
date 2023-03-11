@@ -10,6 +10,26 @@ import (
 	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
 )
 
+func GenerateUpsertBody[Model any](
+	ctx context.Context,
+	fullTypeName string,
+	model Model,
+	attributes map[string]SchemaAttribute[Model, map[string]json.RawMessage, map[string]json.RawMessage],
+) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+	tflog.Info(ctx, "Generating API request body")
+	var diagnostics diag.Diagnostics
+	allDiagnostics := diag.Diagnostics{}
+	options := map[string]json.RawMessage{}
+
+	tflog.Debug(ctx, "Handling attributes")
+	for _, attribute := range attributes {
+		ctx, options, diagnostics = attribute.Upsert(ctx, fullTypeName, options, model)
+		allDiagnostics.Append(diagnostics...)
+	}
+
+	return ctx, options, allDiagnostics
+}
+
 func ReadModel[Model any](
 	ctx context.Context,
 	fullTypeName string,
