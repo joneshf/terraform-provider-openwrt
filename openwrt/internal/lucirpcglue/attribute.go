@@ -25,8 +25,10 @@ const (
 )
 
 var (
-	_ validator.Bool  = requiresAttribute[any]{}
-	_ validator.Int64 = requiresAttribute[any]{}
+	_ validator.Bool   = requiresAttribute[any]{}
+	_ validator.Int64  = requiresAttribute[any]{}
+	_ validator.Set    = requiresAttribute[any]{}
+	_ validator.String = requiresAttribute[any]{}
 )
 
 type AttributeExistence int
@@ -562,6 +564,30 @@ func (a requiresAttribute[Value]) ValidateInt64(
 	ctx context.Context,
 	req validator.Int64Request,
 	res *validator.Int64Response,
+) {
+	diagnostics := a.validate(ctx, req.Config, req.Path, req.ConfigValue)
+	res.Diagnostics.Append(diagnostics...)
+	if res.Diagnostics.HasError() {
+		return
+	}
+}
+
+func (a requiresAttribute[Value]) ValidateSet(
+	ctx context.Context,
+	req validator.SetRequest,
+	res *validator.SetResponse,
+) {
+	diagnostics := a.validate(ctx, req.Config, req.Path, req.ConfigValue)
+	res.Diagnostics.Append(diagnostics...)
+	if res.Diagnostics.HasError() {
+		return
+	}
+}
+
+func (a requiresAttribute[Value]) ValidateString(
+	ctx context.Context,
+	req validator.StringRequest,
+	res *validator.StringResponse,
 ) {
 	diagnostics := a.validate(ctx, req.Config, req.Path, req.ConfigValue)
 	res.Diagnostics.Append(diagnostics...)
