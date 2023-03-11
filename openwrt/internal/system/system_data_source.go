@@ -66,14 +66,23 @@ func (d *systemDataSource) Read(
 	res *datasource.ReadResponse,
 ) {
 	tflog.Info(ctx, fmt.Sprintf("Reading %s data source", d.fullTypeName))
-	ctx, model, diagnostics := lucirpcglue.ReadModel(
+
+	tflog.Debug(ctx, "Retrieving values from config")
+	var model systemModel
+	diagnostics := req.Config.Get(ctx, &model)
+	res.Diagnostics.Append(diagnostics...)
+	if res.Diagnostics.HasError() {
+		return
+	}
+
+	ctx, model, diagnostics = lucirpcglue.ReadModel(
 		ctx,
 		d.fullTypeName,
 		d.terraformType,
 		d.client,
 		systemSchemaAttributes,
 		systemUCIConfig,
-		systemUCISection,
+		model.Id.ValueString(),
 	)
 	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {
