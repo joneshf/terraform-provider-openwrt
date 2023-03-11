@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/logger"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/lucirpcglue"
 )
@@ -77,33 +76,6 @@ var (
 		UpsertRequest:     lucirpcglue.UpsertRequestOptionBool(globalsModelGetPacketSteering, globalsPacketSteeringAttribute, globalsPacketSteeringUCIOption),
 	}
 )
-
-func readGlobalsModel(
-	ctx context.Context,
-	fullTypeName string,
-	terraformType string,
-	client lucirpc.Client,
-	sectionName string,
-) (context.Context, globalsModel, diag.Diagnostics) {
-	tflog.Info(ctx, "Reading globals model")
-	var (
-		allDiagnostics diag.Diagnostics
-		model          globalsModel
-	)
-
-	section, diagnostics := lucirpcglue.GetSection(ctx, client, globalsUCIConfig, sectionName)
-	allDiagnostics.Append(diagnostics...)
-	if allDiagnostics.HasError() {
-		return ctx, model, allDiagnostics
-	}
-
-	for _, attribute := range globalsSchemaAttributes {
-		ctx, model, diagnostics = attribute.Read(ctx, fullTypeName, terraformType, section, model)
-		allDiagnostics.Append(diagnostics...)
-	}
-
-	return ctx, model, diagnostics
-}
 
 type globalsModel struct {
 	Id             types.String `tfsdk:"id"`

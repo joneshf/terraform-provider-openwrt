@@ -90,11 +90,13 @@ func (d *globalsResource) Create(
 	}
 
 	tflog.Debug(ctx, "Reading updated section")
-	ctx, model, diagnostics = readGlobalsModel(
+	ctx, model, diagnostics = lucirpcglue.ReadModel(
 		ctx,
 		d.fullTypeName,
 		d.terraformType,
 		d.client,
+		globalsSchemaAttributes,
+		globalsUCIConfig,
 		id,
 	)
 	res.Diagnostics.Append(diagnostics...)
@@ -180,11 +182,13 @@ func (d *globalsResource) Read(
 		return
 	}
 
-	ctx, model, diagnostics = readGlobalsModel(
+	ctx, model, diagnostics = lucirpcglue.ReadModel(
 		ctx,
 		d.fullTypeName,
 		d.terraformType,
 		d.client,
+		globalsSchemaAttributes,
+		globalsUCIConfig,
 		model.Id.ValueString(),
 	)
 	res.Diagnostics.Append(diagnostics...)
@@ -256,11 +260,13 @@ func (d *globalsResource) Update(
 	}
 
 	tflog.Debug(ctx, "Reading updated section")
-	ctx, model, diagnostics = readGlobalsModel(
+	ctx, model, diagnostics = lucirpcglue.ReadModel(
 		ctx,
 		d.fullTypeName,
 		d.terraformType,
 		d.client,
+		globalsSchemaAttributes,
+		globalsUCIConfig,
 		id,
 	)
 	res.Diagnostics.Append(diagnostics...)

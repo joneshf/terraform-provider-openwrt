@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/logger"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/lucirpcglue"
 )
@@ -155,33 +154,6 @@ var (
 		UpsertRequest:     lucirpcglue.UpsertRequestOptionString(systemModelGetZonename, systemZonenameAttribute, systemZonenameUCIOption),
 	}
 )
-
-func readSystemModel(
-	ctx context.Context,
-	fullTypeName string,
-	terraformType string,
-	client lucirpc.Client,
-	sectionName string,
-) (context.Context, systemModel, diag.Diagnostics) {
-	tflog.Info(ctx, "Reading system model")
-	var (
-		allDiagnostics diag.Diagnostics
-		model          systemModel
-	)
-
-	section, diagnostics := lucirpcglue.GetSection(ctx, client, systemUCIConfig, sectionName)
-	allDiagnostics.Append(diagnostics...)
-	if allDiagnostics.HasError() {
-		return ctx, model, allDiagnostics
-	}
-
-	for _, attribute := range systemSchemaAttributes {
-		ctx, model, diagnostics = attribute.Read(ctx, fullTypeName, terraformType, section, model)
-		allDiagnostics.Append(diagnostics...)
-	}
-
-	return ctx, model, diagnostics
-}
 
 type systemModel struct {
 	ConLogLevel  types.Int64  `tfsdk:"conloglevel"`

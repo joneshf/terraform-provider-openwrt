@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/logger"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/lucirpcglue"
 )
@@ -284,30 +283,3 @@ func deviceModelSetMTU6(model *deviceModel, value types.Int64)          { model.
 func deviceModelSetName(model *deviceModel, value types.String)         { model.Name = value }
 func deviceModelSetTXQueueLength(model *deviceModel, value types.Int64) { model.TXQueueLength = value }
 func deviceModelSetType(model *deviceModel, value types.String)         { model.Type = value }
-
-func readDeviceModel(
-	ctx context.Context,
-	fullTypeName string,
-	terraformType string,
-	client lucirpc.Client,
-	sectionName string,
-) (context.Context, deviceModel, diag.Diagnostics) {
-	tflog.Info(ctx, "Reading device model")
-	var (
-		allDiagnostics diag.Diagnostics
-		model          deviceModel
-	)
-
-	section, diagnostics := lucirpcglue.GetSection(ctx, client, deviceUCIConfig, sectionName)
-	allDiagnostics.Append(diagnostics...)
-	if allDiagnostics.HasError() {
-		return ctx, model, allDiagnostics
-	}
-
-	for _, attribute := range deviceSchemaAttributes {
-		ctx, model, diagnostics = attribute.Read(ctx, fullTypeName, terraformType, section, model)
-		allDiagnostics.Append(diagnostics...)
-	}
-
-	return ctx, model, diagnostics
-}

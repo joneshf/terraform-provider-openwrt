@@ -90,11 +90,13 @@ func (d *deviceResource) Create(
 	}
 
 	tflog.Debug(ctx, "Reading updated section")
-	ctx, model, diagnostics = readDeviceModel(
+	ctx, model, diagnostics = lucirpcglue.ReadModel(
 		ctx,
 		d.fullTypeName,
 		d.terraformType,
 		d.client,
+		deviceSchemaAttributes,
+		deviceUCIConfig,
 		id,
 	)
 	res.Diagnostics.Append(diagnostics...)
@@ -180,11 +182,13 @@ func (d *deviceResource) Read(
 		return
 	}
 
-	ctx, model, diagnostics = readDeviceModel(
+	ctx, model, diagnostics = lucirpcglue.ReadModel(
 		ctx,
 		d.fullTypeName,
 		d.terraformType,
 		d.client,
+		deviceSchemaAttributes,
+		deviceUCIConfig,
 		model.Id.ValueString(),
 	)
 	res.Diagnostics.Append(diagnostics...)
@@ -256,11 +260,13 @@ func (d *deviceResource) Update(
 	}
 
 	tflog.Debug(ctx, "Reading updated section")
-	ctx, model, diagnostics = readDeviceModel(
+	ctx, model, diagnostics = lucirpcglue.ReadModel(
 		ctx,
 		d.fullTypeName,
 		d.terraformType,
 		d.client,
+		deviceSchemaAttributes,
+		deviceUCIConfig,
 		id,
 	)
 	res.Diagnostics.Append(diagnostics...)
