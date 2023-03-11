@@ -78,7 +78,7 @@ func (d *systemResource) Create(
 	}
 
 	id := model.Id.ValueString()
-	ctx = tflog.SetField(ctx, "section", fmt.Sprintf("%s.%s", systemUCIConfig, systemUCISection))
+	ctx = tflog.SetField(ctx, "section", fmt.Sprintf("%s.%s", systemUCIConfig, id))
 	diagnostics = lucirpcglue.CreateSection(
 		ctx,
 		d.client,
@@ -252,7 +252,7 @@ func (d *systemResource) Update(
 	}
 
 	id := model.Id.ValueString()
-	ctx = tflog.SetField(ctx, "section", fmt.Sprintf("%s.%s", systemUCIConfig, systemUCISection))
+	ctx = tflog.SetField(ctx, "section", fmt.Sprintf("%s.%s", systemUCIConfig, id))
 	diagnostics = lucirpcglue.UpdateSection(
 		ctx,
 		d.client,
