@@ -86,20 +86,19 @@ type globalsModel struct {
 func (m globalsModel) generateAPIBody(
 	ctx context.Context,
 	fullTypeName string,
-) (context.Context, string, map[string]json.RawMessage, diag.Diagnostics) {
+) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
 	tflog.Info(ctx, "Generating API request body")
 	var diagnostics diag.Diagnostics
 	allDiagnostics := diag.Diagnostics{}
 	options := map[string]json.RawMessage{}
 
 	tflog.Debug(ctx, "Handling attributes")
-	id := m.Id.ValueString()
 	for _, attribute := range globalsSchemaAttributes {
 		ctx, options, diagnostics = attribute.Upsert(ctx, fullTypeName, lucirpcglue.ResourceTerraformType, options, m)
 		allDiagnostics.Append(diagnostics...)
 	}
 
-	return ctx, id, options, allDiagnostics
+	return ctx, options, allDiagnostics
 }
 
 func globalsModelGetPacketSteering(model globalsModel) types.Bool { return model.PacketSteering }

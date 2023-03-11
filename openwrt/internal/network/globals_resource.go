@@ -66,7 +66,7 @@ func (d *globalsResource) Create(
 		return
 	}
 
-	ctx, id, options, diagnostics := model.generateAPIBody(
+	ctx, options, diagnostics := model.generateAPIBody(
 		ctx,
 		d.fullTypeName,
 	)
@@ -75,6 +75,7 @@ func (d *globalsResource) Create(
 		return
 	}
 
+	id := model.Id.ValueString()
 	ctx = tflog.SetField(ctx, "section", fmt.Sprintf("%s.%s", globalsUCIConfig, id))
 	diagnostics = lucirpcglue.CreateSection(
 		ctx,
@@ -237,7 +238,7 @@ func (d *globalsResource) Update(
 		return
 	}
 
-	ctx, id, options, diagnostics := model.generateAPIBody(
+	ctx, options, diagnostics := model.generateAPIBody(
 		ctx,
 		d.fullTypeName,
 	)
@@ -246,6 +247,7 @@ func (d *globalsResource) Update(
 		return
 	}
 
+	id := model.Id.ValueString()
 	ctx = tflog.SetField(ctx, "section", fmt.Sprintf("%s.%s", globalsUCIConfig, id))
 	diagnostics = lucirpcglue.UpdateSection(
 		ctx,
