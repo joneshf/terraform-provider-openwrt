@@ -66,9 +66,11 @@ func (d *systemResource) Create(
 		return
 	}
 
-	ctx, options, diagnostics := model.generateAPIBody(
+	ctx, options, diagnostics := lucirpcglue.GenerateUpsertBody(
 		ctx,
 		d.fullTypeName,
+		model,
+		systemSchemaAttributes,
 	)
 	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {
@@ -238,9 +240,11 @@ func (d *systemResource) Update(
 		return
 	}
 
-	ctx, options, diagnostics := model.generateAPIBody(
+	ctx, options, diagnostics := lucirpcglue.GenerateUpsertBody(
 		ctx,
 		d.fullTypeName,
+		model,
+		systemSchemaAttributes,
 	)
 	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {

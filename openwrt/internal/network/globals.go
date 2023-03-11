@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/logger"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/lucirpcglue"
 )
@@ -80,24 +79,6 @@ type globalsModel struct {
 	Id             types.String `tfsdk:"id"`
 	PacketSteering types.Bool   `tfsdk:"packet_steering"`
 	ULAPrefix      types.String `tfsdk:"ula_prefix"`
-}
-
-func (m globalsModel) generateAPIBody(
-	ctx context.Context,
-	fullTypeName string,
-) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
-	tflog.Info(ctx, "Generating API request body")
-	var diagnostics diag.Diagnostics
-	allDiagnostics := diag.Diagnostics{}
-	options := map[string]json.RawMessage{}
-
-	tflog.Debug(ctx, "Handling attributes")
-	for _, attribute := range globalsSchemaAttributes {
-		ctx, options, diagnostics = attribute.Upsert(ctx, fullTypeName, options, m)
-		allDiagnostics.Append(diagnostics...)
-	}
-
-	return ctx, options, allDiagnostics
 }
 
 func globalsModelGetPacketSteering(model globalsModel) types.Bool { return model.PacketSteering }
