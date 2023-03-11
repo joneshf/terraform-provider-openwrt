@@ -75,11 +75,13 @@ func (d *deviceDataSource) Read(
 		return
 	}
 
-	ctx, model, diagnostics = readDeviceModel(
+	ctx, model, diagnostics = lucirpcglue.ReadModel(
 		ctx,
 		d.fullTypeName,
 		d.terraformType,
 		d.client,
+		deviceSchemaAttributes,
+		deviceUCIConfig,
 		model.Id.ValueString(),
 	)
 	res.Diagnostics.Append(diagnostics...)

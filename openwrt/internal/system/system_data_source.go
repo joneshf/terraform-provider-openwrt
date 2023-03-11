@@ -66,11 +66,13 @@ func (d *systemDataSource) Read(
 	res *datasource.ReadResponse,
 ) {
 	tflog.Info(ctx, fmt.Sprintf("Reading %s data source", d.fullTypeName))
-	ctx, model, diagnostics := readSystemModel(
+	ctx, model, diagnostics := lucirpcglue.ReadModel(
 		ctx,
 		d.fullTypeName,
 		d.terraformType,
 		d.client,
+		systemSchemaAttributes,
+		systemUCIConfig,
 		systemUCISection,
 	)
 	res.Diagnostics.Append(diagnostics...)

@@ -90,11 +90,13 @@ func (d *systemResource) Create(
 	}
 
 	tflog.Debug(ctx, "Reading updated section")
-	ctx, model, diagnostics = readSystemModel(
+	ctx, model, diagnostics = lucirpcglue.ReadModel(
 		ctx,
 		d.fullTypeName,
 		d.terraformType,
 		d.client,
+		systemSchemaAttributes,
+		systemUCIConfig,
 		id,
 	)
 	res.Diagnostics.Append(diagnostics...)
@@ -180,11 +182,13 @@ func (d *systemResource) Read(
 		return
 	}
 
-	ctx, model, diagnostics = readSystemModel(
+	ctx, model, diagnostics = lucirpcglue.ReadModel(
 		ctx,
 		d.fullTypeName,
 		d.terraformType,
 		d.client,
+		systemSchemaAttributes,
+		systemUCIConfig,
 		model.Id.ValueString(),
 	)
 	res.Diagnostics.Append(diagnostics...)
@@ -256,11 +260,13 @@ func (d *systemResource) Update(
 	}
 
 	tflog.Debug(ctx, "Reading updated section")
-	ctx, model, diagnostics = readSystemModel(
+	ctx, model, diagnostics = lucirpcglue.ReadModel(
 		ctx,
 		d.fullTypeName,
 		d.terraformType,
 		d.client,
+		systemSchemaAttributes,
+		systemUCIConfig,
 		id,
 	)
 	res.Diagnostics.Append(diagnostics...)
