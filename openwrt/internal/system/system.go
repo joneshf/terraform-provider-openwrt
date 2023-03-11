@@ -97,7 +97,6 @@ var (
 		UpsertRequest: func(
 			ctx context.Context,
 			fullTypeName string,
-			terraformType string,
 			options map[string]json.RawMessage,
 			model systemModel,
 		) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
@@ -179,7 +178,7 @@ func (m systemModel) generateAPIBody(
 
 	tflog.Debug(ctx, "Handling attributes")
 	for _, attribute := range systemSchemaAttributes {
-		ctx, options, diagnostics = attribute.Upsert(ctx, fullTypeName, lucirpcglue.ResourceTerraformType, options, m)
+		ctx, options, diagnostics = attribute.Upsert(ctx, fullTypeName, options, m)
 		allDiagnostics.Append(diagnostics...)
 	}
 
