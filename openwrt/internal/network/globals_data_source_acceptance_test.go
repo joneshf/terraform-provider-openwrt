@@ -18,6 +18,8 @@ import (
 )
 
 func TestNetworkGlobalsDataSourceAcceptance(t *testing.T) {
+	t.Parallel()
+
 	ctx := context.Background()
 	openWrt, hostname, port := acceptancetest.RunOpenWrtServer(
 		ctx,
@@ -35,7 +37,7 @@ func TestNetworkGlobalsDataSourceAcceptance(t *testing.T) {
 	assert.NilError(t, err)
 	assert.Check(t, ok)
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){
 			"openwrt": providerserver.NewProtocol6WithError(openwrt.New("test")),
 		},

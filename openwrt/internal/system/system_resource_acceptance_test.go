@@ -15,6 +15,8 @@ import (
 )
 
 func TestSystemSystemResourceAcceptance(t *testing.T) {
+	t.Parallel()
+
 	ctx := context.Background()
 	openWrt, hostname, port := acceptancetest.RunOpenWrtServer(
 		ctx,
@@ -85,7 +87,7 @@ resource "openwrt_system_system" "this" {
 		),
 	}
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){
 			"openwrt": providerserver.NewProtocol6WithError(openwrt.New("test")),
 		},
