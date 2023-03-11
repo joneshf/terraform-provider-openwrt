@@ -3,7 +3,9 @@ package lucirpcglue
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/helpers/validatordiag"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -20,6 +22,11 @@ const (
 	NoValidation
 	Optional
 	Required
+)
+
+var (
+	_ validator.Bool  = requiresAttribute[any]{}
+	_ validator.Int64 = requiresAttribute[any]{}
 )
 
 type AttributeExistence int
@@ -238,6 +245,27 @@ func ReadResponseOptionString[Model any](
 		set(&model, value)
 		return ctx, model, diagnostics
 	}
+}
+func RequiresAttributeEqualBool(
+	expression path.Expression,
+	expected bool,
+) requiresAttribute[bool] {
+	return requiresAttributeEqual(
+		types.BoolType,
+		expression,
+		expected,
+	)
+}
+
+func RequiresAttributeEqualString(
+	expression path.Expression,
+	expected string,
+) requiresAttribute[string] {
+	return requiresAttributeEqual(
+		types.StringType,
+		expression,
+		expected,
+	)
 }
 
 type SchemaAttribute[Model any, Request any, Response any] interface {
@@ -502,6 +530,129 @@ func hasValue(
 	attribute attributeHasValue,
 ) bool {
 	return !attribute.IsNull() && !attribute.IsUnknown()
+}
+
+type requiresAttribute[Value any] struct {
+	attrType   attr.Type
+	expected   Value
+	expression path.Expression
+}
+
+func (a requiresAttribute[Value]) Description(ctx context.Context) string {
+	return a.MarkdownDescription(ctx)
+}
+
+func (a requiresAttribute[Value]) MarkdownDescription(ctx context.Context) string {
+	return fmt.Sprintf("Ensures that if an attribute is set, %q is also set to %v", a.expression, a.expected)
+}
+
+func (a requiresAttribute[Value]) ValidateBool(
+	ctx context.Context,
+	req validator.BoolRequest,
+	res *validator.BoolResponse,
+) {
+	diagnostics := a.validate(ctx, req.Config, req.Path, req.ConfigValue)
+	res.Diagnostics.Append(diagnostics...)
+	if res.Diagnostics.HasError() {
+		return
+	}
+}
+
+func (a requiresAttribute[Value]) ValidateInt64(
+	ctx context.Context,
+	req validator.Int64Request,
+	res *validator.Int64Response,
+) {
+	diagnostics := a.validate(ctx, req.Config, req.Path, req.ConfigValue)
+	res.Diagnostics.Append(diagnostics...)
+	if res.Diagnostics.HasError() {
+		return
+	}
+}
+
+func (a requiresAttribute[Value]) validate(
+	ctx context.Context,
+	config tfsdk.Config,
+	requestPath path.Path,
+	configValue interface{ IsNull() bool },
+) (allDiagnostics diag.Diagnostics) {
+	if configValue.IsNull() {
+		return
+	}
+
+	matchedPaths, diagnostics := config.PathMatches(ctx, a.expression)
+	allDiagnostics.Append(diagnostics...)
+	if allDiagnostics.HasError() {
+		return
+	}
+
+	for _, matchedPath := range matchedPaths {
+		if matchedPath.Equal(requestPath) {
+			allDiagnostics.Append(
+				validatordiag.BugInProviderDiagnostic(
+					fmt.Sprintf("Attribute %q cannot require itself to have a specific value", requestPath),
+				),
+			)
+			continue
+		}
+
+		var actual attr.Value
+		diagnostics = config.GetAttribute(ctx, matchedPath, &actual)
+		allDiagnostics.Append(diagnostics...)
+		if allDiagnostics.HasError() {
+			continue
+		}
+
+		if actual.IsUnknown() {
+			// Ignore this value until it is known.
+			continue
+		}
+
+		if actual.IsNull() {
+			allDiagnostics.Append(
+				validatordiag.InvalidAttributeCombinationDiagnostic(
+					requestPath,
+					fmt.Sprintf("Attribute %q must be %v when %q is specified, but %q was not specified", matchedPath, a.expected, requestPath, matchedPath),
+				),
+			)
+			continue
+		}
+
+		var expected attr.Value
+		diagnostics = tfsdk.ValueFrom(ctx, a.expected, a.attrType, &expected)
+		allDiagnostics.Append(diagnostics...)
+		if allDiagnostics.HasError() {
+			continue
+		}
+
+		if !actual.Equal(expected) {
+			allDiagnostics.Append(
+				validatordiag.InvalidAttributeCombinationDiagnostic(
+					requestPath,
+					fmt.Sprintf("Attribute %q must be %v when %q is specified, but %q was %v", matchedPath, expected, requestPath, matchedPath, actual),
+				),
+			)
+			continue
+		}
+	}
+
+	if allDiagnostics.HasError() {
+		return
+	}
+
+	return
+}
+
+func requiresAttributeEqual[Value any](
+	attrType attr.Type,
+	expression path.Expression,
+	expected Value,
+) requiresAttribute[Value] {
+	return requiresAttribute[Value]{
+		attrType:   attrType,
+		expected:   expected,
+		expression: expression,
+	}
 }
 
 func serializeBool(
