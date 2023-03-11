@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	resourceschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/logger"
 )
@@ -202,6 +204,24 @@ func ReadResponseOptionInt64[Model any](
 	}
 }
 
+func ReadResponseOptionSetString[Model any](
+	set func(*Model, types.Set),
+	attribute string,
+	option string,
+) func(context.Context, string, string, map[string]json.RawMessage, Model) (context.Context, Model, diag.Diagnostics) {
+	return func(
+		ctx context.Context,
+		fullTypeName string,
+		terraformType string,
+		section map[string]json.RawMessage,
+		model Model,
+	) (context.Context, Model, diag.Diagnostics) {
+		ctx, value, diagnostics := GetOptionSetString(ctx, fullTypeName, terraformType, section, path.Root(attribute), option)
+		set(&model, value)
+		return ctx, model, diagnostics
+	}
+}
+
 func ReadResponseOptionString[Model any](
 	set func(*Model, types.String),
 	attribute string,
@@ -225,6 +245,74 @@ type SchemaAttribute[Model any, Request any, Response any] interface {
 	ToDataSource() datasourceschema.Attribute
 	ToResource() resourceschema.Attribute
 	Upsert(context.Context, string, string, Request, Model) (context.Context, Request, diag.Diagnostics)
+}
+
+type SetStringSchemaAttribute[Model any, Request any, Response any] struct {
+	DataSourceExistence AttributeExistence
+	DeprecationMessage  string
+	Description         string
+	MarkdownDescription string
+	ReadResponse        func(context.Context, string, string, Response, Model) (context.Context, Model, diag.Diagnostics)
+	ResourceExistence   AttributeExistence
+	Sensitive           bool
+	UpsertRequest       func(context.Context, string, string, Request, Model) (context.Context, Request, diag.Diagnostics)
+	Validators          []validator.Set
+}
+
+func (a SetStringSchemaAttribute[Model, Request, Response]) Read(
+	ctx context.Context,
+	fullTypeName string,
+	terraformType string,
+	response Response,
+	model Model,
+) (context.Context, Model, diag.Diagnostics) {
+	if a.ReadResponse == nil {
+		return ctx, model, diag.Diagnostics{}
+	}
+
+	return a.ReadResponse(ctx, fullTypeName, terraformType, response, model)
+}
+
+func (a SetStringSchemaAttribute[Model, Request, Response]) ToDataSource() datasourceschema.Attribute {
+	return datasourceschema.SetAttribute{
+		Computed:            a.DataSourceExistence.ToComputed(),
+		DeprecationMessage:  a.DeprecationMessage,
+		Description:         a.Description,
+		ElementType:         types.StringType,
+		MarkdownDescription: a.MarkdownDescription,
+		Optional:            a.DataSourceExistence.ToOptional(),
+		Required:            a.DataSourceExistence.ToRequired(),
+		Sensitive:           a.Sensitive,
+		Validators:          a.Validators,
+	}
+}
+
+func (a SetStringSchemaAttribute[Model, Request, Response]) ToResource() resourceschema.Attribute {
+	return resourceschema.SetAttribute{
+		Computed:            a.ResourceExistence.ToComputed(),
+		DeprecationMessage:  a.DeprecationMessage,
+		Description:         a.Description,
+		ElementType:         types.StringType,
+		MarkdownDescription: a.MarkdownDescription,
+		Optional:            a.ResourceExistence.ToOptional(),
+		Required:            a.ResourceExistence.ToRequired(),
+		Sensitive:           a.Sensitive,
+		Validators:          a.Validators,
+	}
+}
+
+func (a SetStringSchemaAttribute[Model, Request, Response]) Upsert(
+	ctx context.Context,
+	fullTypeName string,
+	terraformType string,
+	request Request,
+	model Model,
+) (context.Context, Request, diag.Diagnostics) {
+	if a.UpsertRequest == nil {
+		return ctx, request, diag.Diagnostics{}
+	}
+
+	return a.UpsertRequest(ctx, fullTypeName, terraformType, request, model)
 }
 
 type StringSchemaAttribute[Model any, Request any, Response any] struct {
@@ -349,6 +437,34 @@ func UpsertRequestOptionInt64[Model any](
 	}
 }
 
+func UpsertRequestOptionSetString[Model any](
+	get func(Model) types.Set,
+	attribute string,
+	option string,
+) func(context.Context, string, string, map[string]json.RawMessage, Model) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+	return func(
+		ctx context.Context,
+		fullTypeName string,
+		terraformType string,
+		options map[string]json.RawMessage,
+		model Model,
+	) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+		str := get(model)
+		if !hasValue(str) {
+			return ctx, options, diag.Diagnostics{}
+		}
+
+		value, diagnostics := serializeSetString(ctx, str, path.Root(attribute))
+		if diagnostics.HasError() {
+			return ctx, options, diagnostics
+		}
+
+		ctx = logger.SetFieldSetString(ctx, fullTypeName, terraformType, attribute, str)
+		options[option] = value
+		return ctx, options, diag.Diagnostics{}
+	}
+}
+
 func UpsertRequestOptionString[Model any](
 	get func(Model) types.String,
 	attribute string,
@@ -422,6 +538,44 @@ func serializeInt64(
 	}
 
 	return json.RawMessage(value), diagnostics
+}
+
+func serializeSetString(
+	ctx context.Context,
+	attribute interface{ Elements() []attr.Value },
+	attributePath path.Path,
+) (json.RawMessage, diag.Diagnostics) {
+	allDiagnostics := diag.Diagnostics{}
+	elements := attribute.Elements()
+	values := []string{}
+	for _, element := range elements {
+		var value string
+		diagnostics := tfsdk.ValueAs(ctx, element, &value)
+		allDiagnostics.Append(diagnostics...)
+		if allDiagnostics.HasError() {
+			// We don't want to exit early.
+			// We want to continue to accumulate diagnostics.
+			continue
+		}
+
+		values = append(values, value)
+	}
+
+	if allDiagnostics.HasError() {
+		return nil, allDiagnostics
+	}
+
+	value, err := json.Marshal(values)
+	if err != nil {
+		allDiagnostics.AddAttributeError(
+			attributePath,
+			"Could not serialize",
+			err.Error(),
+		)
+		return nil, allDiagnostics
+	}
+
+	return json.RawMessage(value), allDiagnostics
 }
 
 func serializeString(

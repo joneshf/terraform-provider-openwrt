@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/logger"
 )
@@ -107,6 +109,61 @@ func GetOptionInt64(
 	result = types.Int64Value(int64(value))
 	ctx = logger.SetFieldInt64(ctx, fullTypeName, terraformType, option, result)
 	return ctx, result, diagnostics
+}
+
+// GetOptionSetString attempts to parse the given option from the section as a []string.
+// Any diagnostic information found in the process (including errors) is returned.
+func GetOptionSetString(
+	ctx context.Context,
+	fullTypeName string,
+	terraformType string,
+	section map[string]json.RawMessage,
+	attribute path.Path,
+	option string,
+) (context.Context, types.Set, diag.Diagnostics) {
+	allDiagnostics := diag.Diagnostics{}
+	result := types.SetNull(types.StringType)
+	raw, ok := section[option]
+	if !ok {
+		return ctx, result, allDiagnostics
+	}
+
+	var values []string
+	err := json.Unmarshal(raw, &values)
+	if err != nil {
+		allDiagnostics.AddAttributeError(
+			attribute,
+			fmt.Sprintf("unable to parse option: %q", option),
+			err.Error(),
+		)
+		return ctx, result, allDiagnostics
+	}
+
+	var attrValues []attr.Value
+	for _, value := range values {
+		var attrValue attr.Value
+		diagnostics := tfsdk.ValueFrom(ctx, value, types.StringType, &attrValue)
+		allDiagnostics.Append(diagnostics...)
+		if allDiagnostics.HasError() {
+			// We don't want to exit early.
+			// We want to continue to accumulate diagnostics.
+			continue
+		}
+
+		attrValues = append(attrValues, attrValue)
+	}
+
+	if allDiagnostics.HasError() {
+		return ctx, result, allDiagnostics
+	}
+
+	result, allDiagnostics = types.SetValue(types.StringType, attrValues)
+	if allDiagnostics.HasError() {
+		return ctx, result, allDiagnostics
+	}
+
+	ctx = logger.SetFieldSetString(ctx, fullTypeName, terraformType, option, result)
+	return ctx, result, allDiagnostics
 }
 
 // GetOptionString attempts to parse the given option from the section as a string.
