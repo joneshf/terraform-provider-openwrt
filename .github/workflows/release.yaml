@@ -24,8 +24,11 @@ jobs:
       - name: Cache Nix
         uses: actions/cache@v3.3.0
         with:
-          key: ${{ runner.os }}-${{ hashfiles('flake.nix') }}
+          key: ${{ runner.os }}-nix-${{ hashfiles('flake.nix') }}
           path: ~/nix
+          restore-keys: |
+            ${{ runner.os }}-nix-${{ hashfiles('flake.nix') }}
+            ${{ runner.os }}-nix-
       - name: Import GPG
         uses: crazy-max/ghaction-import-gpg@v5.2.0
         id: import_gpg
