@@ -11,6 +11,6 @@ func NewSystemResource() resource.Resource {
 		systemSchemaAttributes,
 		systemSchemaDescription,
 		systemUCIConfig,
-		systemUCISystemType,
+		systemUCIType,
 	)
 }
