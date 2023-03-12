@@ -14,4 +14,4 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v19
       - name: Test
-        run: nix-shell --run 'make test'
+        run: nix develop . --command make test
