@@ -18,7 +18,5 @@ jobs:
         with:
           key: ${{ runner.os }}-${{ hashfiles('flake.nix') }}
           path: ~/nix
-      - name: Prime nix dependencies
-        run: nix --store ~/nix develop . --command echo 'primed nix dependencies'
       - name: Test
         run: nix --store ~/nix develop . --command make test
