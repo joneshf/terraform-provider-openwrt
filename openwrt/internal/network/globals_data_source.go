@@ -11,6 +11,6 @@ func NewGlobalsDataSource() datasource.DataSource {
 		globalsSchemaAttributes,
 		globalsSchemaDescription,
 		globalsUCIConfig,
-		globalsUCIGlobalsType,
+		globalsUCIType,
 	)
 }

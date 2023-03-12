@@ -13,8 +13,8 @@ const (
 
 	globalsSchemaDescription = "Contains interface-independent options affecting the network configuration in general."
 
-	globalsUCIConfig      = "network"
-	globalsUCIGlobalsType = "globals"
+	globalsUCIConfig = "network"
+	globalsUCIType   = "globals"
 
 	globalsULAPrefixAttribute = "ula_prefix"
 	globalsULAPrefixUCIOption = "ula_prefix"

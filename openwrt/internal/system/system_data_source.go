@@ -11,6 +11,6 @@ func NewSystemDataSource() datasource.DataSource {
 		systemSchemaAttributes,
 		systemSchemaDescription,
 		systemUCIConfig,
-		systemUCISystemType,
+		systemUCIType,
 	)
 }

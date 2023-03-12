@@ -11,6 +11,6 @@ func NewGlobalsResource() resource.Resource {
 		globalsSchemaAttributes,
 		globalsSchemaDescription,
 		globalsUCIConfig,
-		globalsUCIGlobalsType,
+		globalsUCIType,
 	)
 }
