@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -78,6 +79,65 @@ func TestOpenWrtProviderConfigureConnectsWithoutError(t *testing.T) {
 				"port":     tftypes.NewValue(tftypes.Number, port),
 				"scheme":   tftypes.NewValue(tftypes.String, acceptancetest.Scheme),
 				"username": tftypes.NewValue(tftypes.String, acceptancetest.Username),
+			},
+		),
+	}
+	req := provider.ConfigureRequest{
+		Config: config,
+	}
+	res := &provider.ConfigureResponse{}
+
+	// When
+	openWrtProvider.Configure(ctx, req, res)
+
+	// Then
+	assert.DeepEqual(t, res.Diagnostics, diag.Diagnostics{})
+}
+
+func TestOpenWrtProviderConfigureConnectsWithoutErrorWithEnvironmentVariables(t *testing.T) {
+	t.Parallel()
+
+	// Given
+	ctx := context.Background()
+	openWrt, hostname, port := acceptancetest.RunOpenWrtServer(
+		ctx,
+		*dockerPool,
+		t,
+	)
+	defer openWrt.Close()
+	env := map[string]string{
+		"OPENWRT_HOSTNAME": hostname,
+		"OPENWRT_PASSWORD": acceptancetest.Password,
+		"OPENWRT_PORT":     strconv.Itoa(int(port)),
+		"OPENWRT_SCHEME":   acceptancetest.Scheme,
+		"OPENWRT_USERNAME": acceptancetest.Username,
+	}
+	lookupEnv := func(key string) (string, bool) {
+		value, ok := env[key]
+		return value, ok
+	}
+	openWrtProvider := openwrt.New("test", lookupEnv)
+	schemaReq := provider.SchemaRequest{}
+	schemaRes := &provider.SchemaResponse{}
+	openWrtProvider.Schema(ctx, schemaReq, schemaRes)
+	config := tfsdk.Config{
+		Schema: schemaRes.Schema,
+		Raw: tftypes.NewValue(
+			tftypes.Object{
+				AttributeTypes: map[string]tftypes.Type{
+					"hostname": tftypes.String,
+					"password": tftypes.String,
+					"port":     tftypes.Number,
+					"scheme":   tftypes.String,
+					"username": tftypes.String,
+				},
+			},
+			map[string]tftypes.Value{
+				"hostname": tftypes.NewValue(tftypes.String, nil),
+				"password": tftypes.NewValue(tftypes.String, nil),
+				"port":     tftypes.NewValue(tftypes.Number, nil),
+				"scheme":   tftypes.NewValue(tftypes.String, nil),
+				"username": tftypes.NewValue(tftypes.String, nil),
 			},
 		),
 	}
