@@ -29,6 +29,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nix-${{ hashfiles('flake.lock', 'flake.nix') }}
             ${{ runner.os }}-nix-
+      - name: Cache Go
+        uses: actions/cache@v3.3.0
+        with:
+          # We hash both `go.mod` in addition to `go.sum` because the version of go is only in `go.mod`.
+          key: ${{ runner.os }}-go-${{ hashfiles('go.mod', 'go.sum') }}
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          restore-keys: |
+            ${{ runner.os }}-go-${{ hashfiles('go.mod', 'go.sum') }}
+            ${{ runner.os }}-go-
       - name: Import GPG
         uses: crazy-max/ghaction-import-gpg@v5.2.0
         id: import_gpg
