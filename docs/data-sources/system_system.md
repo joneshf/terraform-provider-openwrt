@@ -32,7 +32,7 @@ output "system_system" {
 
 ### Required
 
-- `id` (String) Placeholder identifier attribute.
+- `id` (String) Name of the section. This name is only used when interacting with UCI directly.
 
 ### Read-Only
 

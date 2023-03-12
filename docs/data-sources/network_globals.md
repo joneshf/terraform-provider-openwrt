@@ -32,7 +32,7 @@ output "network_globals" {
 
 ### Required
 
-- `id` (String) Name of the section.
+- `id` (String) Name of the section. This name is only used when interacting with UCI directly.
 
 ### Read-Only
 
