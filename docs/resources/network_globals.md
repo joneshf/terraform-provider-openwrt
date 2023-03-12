@@ -32,4 +32,13 @@ resource "openwrt_network_globals" "this" {
 - `packet_steering` (Boolean) Use every CPU to handle packet traffic.
 - `ula_prefix` (String) IPv6 ULA prefix for this device.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+# There should only be one `network.globals` config.
+# It seems to default to the UCI name of `globals`.
+
+terraform import openwrt_network_globals.this globals
+```
