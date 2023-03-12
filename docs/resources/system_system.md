@@ -39,4 +39,12 @@ resource "openwrt_system_system" "this" {
 - `ttylogin` (Boolean) Require authentication for local users to log in the system.
 - `zonename` (String) The IANA/Olson time zone string. This corresponds to "Timezone" in LuCI. See: https://github.com/openwrt/luci/blob/cd82ccacef78d3bb8b8af6b87dabb9e892e2b2aa/modules/luci-base/luasrc/sys/zoneinfo/tzdata.lua.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+# Every `system.system` seems to have the same UCI name of `cfg01e48a`
+
+terraform import openwrt_system_system.this cfg01e48a
+```
