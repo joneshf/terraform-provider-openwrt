@@ -1,19 +1,13 @@
 package network
 
 import (
-	"context"
 	"encoding/json"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/logger"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/lucirpcglue"
 )
 
 const (
-	globalsIdAttribute  = "id"
-	globalsIdUCISection = ".name"
-
 	globalsPacketSteeringAttribute = "packet_steering"
 	globalsPacketSteeringUCIOption = "packet_steering"
 
@@ -28,36 +22,10 @@ const (
 )
 
 var (
-	globalsIdSchemaAttribute = lucirpcglue.StringSchemaAttribute[globalsModel, map[string]json.RawMessage, map[string]json.RawMessage]{
-		DataSourceExistence: lucirpcglue.Required,
-		Description:         "Name of the section.",
-		ReadResponse: func(
-			ctx context.Context,
-			fullTypeName string,
-			terraformType string,
-			section map[string]json.RawMessage,
-			model globalsModel,
-		) (context.Context, globalsModel, diag.Diagnostics) {
-			ctx, value, diagnostics := lucirpcglue.GetMetadataString(ctx, fullTypeName, terraformType, section, globalsIdUCISection)
-			model.Id = value
-			return ctx, model, diagnostics
-		},
-		ResourceExistence: lucirpcglue.Required,
-		UpsertRequest: func(
-			ctx context.Context,
-			fullTypeName string,
-			options map[string]json.RawMessage,
-			model globalsModel,
-		) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
-			ctx = logger.SetFieldString(ctx, fullTypeName, lucirpcglue.ResourceTerraformType, globalsIdAttribute, model.Id)
-			return ctx, options, diag.Diagnostics{}
-		},
-	}
-
 	globalsSchemaAttributes = map[string]lucirpcglue.SchemaAttribute[globalsModel, map[string]json.RawMessage, map[string]json.RawMessage]{
-		globalsIdAttribute:             globalsIdSchemaAttribute,
 		globalsULAPrefixAttribute:      globalsULAPrefixSchemaAttribute,
 		globalsPacketSteeringAttribute: globalsPacketSteeringSchemaAttribute,
+		lucirpcglue.IdAttribute:        lucirpcglue.IdSchemaAttribute(globalsModelGetId, globalsModelSetId),
 	}
 
 	globalsULAPrefixSchemaAttribute = lucirpcglue.StringSchemaAttribute[globalsModel, map[string]json.RawMessage, map[string]json.RawMessage]{
@@ -81,9 +49,11 @@ type globalsModel struct {
 	ULAPrefix      types.String `tfsdk:"ula_prefix"`
 }
 
+func globalsModelGetId(model globalsModel) types.String           { return model.Id }
 func globalsModelGetPacketSteering(model globalsModel) types.Bool { return model.PacketSteering }
 func globalsModelGetULAPrefix(model globalsModel) types.String    { return model.ULAPrefix }
 
+func globalsModelSetId(model *globalsModel, value types.String) { model.Id = value }
 func globalsModelSetPacketSteering(model *globalsModel, value types.Bool) {
 	model.PacketSteering = value
 }

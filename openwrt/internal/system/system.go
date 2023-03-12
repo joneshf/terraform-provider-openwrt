@@ -1,12 +1,9 @@
 package system
 
 import (
-	"context"
 	"encoding/json"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/logger"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/lucirpcglue"
 )
 
@@ -22,9 +19,6 @@ const (
 
 	systemHostnameAttribute = "hostname"
 	systemHostnameUCIOption = "hostname"
-
-	systemIdAttribute  = "id"
-	systemIdUCISection = ".name"
 
 	systemLogSizeAttribute = "log_size"
 	systemLogSizeUCIOption = "log_size"
@@ -77,32 +71,6 @@ var (
 		UpsertRequest:     lucirpcglue.UpsertRequestOptionString(systemModelGetHostname, systemHostnameAttribute, systemHostnameUCIOption),
 	}
 
-	systemIdSchemaAttribute = lucirpcglue.StringSchemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
-		DataSourceExistence: lucirpcglue.Required,
-		Description:         "Placeholder identifier attribute.",
-		ReadResponse: func(
-			ctx context.Context,
-			fullTypeName string,
-			terraformType string,
-			section map[string]json.RawMessage,
-			model systemModel,
-		) (context.Context, systemModel, diag.Diagnostics) {
-			ctx, value, diagnostics := lucirpcglue.GetMetadataString(ctx, fullTypeName, terraformType, section, systemIdUCISection)
-			model.Id = value
-			return ctx, model, diagnostics
-		},
-		ResourceExistence: lucirpcglue.Required,
-		UpsertRequest: func(
-			ctx context.Context,
-			fullTypeName string,
-			options map[string]json.RawMessage,
-			model systemModel,
-		) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
-			ctx = logger.SetFieldString(ctx, fullTypeName, lucirpcglue.ResourceTerraformType, systemIdAttribute, model.Id)
-			return ctx, options, diag.Diagnostics{}
-		},
-	}
-
 	systemLogSizeSchemaAttribute = lucirpcglue.Int64SchemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
 		Description:       "Size of the file based log buffer in KiB.",
 		ReadResponse:      lucirpcglue.ReadResponseOptionInt64(systemModelSetLogSize, systemLogSizeAttribute, systemLogSizeUCIOption),
@@ -118,11 +86,11 @@ var (
 	}
 
 	systemSchemaAttributes = map[string]lucirpcglue.SchemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+		lucirpcglue.IdAttribute:     lucirpcglue.IdSchemaAttribute(systemModelGetId, systemModelSetId),
 		systemConLogLevelAttribute:  systemConLogLevelSchemaAttribute,
 		systemCronLogLevelAttribute: systemCronLogLevelSchemaAttribute,
 		systemDescriptionAttribute:  systemDescriptionSchemaAttribute,
 		systemHostnameAttribute:     systemHostnameSchemaAttribute,
-		systemIdAttribute:           systemIdSchemaAttribute,
 		systemLogSizeAttribute:      systemLogSizeSchemaAttribute,
 		systemNotesAttribute:        systemNotesSchemaAttribute,
 		systemTimezoneAttribute:     systemTimezoneSchemaAttribute,
@@ -169,6 +137,7 @@ func systemModelGetConLogLevel(model systemModel) types.Int64  { return model.Co
 func systemModelGetCronLogLevel(model systemModel) types.Int64 { return model.CronLogLevel }
 func systemModelGetDescription(model systemModel) types.String { return model.Description }
 func systemModelGetHostname(model systemModel) types.String    { return model.Hostname }
+func systemModelGetId(model systemModel) types.String          { return model.Id }
 func systemModelGetLogSize(model systemModel) types.Int64      { return model.LogSize }
 func systemModelGetNotes(model systemModel) types.String       { return model.Notes }
 func systemModelGetTimezone(model systemModel) types.String    { return model.Timezone }
@@ -179,6 +148,7 @@ func systemModelSetConLogLevel(model *systemModel, value types.Int64)  { model.C
 func systemModelSetCronLogLevel(model *systemModel, value types.Int64) { model.CronLogLevel = value }
 func systemModelSetDescription(model *systemModel, value types.String) { model.Description = value }
 func systemModelSetHostname(model *systemModel, value types.String)    { model.Hostname = value }
+func systemModelSetId(model *systemModel, value types.String)          { model.Id = value }
 func systemModelSetLogSize(model *systemModel, value types.Int64)      { model.LogSize = value }
 func systemModelSetNotes(model *systemModel, value types.String)       { model.Notes = value }
 func systemModelSetTimezone(model *systemModel, value types.String)    { model.Timezone = value }

@@ -22,6 +22,11 @@ const (
 	NoValidation
 	Optional
 	Required
+
+	idAttributeDescription = "Name of the section. This name is only used when interacting with UCI directly."
+	idUCISection           = ".name"
+
+	IdAttribute = "id"
 )
 
 var (
@@ -108,6 +113,38 @@ func (a BoolSchemaAttribute[Model, Request, Response]) Upsert(
 	}
 
 	return a.UpsertRequest(ctx, fullTypeName, request, model)
+}
+
+func IdSchemaAttribute[Model any](
+	get func(Model) types.String,
+	set func(*Model, types.String),
+) SchemaAttribute[Model, map[string]json.RawMessage, map[string]json.RawMessage] {
+	return StringSchemaAttribute[Model, map[string]json.RawMessage, map[string]json.RawMessage]{
+		DataSourceExistence: Required,
+		Description:         idAttributeDescription,
+		ReadResponse: func(
+			ctx context.Context,
+			fullTypeName string,
+			terraformType string,
+			section map[string]json.RawMessage,
+			model Model,
+		) (context.Context, Model, diag.Diagnostics) {
+			ctx, value, diagnostics := GetMetadataString(ctx, fullTypeName, terraformType, section, idUCISection)
+			set(&model, value)
+			return ctx, model, diagnostics
+		},
+		ResourceExistence: Required,
+		UpsertRequest: func(
+			ctx context.Context,
+			fullTypeName string,
+			options map[string]json.RawMessage,
+			model Model,
+		) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+			id := get(model)
+			ctx = logger.SetFieldString(ctx, fullTypeName, ResourceTerraformType, IdAttribute, id)
+			return ctx, options, diag.Diagnostics{}
+		},
+	}
 }
 
 type Int64SchemaAttribute[Model any, Request any, Response any] struct {
