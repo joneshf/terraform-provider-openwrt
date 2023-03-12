@@ -34,7 +34,6 @@ const (
 	systemTTYLoginAttribute = "ttylogin"
 	systemTTYLoginUCIOption = "ttylogin"
 
-	systemTypeName      = "system_system"
 	systemUCIConfig     = "system"
 	systemUCISystemType = "system"
 

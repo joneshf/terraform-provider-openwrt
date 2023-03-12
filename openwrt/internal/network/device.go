@@ -57,7 +57,6 @@ const (
 	deviceTypeBridge               = "bridge"
 	deviceTypeUCIOption            = "type"
 
-	deviceTypeName  = "network_device"
 	deviceUCIConfig = "network"
 	deviceUCIType   = "device"
 )

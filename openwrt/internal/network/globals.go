@@ -13,7 +13,6 @@ const (
 
 	globalsSchemaDescription = "Contains interface-independent options affecting the network configuration in general."
 
-	globalsTypeName       = "network_globals"
 	globalsUCIConfig      = "network"
 	globalsUCIGlobalsType = "globals"
 
