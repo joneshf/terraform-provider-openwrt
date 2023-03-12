@@ -131,7 +131,7 @@ func (d *deviceResource) Delete(
 		return
 	}
 
-	ctx = logger.SetFieldString(ctx, d.fullTypeName, d.terraformType, deviceIdAttribute, model.Id)
+	ctx = logger.SetFieldString(ctx, d.fullTypeName, d.terraformType, lucirpcglue.IdAttribute, model.Id)
 	id := model.Id.ValueString()
 	ctx = tflog.SetField(ctx, "section", fmt.Sprintf("%s.%s", deviceUCIConfig, id))
 	tflog.Debug(ctx, "Deleting existing section")
@@ -154,7 +154,7 @@ func (d *deviceResource) ImportState(
 	res *resource.ImportStateResponse,
 ) {
 	tflog.Debug(ctx, "Retrieving import id and saving to id attribute")
-	resource.ImportStatePassthroughID(ctx, path.Root(deviceIdAttribute), req, res)
+	resource.ImportStatePassthroughID(ctx, path.Root(lucirpcglue.IdAttribute), req, res)
 }
 
 // Metadata sets the resource type name.

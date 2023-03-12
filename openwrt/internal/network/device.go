@@ -1,18 +1,15 @@
 package network
 
 import (
-	"context"
 	"encoding/json"
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/logger"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/lucirpcglue"
 )
 
@@ -32,10 +29,6 @@ const (
 	deviceEnableIPv6Attribute            = "ipv6"
 	deviceEnableIPv6AttributeDescription = "Enable IPv6 for the device."
 	deviceEnableIPv6UCIOption            = "ipv6"
-
-	deviceIdAttribute            = "id"
-	deviceIdAttributeDescription = "Name of the section. This name is only used when interacting with UCI directly."
-	deviceIdUCISection           = ".name"
 
 	deviceMacAddressAttribute            = "macaddr"
 	deviceMacAddressAttributeDescription = "MAC Address of the device."
@@ -118,32 +111,6 @@ var (
 		UpsertRequest:     lucirpcglue.UpsertRequestOptionBool(deviceModelGetEnableIPv6, deviceEnableIPv6Attribute, deviceEnableIPv6UCIOption),
 	}
 
-	deviceIdSchemaAttribute = lucirpcglue.StringSchemaAttribute[deviceModel, map[string]json.RawMessage, map[string]json.RawMessage]{
-		DataSourceExistence: lucirpcglue.Required,
-		Description:         deviceIdAttributeDescription,
-		ReadResponse: func(
-			ctx context.Context,
-			fullTypeName string,
-			terraformType string,
-			section map[string]json.RawMessage,
-			model deviceModel,
-		) (context.Context, deviceModel, diag.Diagnostics) {
-			ctx, value, diagnostics := lucirpcglue.GetMetadataString(ctx, fullTypeName, terraformType, section, deviceIdUCISection)
-			model.Id = value
-			return ctx, model, diagnostics
-		},
-		ResourceExistence: lucirpcglue.Required,
-		UpsertRequest: func(
-			ctx context.Context,
-			fullTypeName string,
-			options map[string]json.RawMessage,
-			model deviceModel,
-		) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
-			ctx = logger.SetFieldString(ctx, fullTypeName, lucirpcglue.ResourceTerraformType, deviceIdAttribute, model.Id)
-			return ctx, options, diag.Diagnostics{}
-		},
-	}
-
 	deviceMacAddressSchemaAttribute = lucirpcglue.StringSchemaAttribute[deviceModel, map[string]json.RawMessage, map[string]json.RawMessage]{
 		Description:       deviceMacAddressAttributeDescription,
 		ReadResponse:      lucirpcglue.ReadResponseOptionString(deviceModelSetMacAddress, deviceMacAddressAttribute, deviceMacAddressUCIOption),
@@ -193,13 +160,13 @@ var (
 		deviceBringUpEmptyBridgeAttribute: deviceBringUpEmptyBridgeSchemaAttribute,
 		deviceDADTransmitsAttribute:       deviceDADTransmitsSchemaAttribute,
 		deviceEnableIPv6Attribute:         deviceEnableIPv6SchemaAttribute,
-		deviceIdAttribute:                 deviceIdSchemaAttribute,
 		deviceMacAddressAttribute:         deviceMacAddressSchemaAttribute,
 		deviceMTUAttribute:                deviceMTUSchemaAttribute,
 		deviceMTU6Attribute:               deviceMTU6SchemaAttribute,
 		deviceNameAttribute:               deviceNameSchemaAttribute,
 		deviceTXQueueLengthAttribute:      deviceTXQueueLengthSchemaAttribute,
 		deviceTypeAttribute:               deviceTypeSchemaAttribute,
+		lucirpcglue.IdAttribute:           lucirpcglue.IdSchemaAttribute(deviceModelGetId, deviceModelSetId),
 	}
 
 	deviceTXQueueLengthSchemaAttribute = lucirpcglue.Int64SchemaAttribute[deviceModel, map[string]json.RawMessage, map[string]json.RawMessage]{
@@ -243,6 +210,7 @@ func deviceModelGetBridgePorts(model deviceModel) types.Set         { return mod
 func deviceModelGetBringUpEmptyBridge(model deviceModel) types.Bool { return model.BringUpEmptyBridge }
 func deviceModelGetDADTransmits(model deviceModel) types.Int64      { return model.DADTransmits }
 func deviceModelGetEnableIPv6(model deviceModel) types.Bool         { return model.EnableIPv6 }
+func deviceModelGetId(model deviceModel) types.String               { return model.Id }
 func deviceModelGetMacAddress(model deviceModel) types.String       { return model.MacAddress }
 func deviceModelGetMTU(model deviceModel) types.Int64               { return model.MTU }
 func deviceModelGetMTU6(model deviceModel) types.Int64              { return model.MTU6 }
@@ -256,6 +224,7 @@ func deviceModelSetBringUpEmptyBridge(model *deviceModel, value types.Bool) {
 }
 func deviceModelSetDADTransmits(model *deviceModel, value types.Int64)  { model.DADTransmits = value }
 func deviceModelSetEnableIPv6(model *deviceModel, value types.Bool)     { model.EnableIPv6 = value }
+func deviceModelSetId(model *deviceModel, value types.String)           { model.Id = value }
 func deviceModelSetMacAddress(model *deviceModel, value types.String)   { model.MacAddress = value }
 func deviceModelSetMTU(model *deviceModel, value types.Int64)           { model.MTU = value }
 func deviceModelSetMTU6(model *deviceModel, value types.Int64)          { model.MTU6 = value }
