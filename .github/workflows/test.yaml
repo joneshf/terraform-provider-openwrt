@@ -16,7 +16,10 @@ jobs:
       - name: Cache Nix
         uses: actions/cache@v3.3.0
         with:
-          key: ${{ runner.os }}-${{ hashfiles('flake.nix') }}
+          key: ${{ runner.os }}-nix-${{ hashfiles('flake.lock', 'flake.nix') }}
           path: ~/nix
+          restore-keys: |
+            ${{ runner.os }}-nix-${{ hashfiles('flake.lock', 'flake.nix') }}
+            ${{ runner.os }}-nix-
       - name: Test
         run: nix --store ~/nix develop . --command make test
