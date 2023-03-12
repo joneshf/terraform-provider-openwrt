@@ -13,5 +13,12 @@ jobs:
         uses: actions/checkout@v3
       - name: Install Nix
         uses: cachix/install-nix-action@v19
+      - name: Cache Nix
+        uses: actions/cache@v3.3.0
+        with:
+          key: ${{ runner.os }}-${{ hashfiles('flake.nix') }}
+          path: ~/nix
+      - name: Prime nix dependencies
+        run: nix --store ~/nix develop . --command echo 'primed nix dependencies'
       - name: Test
-        run: nix develop . --command make test
+        run: nix --store ~/nix develop . --command make test

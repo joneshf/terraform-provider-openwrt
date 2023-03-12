@@ -21,6 +21,13 @@ jobs:
         run: git fetch --force --tags
       - name: Install Nix
         uses: cachix/install-nix-action@v19
+      - name: Cache Nix
+        uses: actions/cache@v3.3.0
+        with:
+          key: ${{ runner.os }}-${{ hashfiles('flake.nix') }}
+          path: ~/nix
+      - name: Prime nix dependencies
+        run: nix --store ~/nix develop . --command echo 'primed nix dependencies'
       - name: Import GPG
         uses: crazy-max/ghaction-import-gpg@v5.2.0
         id: import_gpg
@@ -28,7 +35,7 @@ jobs:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
       - name: Release
-        run: nix develop . --command make release
+        run: nix --store ~/nix develop . --command make release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
