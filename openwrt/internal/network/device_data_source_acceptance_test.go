@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
@@ -40,7 +41,7 @@ func TestNetworkDeviceDataSourceAcceptance(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){
-			"openwrt": providerserver.NewProtocol6WithError(openwrt.New("test")),
+			"openwrt": providerserver.NewProtocol6WithError(openwrt.New("test", os.LookupEnv)),
 		},
 		Steps: []resource.TestStep{
 			{

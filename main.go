@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"os"
 
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
@@ -19,7 +20,7 @@ const (
 func main() {
 	ctx := context.Background()
 	providerNew := func() provider.Provider {
-		return openwrt.New(version)
+		return openwrt.New(version, os.LookupEnv)
 	}
 	options := providerserver.ServeOpts{
 		Address: "registry.terraform.io/joneshf/openwrt",
