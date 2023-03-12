@@ -3,7 +3,6 @@ package openwrt
 import (
 	"context"
 	"fmt"
-	"os"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -54,14 +53,19 @@ var (
 	_ provider.Provider = &openWrtProvider{}
 )
 
-func New(version string) provider.Provider {
+func New(
+	version string,
+	lookupEnv func(string) (string, bool),
+) provider.Provider {
 	return &openWrtProvider{
-		version: version,
+		lookupEnv: lookupEnv,
+		version:   version,
 	}
 }
 
 type openWrtProvider struct {
-	version string
+	lookupEnv func(string) (string, bool)
+	version   string
 }
 
 // Configure prepares an OpenWrt API client for data sources and resources.
@@ -83,26 +87,31 @@ func (p *openWrtProvider) Configure(
 	}
 
 	hostname := defaultStringAttributeValue(
+		p.lookupEnv,
 		model.Hostname,
 		hostnameEnvironmentVariable,
 		hostnameDefaultValue,
 	)
 	password := defaultStringAttributeValue(
+		p.lookupEnv,
 		model.Password,
 		passwordEnvironmentVariable,
 		passwordDefaultValue,
 	)
 	port := defaultInt64AttributeValue(
+		p.lookupEnv,
 		model.Port,
 		portEnvironmentVariable,
 		portDefaultValue,
 	)
 	scheme := defaultStringAttributeValue(
+		p.lookupEnv,
 		model.Scheme,
 		schemeEnvironmentVariable,
 		schemeDefaultValue,
 	)
 	username := defaultStringAttributeValue(
+		p.lookupEnv,
 		model.Username,
 		usernameEnvironmentVariable,
 		usernameDefaultValue,
@@ -271,12 +280,13 @@ type attributeKnown interface {
 }
 
 func defaultInt64AttributeValue(
+	lookupEnv func(string) (string, bool),
 	attribute attributeInt64Default,
 	environmentVariable string,
 	defaultValue int64,
 ) int64 {
 	value := defaultValue
-	variable, ok := os.LookupEnv(environmentVariable)
+	variable, ok := lookupEnv(environmentVariable)
 	if ok {
 		parsed, err := strconv.Atoi(variable)
 		if err != nil {
@@ -292,12 +302,13 @@ func defaultInt64AttributeValue(
 }
 
 func defaultStringAttributeValue(
+	lookupEnv func(string) (string, bool),
 	attribute attributeStringDefault,
 	environmentVariable string,
 	defaultValue string,
 ) string {
 	value := defaultValue
-	variable, ok := os.LookupEnv(environmentVariable)
+	variable, ok := lookupEnv(environmentVariable)
 	if ok {
 		value = variable
 	}

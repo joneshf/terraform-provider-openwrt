@@ -5,6 +5,7 @@ package system_test
 import (
 	"context"
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
@@ -89,7 +90,7 @@ resource "openwrt_system_system" "this" {
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){
-			"openwrt": providerserver.NewProtocol6WithError(openwrt.New("test")),
+			"openwrt": providerserver.NewProtocol6WithError(openwrt.New("test", os.LookupEnv)),
 		},
 		Steps: []resource.TestStep{
 			createAndReadTestStep,
