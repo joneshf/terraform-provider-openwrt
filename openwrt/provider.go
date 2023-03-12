@@ -289,7 +289,7 @@ func defaultInt64AttributeValue(
 	variable, ok := lookupEnv(environmentVariable)
 	if ok {
 		parsed, err := strconv.Atoi(variable)
-		if err != nil {
+		if err == nil {
 			value = int64(parsed)
 		}
 	}
