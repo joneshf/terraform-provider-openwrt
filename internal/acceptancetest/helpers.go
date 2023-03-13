@@ -9,7 +9,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"strconv"
 	"testing"
 
@@ -32,6 +32,11 @@ const (
 	Username = "root"
 )
 
+var (
+	acceptanceTestDockerCachedFilePath = filepath.Join(".cache", "docker", "acceptance-test.tar")
+	acceptanceTestDockerImage          = fmt.Sprintf("%s:%s", acceptanceTestDockerName, acceptanceTestDockerTag)
+)
+
 // Setup does a bit of setup so acceptance tests can run:
 //  1. Connect to a running docker daemon.
 //  2. Build and tag the image for acceptance tests.
@@ -52,7 +57,7 @@ func Setup(
 	homeDir, err := os.UserHomeDir()
 	if err == nil {
 		log.Printf("Attempting to connect to colima socket")
-		colimaSocket := path.Join(homeDir, ".colima", "docker.sock")
+		colimaSocket := filepath.Join(homeDir, ".colima", "docker.sock")
 		conn, err := net.Dial("unix", colimaSocket)
 		if err == nil {
 			log.Printf("Connect to colima successful")
@@ -96,11 +101,11 @@ func Setup(
 	log.Printf("Building acceptance test image")
 	err = dockerPool.Client.BuildImage(docker.BuildImageOptions{
 		CacheFrom: []string{
-			fmt.Sprintf("%s:%s", acceptanceTestDockerName, acceptanceTestDockerTag),
+			acceptanceTestDockerImage,
 		},
 		ContextDir:   string(topLevelDirectory),
 		Dockerfile:   acceptanceTestDockerDockerfile,
-		Name:         fmt.Sprintf("%s:%s", acceptanceTestDockerName, acceptanceTestDockerTag),
+		Name:         acceptanceTestDockerImage,
 		OutputStream: os.Stdout,
 	})
 	if err != nil {
@@ -193,7 +198,7 @@ func loadImageCache(
 	topLevelDirectory string,
 ) error {
 	log.Println("Attempting to load image cache")
-	cachedImageFilePath := path.Join(topLevelDirectory, ".cache", "docker", "acceptance-test.tar")
+	cachedImageFilePath := filepath.Join(topLevelDirectory, acceptanceTestDockerCachedFilePath)
 	cachedImageFile, err := os.Open(cachedImageFilePath)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
@@ -223,8 +228,8 @@ func saveImageCache(
 	topLevelDirectory string,
 ) error {
 	log.Println("Saving image to cache")
-	cachedImageFilePath := path.Join(topLevelDirectory, ".cache", "docker", "acceptance-test.tar")
-	err := os.MkdirAll(path.Dir(cachedImageFilePath), 0755)
+	cachedImageFilePath := filepath.Join(topLevelDirectory, acceptanceTestDockerCachedFilePath)
+	err := os.MkdirAll(filepath.Dir(cachedImageFilePath), 0755)
 	if err != nil {
 		return fmt.Errorf("problem creating cache directory: %w", err)
 	}
@@ -237,7 +242,7 @@ func saveImageCache(
 	defer cachedImageFile.Close()
 	err = dockerPool.Client.ExportImage(docker.ExportImageOptions{
 		Context:      ctx,
-		Name:         fmt.Sprintf("%s:%s", acceptanceTestDockerName, acceptanceTestDockerTag),
+		Name:         acceptanceTestDockerImage,
 		OutputStream: cachedImageFile,
 	})
 	if err != nil {
