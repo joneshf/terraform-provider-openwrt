@@ -32,5 +32,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-${{ hashfiles('go.mod', 'go.sum') }}
             ${{ runner.os }}-go-
+      - name: Cache Docker Image
+        uses: actions/cache@v3.3.0
+        with:
+          key: ${{ runner.os }}-docker-${{ hashfiles('acceptance-test.Dockerfile', 'acceptance-test.Dockerfile.dockerignore') }}
+          path: .cache/docker
+          restore-keys: |
+            ${{ runner.os }}-docker-${{ hashfiles('acceptance-test.Dockerfile', 'acceptance-test.Dockerfile.dockerignore') }}
+            ${{ runner.os }}-docker-
       - name: Test
         run: nix --store ~/nix develop . --command make test

@@ -3,6 +3,7 @@ package acceptancetest
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -86,8 +87,17 @@ func Setup(
 	}
 
 	topLevelDirectory := bytes.TrimSpace(revParseOutput)
+	err = loadImageCache(ctx, dockerPool, string(topLevelDirectory))
+	if err != nil {
+		err = fmt.Errorf("could load image cache: %w", err)
+		return
+	}
+
 	log.Printf("Building acceptance test image")
 	err = dockerPool.Client.BuildImage(docker.BuildImageOptions{
+		CacheFrom: []string{
+			fmt.Sprintf("%s:%s", acceptanceTestDockerName, acceptanceTestDockerTag),
+		},
 		ContextDir:   string(topLevelDirectory),
 		Dockerfile:   acceptanceTestDockerDockerfile,
 		Name:         fmt.Sprintf("%s:%s", acceptanceTestDockerName, acceptanceTestDockerTag),
@@ -95,6 +105,12 @@ func Setup(
 	})
 	if err != nil {
 		err = fmt.Errorf("could not build acceptance test image: %w", err)
+		return
+	}
+
+	err = saveImageCache(ctx, dockerPool, string(topLevelDirectory))
+	if err != nil {
+		err = fmt.Errorf("could save image cache: %w", err)
 		return
 	}
 
@@ -169,4 +185,65 @@ func RunOpenWrtServer(
 	port = uint16(intPort)
 
 	return
+}
+
+func loadImageCache(
+	ctx context.Context,
+	dockerPool *dockertest.Pool,
+	topLevelDirectory string,
+) error {
+	log.Println("Attempting to load image cache")
+	cachedImageFilePath := path.Join(topLevelDirectory, ".cache", "docker", "acceptance-test.tar")
+	cachedImageFile, err := os.Open(cachedImageFilePath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			log.Println("Image file does not exist; ignoring")
+			return nil
+		}
+
+		return fmt.Errorf("problem opening cached image file: %w", err)
+	}
+
+	defer cachedImageFile.Close()
+	err = dockerPool.Client.LoadImage(docker.LoadImageOptions{
+		InputStream: cachedImageFile,
+		Context:     ctx,
+	})
+	if err != nil {
+		return fmt.Errorf("problem loading image: %w", err)
+	}
+
+	log.Println("Loaded cached image")
+	return nil
+}
+
+func saveImageCache(
+	ctx context.Context,
+	dockerPool *dockertest.Pool,
+	topLevelDirectory string,
+) error {
+	log.Println("Saving image to cache")
+	cachedImageFilePath := path.Join(topLevelDirectory, ".cache", "docker", "acceptance-test.tar")
+	err := os.MkdirAll(path.Dir(cachedImageFilePath), 0755)
+	if err != nil {
+		return fmt.Errorf("problem creating cache directory: %w", err)
+	}
+
+	cachedImageFile, err := os.Create(cachedImageFilePath)
+	if err != nil {
+		return fmt.Errorf("problem creating cached image file: %w", err)
+	}
+
+	defer cachedImageFile.Close()
+	err = dockerPool.Client.ExportImage(docker.ExportImageOptions{
+		Context:      ctx,
+		Name:         fmt.Sprintf("%s:%s", acceptanceTestDockerName, acceptanceTestDockerTag),
+		OutputStream: cachedImageFile,
+	})
+	if err != nil {
+		return fmt.Errorf("problem exporting image: %w", err)
+	}
+
+	log.Println("Saved image to cache")
+	return nil
 }

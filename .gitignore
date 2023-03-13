@@ -1,5 +1,6 @@
 ### Project-specific ###
 .direnv
+.cache
 
 ### DO NOT EDIT ANYTHING BELOW HERE BY HAND; REGNERATE IT AT THE EDIT LINK.
 

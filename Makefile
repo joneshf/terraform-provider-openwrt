@@ -3,6 +3,7 @@ Makefile:;
 
 ACCEPTANCE_TEST_BUILD_CONSTRAINT := acceptance.test
 ACCEPTANCE_TEST_DOCKER_COMPOSE_FILE := ./docker-compose.acceptance-test.yaml
+CACHE_DIRECTORY := .cache
 
 .DEFAULT_GOAL := test
 
@@ -11,11 +12,15 @@ build:
 	go build ./...
 
 .PHONY: clean
-clean: clean-acceptance-test-server
+clean: clean-acceptance-test-server clean-cache-directory
 
 .PHONY: clean-acceptance-test-server
 clean-acceptance-test-server:
 	docker compose --file $(ACCEPTANCE_TEST_DOCKER_COMPOSE_FILE) down --remove-orphans --rmi all --volumes
+
+.PHONY: clean-cache-directory
+clean-cache-directory:
+	rm -fr $(CACHE_DIRECTORY)
 
 .PHONY: docs
 docs: install
