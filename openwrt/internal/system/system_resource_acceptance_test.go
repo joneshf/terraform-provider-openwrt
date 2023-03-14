@@ -25,7 +25,23 @@ func TestSystemSystemResourceAcceptance(t *testing.T) {
 		t,
 	)
 
-	createAndReadTestStep := resource.TestStep{
+	importTestStep := resource.TestStep{
+		Config: fmt.Sprintf(`
+%s
+
+resource "openwrt_system_system" "this" {
+	id = "cfg01e48a"
+}
+`,
+			providerBlock,
+		),
+		ImportState:        true,
+		ImportStateId:      "cfg01e48a",
+		ImportStatePersist: true,
+		ResourceName:       "openwrt_system_system.this",
+	}
+
+	readTestStep := resource.TestStep{
 		Config: fmt.Sprintf(`
 %s
 
@@ -43,11 +59,7 @@ resource "openwrt_system_system" "this" {
 			resource.TestCheckResourceAttr("openwrt_system_system.this", "ttylogin", "false"),
 		),
 	}
-	importTestStep := resource.TestStep{
-		ImportState:       true,
-		ImportStateVerify: true,
-		ResourceName:      "openwrt_system_system.this",
-	}
+
 	updateAndReadTestStep := resource.TestStep{
 		Config: fmt.Sprintf(`
 %s
@@ -76,8 +88,8 @@ resource "openwrt_system_system" "this" {
 			"openwrt": providerserver.NewProtocol6WithError(openwrt.New("test", os.LookupEnv)),
 		},
 		Steps: []resource.TestStep{
-			createAndReadTestStep,
 			importTestStep,
+			readTestStep,
 			updateAndReadTestStep,
 		},
 	})
