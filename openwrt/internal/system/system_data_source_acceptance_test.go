@@ -19,12 +19,12 @@ func TestSystemSystemDataSourceAcceptance(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	openWrt, hostname, port := acceptancetest.RunOpenWrtServer(
+	tearDown, hostname, port := acceptancetest.RunOpenWrtServer(
 		ctx,
 		*dockerPool,
 		t,
 	)
-	defer openWrt.Close()
+	defer tearDown()
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){

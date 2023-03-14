@@ -122,17 +122,17 @@ func Setup(
 	return
 }
 
-// AuthenticatedClient constructs a running [*dockertest.Resource] representing an OpenWrt server, and [*lucirpc.Client].
-// [dockertest.Resource.Close] must be called on the returned [*dockertest.Resource].
+// AuthenticatedClient constructs a running OpenWrt server, and [*lucirpc.Client].
+// The tearDown function must be called after finishing with the client.
 // The [*lucirpc.Client] can be used to interact with the underlying OpenWrt server.
 func AuthenticatedClient(
 	ctx context.Context,
 	dockerPool dockertest.Pool,
 	t *testing.T,
-) (*dockertest.Resource, *lucirpc.Client) {
+) (tearDown func(), client *lucirpc.Client) {
 	t.Helper()
 
-	openWrt, host, port := RunOpenWrtServer(ctx, dockerPool, t)
+	tearDown, host, port := RunOpenWrtServer(ctx, dockerPool, t)
 	client, err := lucirpc.NewClient(
 		ctx,
 		Scheme,
@@ -142,8 +142,7 @@ func AuthenticatedClient(
 		Password,
 	)
 	assert.NilError(t, err)
-
-	return openWrt, client
+	return
 }
 
 func checkHealth(
@@ -166,19 +165,25 @@ func checkHealth(
 	}
 }
 
-// RunOpenWrtServer constructs a running [*dockertest.Resource] representing an OpenWrt server.
-// [dockertest.Resource.Close] must be called on the returned [*dockertest.Resource].
+// RunOpenWrtServer constructs a running OpenWrt server.
+// The tearDown function must be called after finishing with the client.
 // The hostname and port can be arbitrary,
 // so they are returned to make it easier to interact with the OpenWrt server.
 func RunOpenWrtServer(
 	ctx context.Context,
 	dockerPool dockertest.Pool,
 	t *testing.T,
-) (openWrt *dockertest.Resource, hostname string, port uint16) {
+) (tearDown func(), hostname string, port uint16) {
 	t.Helper()
 
 	openWrt, err := dockerPool.Run(acceptanceTestDockerName, acceptanceTestDockerTag, []string{})
 	assert.NilError(t, err)
+	tearDown = func() {
+		t.Helper()
+
+		err = openWrt.Close()
+		assert.NilError(t, err)
+	}
 	err = openWrt.Expire(60)
 	assert.NilError(t, err)
 	err = dockerPool.Retry(checkHealth(ctx, dockerPool, *openWrt))
