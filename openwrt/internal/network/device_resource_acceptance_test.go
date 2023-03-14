@@ -19,7 +19,7 @@ func TestNetworkDeviceResourceAcceptance(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	hostname, port := acceptancetest.RunOpenWrtServer(
+	providerBlock := acceptancetest.RunOpenWrtServerWithProviderBlock(
 		ctx,
 		*dockerPool,
 		t,
@@ -27,12 +27,7 @@ func TestNetworkDeviceResourceAcceptance(t *testing.T) {
 
 	createAndReadTestStep := resource.TestStep{
 		Config: fmt.Sprintf(`
-provider "openwrt" {
-	hostname = %q
-	password = %q
-	port = %d
-	username = %q
-}
+%s
 
 resource "openwrt_network_device" "br_testing" {
 	id = "br_testing"
@@ -44,10 +39,7 @@ resource "openwrt_network_device" "br_testing" {
 	type = "bridge"
 }
 `,
-			hostname,
-			acceptancetest.Password,
-			port,
-			acceptancetest.Username,
+			providerBlock,
 		),
 		Check: resource.ComposeAggregateTestCheckFunc(
 			resource.TestCheckResourceAttr("openwrt_network_device.br_testing", "id", "br_testing"),
@@ -66,12 +58,7 @@ resource "openwrt_network_device" "br_testing" {
 	}
 	updateAndReadTestStep := resource.TestStep{
 		Config: fmt.Sprintf(`
-provider "openwrt" {
-	hostname = %q
-	password = %q
-	port = %d
-	username = %q
-}
+%s
 
 resource "openwrt_network_device" "br_testing" {
 	id = "br_testing"
@@ -87,10 +74,7 @@ resource "openwrt_network_device" "br_testing" {
 	type = "bridge"
 }
 `,
-			hostname,
-			acceptancetest.Password,
-			port,
-			acceptancetest.Username,
+			providerBlock,
 		),
 		Check: resource.ComposeAggregateTestCheckFunc(
 			resource.TestCheckResourceAttr("openwrt_network_device.br_testing", "id", "br_testing"),

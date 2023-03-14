@@ -19,7 +19,7 @@ func TestSystemSystemResourceAcceptance(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	hostname, port := acceptancetest.RunOpenWrtServer(
+	providerBlock := acceptancetest.RunOpenWrtServerWithProviderBlock(
 		ctx,
 		*dockerPool,
 		t,
@@ -27,21 +27,13 @@ func TestSystemSystemResourceAcceptance(t *testing.T) {
 
 	createAndReadTestStep := resource.TestStep{
 		Config: fmt.Sprintf(`
-provider "openwrt" {
-	hostname = %q
-	password = %q
-	port = %d
-	username = %q
-}
+%s
 
 resource "openwrt_system_system" "this" {
 	id = "cfg01e48a"
 }
 `,
-			hostname,
-			acceptancetest.Password,
-			port,
-			acceptancetest.Username,
+			providerBlock,
 		),
 		Check: resource.ComposeAggregateTestCheckFunc(
 			resource.TestCheckResourceAttr("openwrt_system_system.this", "id", "cfg01e48a"),
@@ -58,12 +50,7 @@ resource "openwrt_system_system" "this" {
 	}
 	updateAndReadTestStep := resource.TestStep{
 		Config: fmt.Sprintf(`
-provider "openwrt" {
-	hostname = %q
-	password = %q
-	port = %d
-	username = %q
-}
+%s
 
 resource "openwrt_system_system" "this" {
 	hostname = "OpenWRT"
@@ -73,10 +60,7 @@ resource "openwrt_system_system" "this" {
 	ttylogin = false
 }
 `,
-			hostname,
-			acceptancetest.Password,
-			port,
-			acceptancetest.Username,
+			providerBlock,
 		),
 		Check: resource.ComposeAggregateTestCheckFunc(
 			resource.TestCheckResourceAttr("openwrt_system_system.this", "id", "cfg01e48a"),

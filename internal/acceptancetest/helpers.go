@@ -144,6 +144,42 @@ func AuthenticatedClient(
 	return client
 }
 
+// AuthenticatedClientWithProviderBlock starts an OpenWrt server,
+// returns a [*lucirpc.Client] to interact with it,
+// and a stringified provider block.
+func AuthenticatedClientWithProviderBlock(
+	ctx context.Context,
+	dockerPool dockertest.Pool,
+	t *testing.T,
+) (client *lucirpc.Client, providerBlock string) {
+	t.Helper()
+
+	hostname, port := RunOpenWrtServer(ctx, dockerPool, t)
+	client, err := lucirpc.NewClient(
+		ctx,
+		Scheme,
+		hostname,
+		port,
+		Username,
+		Password,
+	)
+	assert.NilError(t, err)
+	providerBlock = fmt.Sprintf(`
+provider "openwrt" {
+	hostname = %q
+	password = %q
+	port = %d
+	username = %q
+}
+`,
+		hostname,
+		Password,
+		port,
+		Username,
+	)
+	return
+}
+
 func checkHealth(
 	ctx context.Context,
 	dockerPool dockertest.Pool,
@@ -191,6 +227,33 @@ func RunOpenWrtServer(
 	port = uint16(intPort)
 
 	return
+}
+
+// RunOpenWrtServerWithProviderBlock constructs a running OpenWrt server,
+// and a stringified provider block.
+func RunOpenWrtServerWithProviderBlock(
+	ctx context.Context,
+	dockerPool dockertest.Pool,
+	t *testing.T,
+) string {
+	t.Helper()
+
+	hostname, port := RunOpenWrtServer(ctx, dockerPool, t)
+	providerBlock := fmt.Sprintf(`
+provider "openwrt" {
+	hostname = %q
+	password = %q
+	port = %d
+	username = %q
+}
+`,
+		hostname,
+		Password,
+		port,
+		Username,
+	)
+
+	return providerBlock
 }
 
 func loadImageCache(

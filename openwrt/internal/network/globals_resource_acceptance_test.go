@@ -19,7 +19,7 @@ func TestNetworkGlobalsResourceAcceptance(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	hostname, port := acceptancetest.RunOpenWrtServer(
+	providerBlock := acceptancetest.RunOpenWrtServerWithProviderBlock(
 		ctx,
 		*dockerPool,
 		t,
@@ -27,21 +27,13 @@ func TestNetworkGlobalsResourceAcceptance(t *testing.T) {
 
 	createAndReadTestStep := resource.TestStep{
 		Config: fmt.Sprintf(`
-provider "openwrt" {
-	hostname = %q
-	password = %q
-	port = %d
-	username = %q
-}
+%s
 
 resource "openwrt_network_globals" "this" {
 	id = "globals"
 }
 `,
-			hostname,
-			acceptancetest.Password,
-			port,
-			acceptancetest.Username,
+			providerBlock,
 		),
 		Check: resource.ComposeAggregateTestCheckFunc(
 			resource.TestCheckResourceAttr("openwrt_network_globals.this", "id", "globals"),
@@ -56,12 +48,7 @@ resource "openwrt_network_globals" "this" {
 	}
 	updateAndReadTestStep := resource.TestStep{
 		Config: fmt.Sprintf(`
-provider "openwrt" {
-	hostname = %q
-	password = %q
-	port = %d
-	username = %q
-}
+%s
 
 resource "openwrt_network_globals" "this" {
 	id = "globals"
@@ -69,10 +56,7 @@ resource "openwrt_network_globals" "this" {
 	ula_prefix = "fd12:3456:789a::/48"
 }
 `,
-			hostname,
-			acceptancetest.Password,
-			port,
-			acceptancetest.Username,
+			providerBlock,
 		),
 		Check: resource.ComposeAggregateTestCheckFunc(
 			resource.TestCheckResourceAttr("openwrt_network_globals.this", "id", "globals"),

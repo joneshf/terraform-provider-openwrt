@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/joneshf/terraform-provider-openwrt/internal/acceptancetest"
-	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt"
 	"gotest.tools/v3/assert"
 )
@@ -22,13 +21,11 @@ func TestNetworkDeviceDataSourceAcceptance(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	hostname, port := acceptancetest.RunOpenWrtServer(
+	client, providerBlock := acceptancetest.AuthenticatedClientWithProviderBlock(
 		ctx,
 		*dockerPool,
 		t,
 	)
-	client, err := lucirpc.NewClient(ctx, acceptancetest.Scheme, hostname, port, acceptancetest.Username, acceptancetest.Password)
-	assert.NilError(t, err)
 	options := map[string]json.RawMessage{
 		"name":  json.RawMessage(`"br-testing"`),
 		"ports": json.RawMessage(`["eth0", "eth1"]`),
@@ -45,21 +42,13 @@ func TestNetworkDeviceDataSourceAcceptance(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(`
-provider "openwrt" {
-	hostname = %q
-	password = %q
-	port = %d
-	username = %q
-}
+%s
 
 data "openwrt_network_device" "this" {
 	id = "br_testing"
 }
 `,
-					hostname,
-					acceptancetest.Password,
-					port,
-					acceptancetest.Username,
+					providerBlock,
 				),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.openwrt_network_device.this", "id", "br_testing"),
