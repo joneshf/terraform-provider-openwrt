@@ -28,12 +28,11 @@ func TestClientCreateSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		tearDown, client := acceptancetest.AuthenticatedClient(
+		client := acceptancetest.AuthenticatedClient(
 			ctx,
 			*dockerPool,
 			t,
 		)
-		defer tearDown()
 
 		// When
 		got, err := client.CreateSection(
@@ -54,12 +53,11 @@ func TestClientCreateSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		tearDown, client := acceptancetest.AuthenticatedClient(
+		client := acceptancetest.AuthenticatedClient(
 			ctx,
 			*dockerPool,
 			t,
 		)
-		defer tearDown()
 
 		// When
 		got, err := client.CreateSection(
@@ -80,12 +78,11 @@ func TestClientCreateSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		tearDown, client := acceptancetest.AuthenticatedClient(
+		client := acceptancetest.AuthenticatedClient(
 			ctx,
 			*dockerPool,
 			t,
 		)
-		defer tearDown()
 
 		// When
 		_, err := client.CreateSection(
@@ -123,12 +120,11 @@ func TestClientCreateSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		tearDown, client := acceptancetest.AuthenticatedClient(
+		client := acceptancetest.AuthenticatedClient(
 			ctx,
 			*dockerPool,
 			t,
 		)
-		defer tearDown()
 
 		// When
 		_, err := client.CreateSection(
@@ -158,12 +154,11 @@ func TestClientDeleteSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		tearDown, client := acceptancetest.AuthenticatedClient(
+		client := acceptancetest.AuthenticatedClient(
 			ctx,
 			*dockerPool,
 			t,
 		)
-		defer tearDown()
 
 		// When
 		got, err := client.DeleteSection(
@@ -182,12 +177,11 @@ func TestClientDeleteSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		tearDown, client := acceptancetest.AuthenticatedClient(
+		client := acceptancetest.AuthenticatedClient(
 			ctx,
 			*dockerPool,
 			t,
 		)
-		defer tearDown()
 		_, err := client.CreateSection(
 			ctx,
 			"network",
@@ -214,12 +208,11 @@ func TestClientDeleteSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		tearDown, client := acceptancetest.AuthenticatedClient(
+		client := acceptancetest.AuthenticatedClient(
 			ctx,
 			*dockerPool,
 			t,
 		)
-		defer tearDown()
 		_, err := client.CreateSection(
 			ctx,
 			"network",
@@ -251,12 +244,11 @@ func TestClientDeleteSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		tearDown, client := acceptancetest.AuthenticatedClient(
+		client := acceptancetest.AuthenticatedClient(
 			ctx,
 			*dockerPool,
 			t,
 		)
-		defer tearDown()
 		_, err := client.CreateSection(
 			ctx,
 			"network",
@@ -292,12 +284,11 @@ func TestClientGetSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		tearDown, client := acceptancetest.AuthenticatedClient(
+		client := acceptancetest.AuthenticatedClient(
 			ctx,
 			*dockerPool,
 			t,
 		)
-		defer tearDown()
 
 		// When
 		_, err := client.GetSection(
@@ -315,12 +306,11 @@ func TestClientGetSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		tearDown, client := acceptancetest.AuthenticatedClient(
+		client := acceptancetest.AuthenticatedClient(
 			ctx,
 			*dockerPool,
 			t,
 		)
-		defer tearDown()
 
 		// When
 		got, err := client.GetSection(
@@ -375,8 +365,7 @@ func TestNewClientAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		tearDown, hostname, port := acceptancetest.RunOpenWrtServer(ctx, *dockerPool, t)
-		defer tearDown()
+		hostname, port := acceptancetest.RunOpenWrtServer(ctx, *dockerPool, t)
 
 		// When
 		_, err := lucirpc.NewClient(
@@ -401,12 +390,11 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		tearDown, client := acceptancetest.AuthenticatedClient(
+		client := acceptancetest.AuthenticatedClient(
 			ctx,
 			*dockerPool,
 			t,
 		)
-		defer tearDown()
 
 		// When
 		got, err := client.UpdateSection(
@@ -426,12 +414,11 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		tearDown, client := acceptancetest.AuthenticatedClient(
+		client := acceptancetest.AuthenticatedClient(
 			ctx,
 			*dockerPool,
 			t,
 		)
-		defer tearDown()
 		_, err := client.CreateSection(
 			ctx,
 			"network",
@@ -459,12 +446,11 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		tearDown, client := acceptancetest.AuthenticatedClient(
+		client := acceptancetest.AuthenticatedClient(
 			ctx,
 			*dockerPool,
 			t,
 		)
-		defer tearDown()
 		_, err := client.CreateSection(
 			ctx,
 			"network",
@@ -494,12 +480,11 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		tearDown, client := acceptancetest.AuthenticatedClient(
+		client := acceptancetest.AuthenticatedClient(
 			ctx,
 			*dockerPool,
 			t,
 		)
-		defer tearDown()
 		_, err := client.CreateSection(
 			ctx,
 			"network",
@@ -544,12 +529,11 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		tearDown, client := acceptancetest.AuthenticatedClient(
+		client := acceptancetest.AuthenticatedClient(
 			ctx,
 			*dockerPool,
 			t,
 		)
-		defer tearDown()
 		_, err := client.CreateSection(
 			ctx,
 			"network",

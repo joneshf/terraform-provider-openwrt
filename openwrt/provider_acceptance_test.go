@@ -51,12 +51,11 @@ func TestOpenWrtProviderConfigureConnectsWithoutError(t *testing.T) {
 
 	// Given
 	ctx := context.Background()
-	tearDown, hostname, port := acceptancetest.RunOpenWrtServer(
+	hostname, port := acceptancetest.RunOpenWrtServer(
 		ctx,
 		*dockerPool,
 		t,
 	)
-	defer tearDown()
 	openWrtProvider := openwrt.New("test", os.LookupEnv)
 	schemaReq := provider.SchemaRequest{}
 	schemaRes := &provider.SchemaResponse{}
@@ -99,12 +98,11 @@ func TestOpenWrtProviderConfigureConnectsWithoutErrorWithEnvironmentVariables(t 
 
 	// Given
 	ctx := context.Background()
-	tearDown, hostname, port := acceptancetest.RunOpenWrtServer(
+	hostname, port := acceptancetest.RunOpenWrtServer(
 		ctx,
 		*dockerPool,
 		t,
 	)
-	defer tearDown()
 	env := map[string]string{
 		"OPENWRT_HOSTNAME": hostname,
 		"OPENWRT_PASSWORD": acceptancetest.Password,
