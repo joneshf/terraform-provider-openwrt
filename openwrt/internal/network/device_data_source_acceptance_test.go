@@ -22,12 +22,11 @@ func TestNetworkDeviceDataSourceAcceptance(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	tearDown, hostname, port := acceptancetest.RunOpenWrtServer(
+	hostname, port := acceptancetest.RunOpenWrtServer(
 		ctx,
 		*dockerPool,
 		t,
 	)
-	defer tearDown()
 	client, err := lucirpc.NewClient(ctx, acceptancetest.Scheme, hostname, port, acceptancetest.Username, acceptancetest.Password)
 	assert.NilError(t, err)
 	options := map[string]json.RawMessage{
