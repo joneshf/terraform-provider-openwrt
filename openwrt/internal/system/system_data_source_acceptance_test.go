@@ -19,7 +19,7 @@ func TestSystemSystemDataSourceAcceptance(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	hostname, port := acceptancetest.RunOpenWrtServer(
+	providerBlock := acceptancetest.RunOpenWrtServerWithProviderBlock(
 		ctx,
 		*dockerPool,
 		t,
@@ -32,21 +32,13 @@ func TestSystemSystemDataSourceAcceptance(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(`
-provider "openwrt" {
-	hostname = %q
-	password = %q
-	port = %d
-	username = %q
-}
+%s
 
 data "openwrt_system_system" "this" {
 	id = "cfg01e48a"
 }
 `,
-					hostname,
-					acceptancetest.Password,
-					port,
-					acceptancetest.Username,
+					providerBlock,
 				),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.openwrt_system_system.this", "id", "cfg01e48a"),
