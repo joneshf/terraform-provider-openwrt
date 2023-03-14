@@ -19,12 +19,12 @@ func TestSystemSystemResourceAcceptance(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	openWrt, hostname, port := acceptancetest.RunOpenWrtServer(
+	tearDown, hostname, port := acceptancetest.RunOpenWrtServer(
 		ctx,
 		*dockerPool,
 		t,
 	)
-	defer openWrt.Close()
+	defer tearDown()
 
 	createAndReadTestStep := resource.TestStep{
 		Config: fmt.Sprintf(`
