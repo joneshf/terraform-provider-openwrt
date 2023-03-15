@@ -34,27 +34,29 @@ func TestNetworkGlobalsDataSourceAcceptance(t *testing.T) {
 	assert.NilError(t, err)
 	assert.Check(t, ok)
 
-	resource.Test(t, resource.TestCase{
-		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){
-			"openwrt": providerserver.NewProtocol6WithError(openwrt.New("test", os.LookupEnv)),
-		},
-		Steps: []resource.TestStep{
-			{
-				Config: fmt.Sprintf(`
+	readDataSource := resource.TestStep{
+		Config: fmt.Sprintf(`
 %s
 
 data "openwrt_network_globals" "this" {
 	id = "globals"
 }
 `,
-					providerBlock,
-				),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("data.openwrt_network_globals.this", "id", "globals"),
-					resource.TestCheckResourceAttr("data.openwrt_network_globals.this", "packet_steering", "false"),
-					resource.TestCheckResourceAttr("data.openwrt_network_globals.this", "ula_prefix", "fd12:3456:789a::/48"),
-				),
-			},
+			providerBlock,
+		),
+		Check: resource.ComposeAggregateTestCheckFunc(
+			resource.TestCheckResourceAttr("data.openwrt_network_globals.this", "id", "globals"),
+			resource.TestCheckResourceAttr("data.openwrt_network_globals.this", "packet_steering", "false"),
+			resource.TestCheckResourceAttr("data.openwrt_network_globals.this", "ula_prefix", "fd12:3456:789a::/48"),
+		),
+	}
+
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){
+			"openwrt": providerserver.NewProtocol6WithError(openwrt.New("test", os.LookupEnv)),
+		},
+		Steps: []resource.TestStep{
+			readDataSource,
 		},
 	})
 }
