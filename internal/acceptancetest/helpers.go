@@ -37,6 +37,120 @@ var (
 	acceptanceTestDockerImage          = fmt.Sprintf("%s:%s", acceptanceTestDockerName, acceptanceTestDockerTag)
 )
 
+// AuthenticatedClient starts an OpenWrt server,
+// and returns a [*lucirpc.Client] to interact with it.
+func AuthenticatedClient(
+	ctx context.Context,
+	dockerPool dockertest.Pool,
+	t *testing.T,
+) *lucirpc.Client {
+	t.Helper()
+
+	host, port := RunOpenWrtServer(ctx, dockerPool, t)
+	client, err := lucirpc.NewClient(
+		ctx,
+		Scheme,
+		host,
+		port,
+		Username,
+		Password,
+	)
+	assert.NilError(t, err)
+	return client
+}
+
+// AuthenticatedClientWithProviderBlock starts an OpenWrt server,
+// returns a [*lucirpc.Client] to interact with it,
+// and a stringified provider block.
+func AuthenticatedClientWithProviderBlock(
+	ctx context.Context,
+	dockerPool dockertest.Pool,
+	t *testing.T,
+) (client *lucirpc.Client, providerBlock string) {
+	t.Helper()
+
+	hostname, port := RunOpenWrtServer(ctx, dockerPool, t)
+	client, err := lucirpc.NewClient(
+		ctx,
+		Scheme,
+		hostname,
+		port,
+		Username,
+		Password,
+	)
+	assert.NilError(t, err)
+	providerBlock = fmt.Sprintf(`
+provider "openwrt" {
+	hostname = %q
+	password = %q
+	port = %d
+	username = %q
+}
+`,
+		hostname,
+		Password,
+		port,
+		Username,
+	)
+	return
+}
+
+// RunOpenWrtServer constructs a running OpenWrt server.
+// The hostname and port can be arbitrary,
+// so they are returned to make it easier to interact with the OpenWrt server.
+func RunOpenWrtServer(
+	ctx context.Context,
+	dockerPool dockertest.Pool,
+	t *testing.T,
+) (hostname string, port uint16) {
+	t.Helper()
+
+	openWrt, err := dockerPool.Run(acceptanceTestDockerName, acceptanceTestDockerTag, []string{})
+	assert.NilError(t, err)
+	t.Cleanup(func() {
+		err = openWrt.Close()
+		assert.NilError(t, err)
+	})
+	err = openWrt.Expire(60)
+	assert.NilError(t, err)
+	err = dockerPool.Retry(checkHealth(ctx, dockerPool, *openWrt))
+	assert.NilError(t, err)
+	hostname = openWrt.GetBoundIP(acceptanceTestDockerPort)
+	rawPort := openWrt.GetPort(acceptanceTestDockerPort)
+	intPort, err := strconv.Atoi(rawPort)
+	assert.NilError(t, err)
+	port = uint16(intPort)
+
+	return
+}
+
+// RunOpenWrtServerWithProviderBlock constructs a running OpenWrt server,
+// and a stringified provider block.
+func RunOpenWrtServerWithProviderBlock(
+	ctx context.Context,
+	dockerPool dockertest.Pool,
+	t *testing.T,
+) string {
+	t.Helper()
+
+	hostname, port := RunOpenWrtServer(ctx, dockerPool, t)
+	providerBlock := fmt.Sprintf(`
+provider "openwrt" {
+	hostname = %q
+	password = %q
+	port = %d
+	username = %q
+}
+`,
+		hostname,
+		Password,
+		port,
+		Username,
+	)
+
+	return providerBlock
+}
+
 // Setup does a bit of setup so acceptance tests can run:
 //  1. Connect to a running docker daemon.
 //  2. Build and tag the image for acceptance tests.
@@ -122,64 +236,6 @@ func Setup(
 	return
 }
 
-// AuthenticatedClient starts an OpenWrt server,
-// and returns a [*lucirpc.Client] to interact with it.
-func AuthenticatedClient(
-	ctx context.Context,
-	dockerPool dockertest.Pool,
-	t *testing.T,
-) *lucirpc.Client {
-	t.Helper()
-
-	host, port := RunOpenWrtServer(ctx, dockerPool, t)
-	client, err := lucirpc.NewClient(
-		ctx,
-		Scheme,
-		host,
-		port,
-		Username,
-		Password,
-	)
-	assert.NilError(t, err)
-	return client
-}
-
-// AuthenticatedClientWithProviderBlock starts an OpenWrt server,
-// returns a [*lucirpc.Client] to interact with it,
-// and a stringified provider block.
-func AuthenticatedClientWithProviderBlock(
-	ctx context.Context,
-	dockerPool dockertest.Pool,
-	t *testing.T,
-) (client *lucirpc.Client, providerBlock string) {
-	t.Helper()
-
-	hostname, port := RunOpenWrtServer(ctx, dockerPool, t)
-	client, err := lucirpc.NewClient(
-		ctx,
-		Scheme,
-		hostname,
-		port,
-		Username,
-		Password,
-	)
-	assert.NilError(t, err)
-	providerBlock = fmt.Sprintf(`
-provider "openwrt" {
-	hostname = %q
-	password = %q
-	port = %d
-	username = %q
-}
-`,
-		hostname,
-		Password,
-		port,
-		Username,
-	)
-	return
-}
-
 func checkHealth(
 	ctx context.Context,
 	dockerPool dockertest.Pool,
@@ -198,62 +254,6 @@ func checkHealth(
 
 		return nil
 	}
-}
-
-// RunOpenWrtServer constructs a running OpenWrt server.
-// The hostname and port can be arbitrary,
-// so they are returned to make it easier to interact with the OpenWrt server.
-func RunOpenWrtServer(
-	ctx context.Context,
-	dockerPool dockertest.Pool,
-	t *testing.T,
-) (hostname string, port uint16) {
-	t.Helper()
-
-	openWrt, err := dockerPool.Run(acceptanceTestDockerName, acceptanceTestDockerTag, []string{})
-	assert.NilError(t, err)
-	t.Cleanup(func() {
-		err = openWrt.Close()
-		assert.NilError(t, err)
-	})
-	err = openWrt.Expire(60)
-	assert.NilError(t, err)
-	err = dockerPool.Retry(checkHealth(ctx, dockerPool, *openWrt))
-	assert.NilError(t, err)
-	hostname = openWrt.GetBoundIP(acceptanceTestDockerPort)
-	rawPort := openWrt.GetPort(acceptanceTestDockerPort)
-	intPort, err := strconv.Atoi(rawPort)
-	assert.NilError(t, err)
-	port = uint16(intPort)
-
-	return
-}
-
-// RunOpenWrtServerWithProviderBlock constructs a running OpenWrt server,
-// and a stringified provider block.
-func RunOpenWrtServerWithProviderBlock(
-	ctx context.Context,
-	dockerPool dockertest.Pool,
-	t *testing.T,
-) string {
-	t.Helper()
-
-	hostname, port := RunOpenWrtServer(ctx, dockerPool, t)
-	providerBlock := fmt.Sprintf(`
-provider "openwrt" {
-	hostname = %q
-	password = %q
-	port = %d
-	username = %q
-}
-`,
-		hostname,
-		Password,
-		port,
-		Username,
-	)
-
-	return providerBlock
 }
 
 func loadImageCache(
