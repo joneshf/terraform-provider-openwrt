@@ -25,7 +25,7 @@ func TestSystemSystemResourceAcceptance(t *testing.T) {
 		t,
 	)
 
-	importTestStep := resource.TestStep{
+	importValidation := resource.TestStep{
 		Config: fmt.Sprintf(`
 %s
 
@@ -41,7 +41,7 @@ resource "openwrt_system_system" "this" {
 		ResourceName:       "openwrt_system_system.this",
 	}
 
-	readTestStep := resource.TestStep{
+	readResource := resource.TestStep{
 		Config: fmt.Sprintf(`
 %s
 
@@ -60,7 +60,7 @@ resource "openwrt_system_system" "this" {
 		),
 	}
 
-	updateAndReadTestStep := resource.TestStep{
+	updateAndReadResource := resource.TestStep{
 		Config: fmt.Sprintf(`
 %s
 
@@ -88,9 +88,9 @@ resource "openwrt_system_system" "this" {
 			"openwrt": providerserver.NewProtocol6WithError(openwrt.New("test", os.LookupEnv)),
 		},
 		Steps: []resource.TestStep{
-			importTestStep,
-			readTestStep,
-			updateAndReadTestStep,
+			importValidation,
+			readResource,
+			updateAndReadResource,
 		},
 	})
 }

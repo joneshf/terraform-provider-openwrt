@@ -25,7 +25,7 @@ func TestNetworkGlobalsResourceAcceptance(t *testing.T) {
 		t,
 	)
 
-	createAndReadTestStep := resource.TestStep{
+	createAndReadResource := resource.TestStep{
 		Config: fmt.Sprintf(`
 %s
 
@@ -41,12 +41,12 @@ resource "openwrt_network_globals" "this" {
 			resource.TestCheckNoResourceAttr("openwrt_network_globals.this", "ula_prefix"),
 		),
 	}
-	importTestStep := resource.TestStep{
+	importValidation := resource.TestStep{
 		ImportState:       true,
 		ImportStateVerify: true,
 		ResourceName:      "openwrt_network_globals.this",
 	}
-	updateAndReadTestStep := resource.TestStep{
+	updateAndReadResource := resource.TestStep{
 		Config: fmt.Sprintf(`
 %s
 
@@ -70,9 +70,9 @@ resource "openwrt_network_globals" "this" {
 			"openwrt": providerserver.NewProtocol6WithError(openwrt.New("test", os.LookupEnv)),
 		},
 		Steps: []resource.TestStep{
-			createAndReadTestStep,
-			importTestStep,
-			updateAndReadTestStep,
+			createAndReadResource,
+			importValidation,
+			updateAndReadResource,
 		},
 	})
 }
