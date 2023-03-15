@@ -24,7 +24,7 @@ func TestMain(m *testing.M) {
 		tearDown func()
 	)
 	ctx := context.Background()
-	tearDown, dockerPool, err = acceptancetest.Setup(ctx, m)
+	tearDown, dockerPool, err = acceptancetest.Setup(ctx)
 	defer func() {
 		tearDown()
 		os.Exit(code)
