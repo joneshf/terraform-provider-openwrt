@@ -6,14 +6,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-framework/providerserver"
-	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/joneshf/terraform-provider-openwrt/internal/acceptancetest"
-	"github.com/joneshf/terraform-provider-openwrt/openwrt"
 	"gotest.tools/v3/assert"
 )
 
@@ -54,12 +50,8 @@ data "openwrt_network_device" "this" {
 		),
 	}
 
-	resource.Test(t, resource.TestCase{
-		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){
-			"openwrt": providerserver.NewProtocol6WithError(openwrt.New("test", os.LookupEnv)),
-		},
-		Steps: []resource.TestStep{
-			readDataSource,
-		},
-	})
+	acceptancetest.TerraformSteps(
+		t,
+		readDataSource,
+	)
 }
