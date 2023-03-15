@@ -3,6 +3,8 @@ package network
 import (
 	"encoding/json"
 
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/lucirpcglue"
 )
@@ -41,6 +43,26 @@ var (
 		UpsertRequest:     lucirpcglue.UpsertRequestOptionBool(globalsModelGetPacketSteering, globalsPacketSteeringAttribute, globalsPacketSteeringUCIOption),
 	}
 )
+
+func NewGlobalsDataSource() datasource.DataSource {
+	return lucirpcglue.NewDataSource(
+		globalsModelGetId,
+		globalsSchemaAttributes,
+		globalsSchemaDescription,
+		globalsUCIConfig,
+		globalsUCIType,
+	)
+}
+
+func NewGlobalsResource() resource.Resource {
+	return lucirpcglue.NewResource(
+		globalsModelGetId,
+		globalsSchemaAttributes,
+		globalsSchemaDescription,
+		globalsUCIConfig,
+		globalsUCIType,
+	)
+}
 
 type globalsModel struct {
 	Id             types.String `tfsdk:"id"`
