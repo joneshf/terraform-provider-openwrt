@@ -13,7 +13,11 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
+	"github.com/joneshf/terraform-provider-openwrt/openwrt"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 	"gotest.tools/v3/assert"
@@ -234,6 +238,24 @@ func Setup(
 	}
 
 	return
+}
+
+// TerraformSteps removes a bit of boilerplate around setting up the [resource.TestStep]s.
+func TerraformSteps(
+	t *testing.T,
+	testStep resource.TestStep,
+	testSteps ...resource.TestStep,
+) {
+	t.Helper()
+
+	allTestSteps := append([]resource.TestStep{testStep}, testSteps...)
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: map[string]func() (tfprotov6.ProviderServer, error){
+			"openwrt": providerserver.NewProtocol6WithError(openwrt.New("test", os.LookupEnv)),
+		},
+		Steps: allTestSteps,
+	})
+
 }
 
 func checkHealth(
