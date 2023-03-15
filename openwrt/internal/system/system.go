@@ -3,6 +3,8 @@ package system
 import (
 	"encoding/json"
 
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/lucirpcglue"
 )
@@ -118,6 +120,26 @@ var (
 		UpsertRequest:     lucirpcglue.UpsertRequestOptionString(systemModelGetZonename, systemZonenameAttribute, systemZonenameUCIOption),
 	}
 )
+
+func NewSystemDataSource() datasource.DataSource {
+	return lucirpcglue.NewDataSource(
+		systemModelGetId,
+		systemSchemaAttributes,
+		systemSchemaDescription,
+		systemUCIConfig,
+		systemUCIType,
+	)
+}
+
+func NewSystemResource() resource.Resource {
+	return lucirpcglue.NewResource(
+		systemModelGetId,
+		systemSchemaAttributes,
+		systemSchemaDescription,
+		systemUCIConfig,
+		systemUCIType,
+	)
+}
 
 type systemModel struct {
 	ConLogLevel  types.Int64  `tfsdk:"conloglevel"`
