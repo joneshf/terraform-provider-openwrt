@@ -162,7 +162,6 @@ provider "openwrt" {
 // The tearDown function must be called after tests are finished.
 func Setup(
 	ctx context.Context,
-	m *testing.M,
 ) (tearDown func(), dockerPool *dockertest.Pool, err error) {
 	var conn net.Conn
 	tearDown = func() {
