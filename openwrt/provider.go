@@ -380,7 +380,7 @@ func setProviderData(
 ) {
 	tflog.Debug(ctx, "Making OpenWrt provider data available during DataSource, and Resource type Configure methods")
 
-	providerData := lucirpcglue.NewProviderData(*client)
+	providerData := lucirpcglue.NewProviderData(*client, providerTypeName)
 	res.DataSourceData = providerData
 	res.ResourceData = providerData
 }

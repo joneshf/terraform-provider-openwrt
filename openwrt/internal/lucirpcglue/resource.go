@@ -31,6 +31,7 @@ func NewResource[Model any](
 		getId:             getId,
 		schemaAttributes:  schemaAttributes,
 		schemaDescription: schemaDescription,
+		terraformType:     ResourceTerraformType,
 		uciConfig:         uciConfig,
 		uciType:           uciType,
 	}
@@ -53,7 +54,7 @@ func (d *deviceResource[Model]) Configure(
 	req resource.ConfigureRequest,
 	res *resource.ConfigureResponse,
 ) {
-	tflog.Info(ctx, fmt.Sprintf("Configuring %s resource", d.fullTypeName))
+	tflog.Info(ctx, fmt.Sprintf("Configuring %s.%s resource", d.uciConfig, d.uciType))
 	if req.ProviderData == nil {
 		tflog.Debug(ctx, "No provider data")
 		return
@@ -66,6 +67,7 @@ func (d *deviceResource[Model]) Configure(
 	}
 
 	d.client = providerData.Client
+	d.fullTypeName = d.getFullTypeName(providerData.TypeName)
 }
 
 // Create constructs a new resource and sets the initial Terraform state.
@@ -181,10 +183,7 @@ func (d *deviceResource[Model]) Metadata(
 	req resource.MetadataRequest,
 	res *resource.MetadataResponse,
 ) {
-	fullTypeName := fmt.Sprintf("%s_%s_%s", req.ProviderTypeName, d.uciConfig, d.uciType)
-	d.fullTypeName = fullTypeName
-	d.terraformType = ResourceTerraformType
-	res.TypeName = fullTypeName
+	res.TypeName = d.getFullTypeName(req.ProviderTypeName)
 }
 
 // Read refreshes the Terraform state with the latest data.
@@ -304,4 +303,10 @@ func (d *deviceResource[Model]) Update(
 	if res.Diagnostics.HasError() {
 		return
 	}
+}
+
+func (d deviceResource[Model]) getFullTypeName(
+	providerTypeName string,
+) string {
+	return fmt.Sprintf("%s_%s_%s", providerTypeName, d.uciConfig, d.uciType)
 }

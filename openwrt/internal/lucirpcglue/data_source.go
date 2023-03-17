@@ -28,6 +28,7 @@ func NewDataSource[Model any](
 		getId:             getId,
 		schemaAttributes:  schemaAttributes,
 		schemaDescription: schemaDescription,
+		terraformType:     DataSourceTerraformType,
 		uciConfig:         uciConfig,
 		uciType:           uciType,
 	}
@@ -50,7 +51,7 @@ func (d *dataSource[Model]) Configure(
 	req datasource.ConfigureRequest,
 	res *datasource.ConfigureResponse,
 ) {
-	tflog.Info(ctx, fmt.Sprintf("Configuring %s data source", d.fullTypeName))
+	tflog.Info(ctx, fmt.Sprintf("Configuring %s.%s data source", d.uciConfig, d.uciType))
 	if req.ProviderData == nil {
 		tflog.Debug(ctx, "No provider data")
 		return
@@ -63,6 +64,7 @@ func (d *dataSource[Model]) Configure(
 	}
 
 	d.client = providerData.Client
+	d.fullTypeName = d.getFullTypeName(providerData.TypeName)
 }
 
 // Metadata sets the data source name.
@@ -71,10 +73,7 @@ func (d *dataSource[Model]) Metadata(
 	req datasource.MetadataRequest,
 	res *datasource.MetadataResponse,
 ) {
-	fullTypeName := fmt.Sprintf("%s_%s_%s", req.ProviderTypeName, d.uciConfig, d.uciType)
-	d.fullTypeName = fullTypeName
-	d.terraformType = DataSourceTerraformType
-	res.TypeName = fullTypeName
+	res.TypeName = d.getFullTypeName(req.ProviderTypeName)
 }
 
 // Read refreshes the Terraform state with the latest data.
@@ -130,4 +129,10 @@ func (d *dataSource[Model]) Schema(
 		Attributes:  attributes,
 		Description: d.schemaDescription,
 	}
+}
+
+func (d dataSource[Model]) getFullTypeName(
+	providerTypeName string,
+) string {
+	return fmt.Sprintf("%s_%s_%s", providerTypeName, d.uciConfig, d.uciType)
 }
