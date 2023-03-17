@@ -56,13 +56,13 @@ func (d *dataSource[Model]) Configure(
 		return
 	}
 
-	client, diagnostics := NewClient(ConfigureRequest(req))
+	providerData, diagnostics := ParseProviderData(ConfigureRequest(req))
 	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {
 		return
 	}
 
-	d.client = *client
+	d.client = providerData.Client
 }
 
 // Metadata sets the data source name.

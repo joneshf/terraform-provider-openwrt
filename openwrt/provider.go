@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
+	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/lucirpcglue"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/network"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/system"
 )
@@ -136,7 +137,7 @@ func (p *openWrtProvider) Configure(
 		return
 	}
 
-	provideClient(ctx, client, res)
+	setProviderData(ctx, client, res)
 	if res.Diagnostics.HasError() {
 		return
 	}
@@ -362,17 +363,6 @@ func newProviderModel(
 	return config
 }
 
-func provideClient(
-	ctx context.Context,
-	client *lucirpc.Client,
-	res *provider.ConfigureResponse,
-) {
-	tflog.Debug(ctx, "Making OpenWrt client available during DataSource, and Resource type Configure methods")
-
-	res.DataSourceData = client
-	res.ResourceData = client
-}
-
 func setField(
 	ctx context.Context,
 	key string,
@@ -381,6 +371,18 @@ func setField(
 	field := fmt.Sprintf("%s_%s", providerTypeName, key)
 	ctx = tflog.SetField(ctx, field, value)
 	return ctx
+}
+
+func setProviderData(
+	ctx context.Context,
+	client *lucirpc.Client,
+	res *provider.ConfigureResponse,
+) {
+	tflog.Debug(ctx, "Making OpenWrt provider data available during DataSource, and Resource type Configure methods")
+
+	providerData := lucirpcglue.NewProviderData(*client)
+	res.DataSourceData = providerData
+	res.ResourceData = providerData
 }
 
 func validateConfigurationKnown(
