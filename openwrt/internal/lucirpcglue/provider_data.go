@@ -11,9 +11,11 @@ type ConfigureRequest struct {
 
 func NewProviderData(
 	client lucirpc.Client,
+	typeName string,
 ) ProviderData {
 	return ProviderData{
-		Client: client,
+		Client:   client,
+		TypeName: typeName,
 	}
 }
 
@@ -36,5 +38,6 @@ func ParseProviderData(
 }
 
 type ProviderData struct {
-	Client lucirpc.Client
+	Client   lucirpc.Client
+	TypeName string
 }
