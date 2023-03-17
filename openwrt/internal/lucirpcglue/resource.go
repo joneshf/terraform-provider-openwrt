@@ -59,13 +59,13 @@ func (d *deviceResource[Model]) Configure(
 		return
 	}
 
-	client, diagnostics := NewClient(ConfigureRequest(req))
+	providerData, diagnostics := ParseProviderData(ConfigureRequest(req))
 	res.Diagnostics.Append(diagnostics...)
 	if res.Diagnostics.HasError() {
 		return
 	}
 
-	d.client = *client
+	d.client = providerData.Client
 }
 
 // Create constructs a new resource and sets the initial Terraform state.
