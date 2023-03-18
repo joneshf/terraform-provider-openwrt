@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/joneshf/terraform-provider-openwrt/internal/acceptancetest"
+	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
 	"gotest.tools/v3/assert"
 )
 
@@ -22,7 +23,7 @@ func TestNetworkDeviceDataSourceAcceptance(t *testing.T) {
 		*dockerPool,
 		t,
 	)
-	options := map[string]json.RawMessage{
+	options := lucirpc.Options{
 		"name":  json.RawMessage(`"br-testing"`),
 		"ports": json.RawMessage(`["eth0", "eth1"]`),
 		"type":  json.RawMessage(`"bridge"`),

@@ -2,7 +2,6 @@ package lucirpcglue
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -17,7 +16,7 @@ func CreateSection(
 	config string,
 	sectionType string,
 	section string,
-	options map[string]json.RawMessage,
+	options lucirpc.Options,
 ) diag.Diagnostics {
 	diagnostics := diag.Diagnostics{}
 	result, err := client.CreateSection(
@@ -86,7 +85,7 @@ func GetSection(
 	client lucirpc.Client,
 	config string,
 	section string,
-) (map[string]json.RawMessage, diag.Diagnostics) {
+) (lucirpc.Options, diag.Diagnostics) {
 	diagnostics := diag.Diagnostics{}
 	result, err := client.GetSection(ctx, config, section)
 	if err != nil {
@@ -94,7 +93,7 @@ func GetSection(
 			fmt.Sprintf("problem getting %s.%s section", config, section),
 			err.Error(),
 		)
-		return map[string]json.RawMessage{}, diagnostics
+		return lucirpc.Options{}, diagnostics
 	}
 
 	return result, diagnostics
@@ -107,7 +106,7 @@ func UpdateSection(
 	client lucirpc.Client,
 	config string,
 	section string,
-	options map[string]json.RawMessage,
+	options lucirpc.Options,
 ) diag.Diagnostics {
 	diagnostics := diag.Diagnostics{}
 	result, err := client.UpdateSection(

@@ -1,11 +1,10 @@
 package network
 
 import (
-	"encoding/json"
-
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/lucirpcglue"
 )
 
@@ -23,20 +22,20 @@ const (
 )
 
 var (
-	globalsSchemaAttributes = map[string]lucirpcglue.SchemaAttribute[globalsModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	globalsSchemaAttributes = map[string]lucirpcglue.SchemaAttribute[globalsModel, lucirpc.Options, lucirpc.Options]{
 		globalsULAPrefixAttribute:      globalsULAPrefixSchemaAttribute,
 		globalsPacketSteeringAttribute: globalsPacketSteeringSchemaAttribute,
 		lucirpcglue.IdAttribute:        lucirpcglue.IdSchemaAttribute(globalsModelGetId, globalsModelSetId),
 	}
 
-	globalsULAPrefixSchemaAttribute = lucirpcglue.StringSchemaAttribute[globalsModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	globalsULAPrefixSchemaAttribute = lucirpcglue.StringSchemaAttribute[globalsModel, lucirpc.Options, lucirpc.Options]{
 		Description:       "IPv6 ULA prefix for this device.",
 		ReadResponse:      lucirpcglue.ReadResponseOptionString(globalsModelSetULAPrefix, globalsULAPrefixAttribute, globalsULAPrefixUCIOption),
 		ResourceExistence: lucirpcglue.NoValidation,
 		UpsertRequest:     lucirpcglue.UpsertRequestOptionString(globalsModelGetULAPrefix, globalsULAPrefixAttribute, globalsULAPrefixUCIOption),
 	}
 
-	globalsPacketSteeringSchemaAttribute = lucirpcglue.BoolSchemaAttribute[globalsModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	globalsPacketSteeringSchemaAttribute = lucirpcglue.BoolSchemaAttribute[globalsModel, lucirpc.Options, lucirpc.Options]{
 		Description:       "Use every CPU to handle packet traffic.",
 		ReadResponse:      lucirpcglue.ReadResponseOptionBool(globalsModelSetPacketSteering, globalsPacketSteeringAttribute, globalsPacketSteeringUCIOption),
 		ResourceExistence: lucirpcglue.NoValidation,

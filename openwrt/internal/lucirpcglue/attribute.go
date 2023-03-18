@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/logger"
 )
 
@@ -118,15 +119,15 @@ func (a BoolSchemaAttribute[Model, Request, Response]) Upsert(
 func IdSchemaAttribute[Model any](
 	get func(Model) types.String,
 	set func(*Model, types.String),
-) SchemaAttribute[Model, map[string]json.RawMessage, map[string]json.RawMessage] {
-	return StringSchemaAttribute[Model, map[string]json.RawMessage, map[string]json.RawMessage]{
+) SchemaAttribute[Model, lucirpc.Options, lucirpc.Options] {
+	return StringSchemaAttribute[Model, lucirpc.Options, lucirpc.Options]{
 		DataSourceExistence: Required,
 		Description:         idAttributeDescription,
 		ReadResponse: func(
 			ctx context.Context,
 			fullTypeName string,
 			terraformType string,
-			section map[string]json.RawMessage,
+			section lucirpc.Options,
 			model Model,
 		) (context.Context, Model, diag.Diagnostics) {
 			ctx, value, diagnostics := GetMetadataString(ctx, fullTypeName, terraformType, section, idUCISection)
@@ -137,9 +138,9 @@ func IdSchemaAttribute[Model any](
 		UpsertRequest: func(
 			ctx context.Context,
 			fullTypeName string,
-			options map[string]json.RawMessage,
+			options lucirpc.Options,
 			model Model,
-		) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+		) (context.Context, lucirpc.Options, diag.Diagnostics) {
 			id := get(model)
 			ctx = logger.SetFieldString(ctx, fullTypeName, ResourceTerraformType, IdAttribute, id)
 			return ctx, options, diag.Diagnostics{}
@@ -216,12 +217,12 @@ func ReadResponseOptionBool[Model any](
 	set func(*Model, types.Bool),
 	attribute string,
 	option string,
-) func(context.Context, string, string, map[string]json.RawMessage, Model) (context.Context, Model, diag.Diagnostics) {
+) func(context.Context, string, string, lucirpc.Options, Model) (context.Context, Model, diag.Diagnostics) {
 	return func(
 		ctx context.Context,
 		fullTypeName string,
 		terraformType string,
-		section map[string]json.RawMessage,
+		section lucirpc.Options,
 		model Model,
 	) (context.Context, Model, diag.Diagnostics) {
 		ctx, value, diagnostics := GetOptionBool(ctx, fullTypeName, terraformType, section, path.Root(attribute), option)
@@ -234,12 +235,12 @@ func ReadResponseOptionInt64[Model any](
 	set func(*Model, types.Int64),
 	attribute string,
 	option string,
-) func(context.Context, string, string, map[string]json.RawMessage, Model) (context.Context, Model, diag.Diagnostics) {
+) func(context.Context, string, string, lucirpc.Options, Model) (context.Context, Model, diag.Diagnostics) {
 	return func(
 		ctx context.Context,
 		fullTypeName string,
 		terraformType string,
-		section map[string]json.RawMessage,
+		section lucirpc.Options,
 		model Model,
 	) (context.Context, Model, diag.Diagnostics) {
 		ctx, value, diagnostics := GetOptionInt64(ctx, fullTypeName, terraformType, section, path.Root(attribute), option)
@@ -252,12 +253,12 @@ func ReadResponseOptionSetString[Model any](
 	set func(*Model, types.Set),
 	attribute string,
 	option string,
-) func(context.Context, string, string, map[string]json.RawMessage, Model) (context.Context, Model, diag.Diagnostics) {
+) func(context.Context, string, string, lucirpc.Options, Model) (context.Context, Model, diag.Diagnostics) {
 	return func(
 		ctx context.Context,
 		fullTypeName string,
 		terraformType string,
-		section map[string]json.RawMessage,
+		section lucirpc.Options,
 		model Model,
 	) (context.Context, Model, diag.Diagnostics) {
 		ctx, value, diagnostics := GetOptionSetString(ctx, fullTypeName, terraformType, section, path.Root(attribute), option)
@@ -270,12 +271,12 @@ func ReadResponseOptionString[Model any](
 	set func(*Model, types.String),
 	attribute string,
 	option string,
-) func(context.Context, string, string, map[string]json.RawMessage, Model) (context.Context, Model, diag.Diagnostics) {
+) func(context.Context, string, string, lucirpc.Options, Model) (context.Context, Model, diag.Diagnostics) {
 	return func(
 		ctx context.Context,
 		fullTypeName string,
 		terraformType string,
-		section map[string]json.RawMessage,
+		section lucirpc.Options,
 		model Model,
 	) (context.Context, Model, diag.Diagnostics) {
 		ctx, value, diagnostics := GetOptionString(ctx, fullTypeName, terraformType, section, path.Root(attribute), option)
@@ -448,13 +449,13 @@ func UpsertRequestOptionBool[Model any](
 	get func(Model) types.Bool,
 	attribute string,
 	option string,
-) func(context.Context, string, map[string]json.RawMessage, Model) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+) func(context.Context, string, lucirpc.Options, Model) (context.Context, lucirpc.Options, diag.Diagnostics) {
 	return func(
 		ctx context.Context,
 		fullTypeName string,
-		options map[string]json.RawMessage,
+		options lucirpc.Options,
 		model Model,
-	) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+	) (context.Context, lucirpc.Options, diag.Diagnostics) {
 		str := get(model)
 		if !hasValue(str) {
 			return ctx, options, diag.Diagnostics{}
@@ -475,13 +476,13 @@ func UpsertRequestOptionInt64[Model any](
 	get func(Model) types.Int64,
 	attribute string,
 	option string,
-) func(context.Context, string, map[string]json.RawMessage, Model) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+) func(context.Context, string, lucirpc.Options, Model) (context.Context, lucirpc.Options, diag.Diagnostics) {
 	return func(
 		ctx context.Context,
 		fullTypeName string,
-		options map[string]json.RawMessage,
+		options lucirpc.Options,
 		model Model,
-	) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+	) (context.Context, lucirpc.Options, diag.Diagnostics) {
 		str := get(model)
 		if !hasValue(str) {
 			return ctx, options, diag.Diagnostics{}
@@ -502,13 +503,13 @@ func UpsertRequestOptionSetString[Model any](
 	get func(Model) types.Set,
 	attribute string,
 	option string,
-) func(context.Context, string, map[string]json.RawMessage, Model) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+) func(context.Context, string, lucirpc.Options, Model) (context.Context, lucirpc.Options, diag.Diagnostics) {
 	return func(
 		ctx context.Context,
 		fullTypeName string,
-		options map[string]json.RawMessage,
+		options lucirpc.Options,
 		model Model,
-	) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+	) (context.Context, lucirpc.Options, diag.Diagnostics) {
 		str := get(model)
 		if !hasValue(str) {
 			return ctx, options, diag.Diagnostics{}
@@ -529,13 +530,13 @@ func UpsertRequestOptionString[Model any](
 	get func(Model) types.String,
 	attribute string,
 	option string,
-) func(context.Context, string, map[string]json.RawMessage, Model) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+) func(context.Context, string, lucirpc.Options, Model) (context.Context, lucirpc.Options, diag.Diagnostics) {
 	return func(
 		ctx context.Context,
 		fullTypeName string,
-		options map[string]json.RawMessage,
+		options lucirpc.Options,
 		model Model,
-	) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+	) (context.Context, lucirpc.Options, diag.Diagnostics) {
 		str := get(model)
 		if !hasValue(str) {
 			return ctx, options, diag.Diagnostics{}

@@ -1,11 +1,10 @@
 package system
 
 import (
-	"encoding/json"
-
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/lucirpcglue"
 )
 
@@ -44,49 +43,49 @@ const (
 )
 
 var (
-	systemConLogLevelSchemaAttribute = lucirpcglue.Int64SchemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	systemConLogLevelSchemaAttribute = lucirpcglue.Int64SchemaAttribute[systemModel, lucirpc.Options, lucirpc.Options]{
 		Description:       "The maximum log level for kernel messages to be logged to the console.",
 		ReadResponse:      lucirpcglue.ReadResponseOptionInt64(systemModelSetConLogLevel, systemConLogLevelAttribute, systemConLogLevelUCIOption),
 		ResourceExistence: lucirpcglue.NoValidation,
 		UpsertRequest:     lucirpcglue.UpsertRequestOptionInt64(systemModelGetConLogLevel, systemConLogLevelAttribute, systemConLogLevelUCIOption),
 	}
 
-	systemCronLogLevelSchemaAttribute = lucirpcglue.Int64SchemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	systemCronLogLevelSchemaAttribute = lucirpcglue.Int64SchemaAttribute[systemModel, lucirpc.Options, lucirpc.Options]{
 		Description:       "The minimum level for cron messages to be logged to syslog.",
 		ReadResponse:      lucirpcglue.ReadResponseOptionInt64(systemModelSetCronLogLevel, systemCronLogLevelAttribute, systemCronLogLevelUCIOption),
 		ResourceExistence: lucirpcglue.NoValidation,
 		UpsertRequest:     lucirpcglue.UpsertRequestOptionInt64(systemModelGetCronLogLevel, systemCronLogLevelAttribute, systemCronLogLevelUCIOption),
 	}
 
-	systemDescriptionSchemaAttribute = lucirpcglue.StringSchemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	systemDescriptionSchemaAttribute = lucirpcglue.StringSchemaAttribute[systemModel, lucirpc.Options, lucirpc.Options]{
 		Description:       "The hostname for the system.",
 		ReadResponse:      lucirpcglue.ReadResponseOptionString(systemModelSetDescription, systemDescriptionAttribute, systemDescriptionUCIOption),
 		ResourceExistence: lucirpcglue.NoValidation,
 		UpsertRequest:     lucirpcglue.UpsertRequestOptionString(systemModelGetDescription, systemDescriptionAttribute, systemDescriptionUCIOption),
 	}
 
-	systemHostnameSchemaAttribute = lucirpcglue.StringSchemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	systemHostnameSchemaAttribute = lucirpcglue.StringSchemaAttribute[systemModel, lucirpc.Options, lucirpc.Options]{
 		Description:       "A short single-line description for the system.",
 		ReadResponse:      lucirpcglue.ReadResponseOptionString(systemModelSetHostname, systemHostnameAttribute, systemHostnameUCIOption),
 		ResourceExistence: lucirpcglue.NoValidation,
 		UpsertRequest:     lucirpcglue.UpsertRequestOptionString(systemModelGetHostname, systemHostnameAttribute, systemHostnameUCIOption),
 	}
 
-	systemLogSizeSchemaAttribute = lucirpcglue.Int64SchemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	systemLogSizeSchemaAttribute = lucirpcglue.Int64SchemaAttribute[systemModel, lucirpc.Options, lucirpc.Options]{
 		Description:       "Size of the file based log buffer in KiB.",
 		ReadResponse:      lucirpcglue.ReadResponseOptionInt64(systemModelSetLogSize, systemLogSizeAttribute, systemLogSizeUCIOption),
 		ResourceExistence: lucirpcglue.NoValidation,
 		UpsertRequest:     lucirpcglue.UpsertRequestOptionInt64(systemModelGetLogSize, systemLogSizeAttribute, systemLogSizeUCIOption),
 	}
 
-	systemNotesSchemaAttribute = lucirpcglue.StringSchemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	systemNotesSchemaAttribute = lucirpcglue.StringSchemaAttribute[systemModel, lucirpc.Options, lucirpc.Options]{
 		Description:       "Multi-line free-form text about the system.",
 		ReadResponse:      lucirpcglue.ReadResponseOptionString(systemModelSetNotes, systemNotesAttribute, systemNotesUCIOption),
 		ResourceExistence: lucirpcglue.NoValidation,
 		UpsertRequest:     lucirpcglue.UpsertRequestOptionString(systemModelGetNotes, systemNotesAttribute, systemNotesUCIOption),
 	}
 
-	systemSchemaAttributes = map[string]lucirpcglue.SchemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	systemSchemaAttributes = map[string]lucirpcglue.SchemaAttribute[systemModel, lucirpc.Options, lucirpc.Options]{
 		lucirpcglue.IdAttribute:     lucirpcglue.IdSchemaAttribute(systemModelGetId, systemModelSetId),
 		systemConLogLevelAttribute:  systemConLogLevelSchemaAttribute,
 		systemCronLogLevelAttribute: systemCronLogLevelSchemaAttribute,
@@ -99,21 +98,21 @@ var (
 		systemZonenameAttribute:     systemZonenameSchemaAttribute,
 	}
 
-	systemTimezoneSchemaAttribute = lucirpcglue.StringSchemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	systemTimezoneSchemaAttribute = lucirpcglue.StringSchemaAttribute[systemModel, lucirpc.Options, lucirpc.Options]{
 		Description:       "The POSIX.1 time zone string. This has no corresponding value in LuCI. See: https://github.com/openwrt/luci/blob/cd82ccacef78d3bb8b8af6b87dabb9e892e2b2aa/modules/luci-base/luasrc/sys/zoneinfo/tzdata.lua.",
 		ReadResponse:      lucirpcglue.ReadResponseOptionString(systemModelSetTimezone, systemTimezoneAttribute, systemTimezoneUCIOption),
 		ResourceExistence: lucirpcglue.NoValidation,
 		UpsertRequest:     lucirpcglue.UpsertRequestOptionString(systemModelGetTimezone, systemTimezoneAttribute, systemTimezoneUCIOption),
 	}
 
-	systemTtyLoginSchemaAttribute = lucirpcglue.BoolSchemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	systemTtyLoginSchemaAttribute = lucirpcglue.BoolSchemaAttribute[systemModel, lucirpc.Options, lucirpc.Options]{
 		Description:       "Require authentication for local users to log in the system.",
 		ReadResponse:      lucirpcglue.ReadResponseOptionBool(systemModelSetTTYLogin, systemTTYLoginAttribute, systemTTYLoginUCIOption),
 		ResourceExistence: lucirpcglue.NoValidation,
 		UpsertRequest:     lucirpcglue.UpsertRequestOptionBool(systemModelGetTTYLogin, systemTTYLoginAttribute, systemTTYLoginUCIOption),
 	}
 
-	systemZonenameSchemaAttribute = lucirpcglue.StringSchemaAttribute[systemModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	systemZonenameSchemaAttribute = lucirpcglue.StringSchemaAttribute[systemModel, lucirpc.Options, lucirpc.Options]{
 		Description:       "The IANA/Olson time zone string. This corresponds to \"Timezone\" in LuCI. See: https://github.com/openwrt/luci/blob/cd82ccacef78d3bb8b8af6b87dabb9e892e2b2aa/modules/luci-base/luasrc/sys/zoneinfo/tzdata.lua.",
 		ReadResponse:      lucirpcglue.ReadResponseOptionString(systemModelSetZonename, systemZonenameAttribute, systemZonenameUCIOption),
 		ResourceExistence: lucirpcglue.NoValidation,

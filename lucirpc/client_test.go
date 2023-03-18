@@ -33,7 +33,7 @@ func TestClientCreateSection(t *testing.T) {
 			"",
 			"",
 			"",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 
 		// Then
@@ -67,7 +67,7 @@ func TestClientCreateSection(t *testing.T) {
 			"",
 			"",
 			"",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 
 		// Then
@@ -93,7 +93,7 @@ func TestClientCreateSection(t *testing.T) {
 			"",
 			"",
 			"",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 
 		// Then
@@ -119,7 +119,7 @@ func TestClientCreateSection(t *testing.T) {
 			"",
 			"",
 			"",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 
 		// Then
@@ -147,7 +147,7 @@ func TestClientCreateSection(t *testing.T) {
 			"",
 			"",
 			"",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 
 		// Then
@@ -175,7 +175,7 @@ func TestClientCreateSection(t *testing.T) {
 			"",
 			"",
 			"",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 
 		// Then
@@ -203,7 +203,7 @@ func TestClientCreateSection(t *testing.T) {
 			"",
 			"",
 			"",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 
 		// Then
@@ -220,7 +220,7 @@ func TestClientCreateSection(t *testing.T) {
 			switch r.URL.Path {
 			case "/cgi-bin/luci/rpc/uci":
 				decoder := json.NewDecoder(r.Body)
-				var body map[string]json.RawMessage
+				var body lucirpc.Options
 				err := decoder.Decode(&body)
 				assert.NilError(t, err)
 				method, ok := body["method"]
@@ -251,7 +251,7 @@ func TestClientCreateSection(t *testing.T) {
 			"",
 			"",
 			"",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 
 		// Then
@@ -451,7 +451,7 @@ func TestClientDeleteSection(t *testing.T) {
 			switch r.URL.Path {
 			case "/cgi-bin/luci/rpc/uci":
 				decoder := json.NewDecoder(r.Body)
-				var body map[string]json.RawMessage
+				var body lucirpc.Options
 				err := decoder.Decode(&body)
 				assert.NilError(t, err)
 				method, ok := body["method"]
@@ -725,7 +725,7 @@ func TestClientGetSection(t *testing.T) {
 
 		// Then
 		assert.NilError(t, err)
-		want := map[string]json.RawMessage{
+		want := lucirpc.Options{
 			".name": json.RawMessage(`"section-name"`),
 			"baz":   json.RawMessage(`"1"`),
 			"foo":   json.RawMessage(`"bar"`),
@@ -922,7 +922,7 @@ func TestClientUpdateSection(t *testing.T) {
 			ctx,
 			"",
 			"",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 
 		// Then
@@ -955,7 +955,7 @@ func TestClientUpdateSection(t *testing.T) {
 			ctx,
 			"",
 			"",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 
 		// Then
@@ -980,7 +980,7 @@ func TestClientUpdateSection(t *testing.T) {
 			ctx,
 			"",
 			"",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 
 		// Then
@@ -1005,7 +1005,7 @@ func TestClientUpdateSection(t *testing.T) {
 			ctx,
 			"",
 			"",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 
 		// Then
@@ -1032,7 +1032,7 @@ func TestClientUpdateSection(t *testing.T) {
 			ctx,
 			"",
 			"",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 
 		// Then
@@ -1059,7 +1059,7 @@ func TestClientUpdateSection(t *testing.T) {
 			ctx,
 			"",
 			"",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 
 		// Then
@@ -1086,7 +1086,7 @@ func TestClientUpdateSection(t *testing.T) {
 			ctx,
 			"",
 			"",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 
 		// Then
@@ -1103,7 +1103,7 @@ func TestClientUpdateSection(t *testing.T) {
 			switch r.URL.Path {
 			case "/cgi-bin/luci/rpc/uci":
 				decoder := json.NewDecoder(r.Body)
-				var body map[string]json.RawMessage
+				var body lucirpc.Options
 				err := decoder.Decode(&body)
 				assert.NilError(t, err)
 				method, ok := body["method"]
@@ -1133,7 +1133,7 @@ func TestClientUpdateSection(t *testing.T) {
 			ctx,
 			"",
 			"",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 
 		// Then

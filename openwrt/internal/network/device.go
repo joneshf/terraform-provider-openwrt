@@ -1,7 +1,6 @@
 package network
 
 import (
-	"encoding/json"
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -12,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/lucirpcglue"
 )
 
@@ -64,7 +64,7 @@ const (
 )
 
 var (
-	deviceBridgePortsSchemaAttribute = lucirpcglue.SetStringSchemaAttribute[deviceModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	deviceBridgePortsSchemaAttribute = lucirpcglue.SetStringSchemaAttribute[deviceModel, lucirpc.Options, lucirpc.Options]{
 		Description:       deviceBridgePortsAttributeDescription,
 		ReadResponse:      lucirpcglue.ReadResponseOptionSetString(deviceModelSetBridgePorts, deviceBridgePortsAttribute, deviceBridgePortsUCIOption),
 		ResourceExistence: lucirpcglue.NoValidation,
@@ -78,7 +78,7 @@ var (
 		},
 	}
 
-	deviceBringUpEmptyBridgeSchemaAttribute = lucirpcglue.BoolSchemaAttribute[deviceModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	deviceBringUpEmptyBridgeSchemaAttribute = lucirpcglue.BoolSchemaAttribute[deviceModel, lucirpc.Options, lucirpc.Options]{
 		Description:       deviceBringUpEmptyBridgeAttributeDescription,
 		ReadResponse:      lucirpcglue.ReadResponseOptionBool(deviceModelSetBringUpEmptyBridge, deviceBringUpEmptyBridgeAttribute, deviceBringUpEmptyBridgeUCIOption),
 		ResourceExistence: lucirpcglue.NoValidation,
@@ -91,7 +91,7 @@ var (
 		},
 	}
 
-	deviceDADTransmitsSchemaAttribute = lucirpcglue.Int64SchemaAttribute[deviceModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	deviceDADTransmitsSchemaAttribute = lucirpcglue.Int64SchemaAttribute[deviceModel, lucirpc.Options, lucirpc.Options]{
 		Description:       deviceDADTransmitsAttributeDescription,
 		ReadResponse:      lucirpcglue.ReadResponseOptionInt64(deviceModelSetDADTransmits, deviceDADTransmitsAttribute, deviceDADTransmitsUCIOption),
 		ResourceExistence: lucirpcglue.NoValidation,
@@ -105,14 +105,14 @@ var (
 		},
 	}
 
-	deviceEnableIPv6SchemaAttribute = lucirpcglue.BoolSchemaAttribute[deviceModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	deviceEnableIPv6SchemaAttribute = lucirpcglue.BoolSchemaAttribute[deviceModel, lucirpc.Options, lucirpc.Options]{
 		Description:       deviceEnableIPv6AttributeDescription,
 		ReadResponse:      lucirpcglue.ReadResponseOptionBool(deviceModelSetEnableIPv6, deviceEnableIPv6Attribute, deviceEnableIPv6UCIOption),
 		ResourceExistence: lucirpcglue.NoValidation,
 		UpsertRequest:     lucirpcglue.UpsertRequestOptionBool(deviceModelGetEnableIPv6, deviceEnableIPv6Attribute, deviceEnableIPv6UCIOption),
 	}
 
-	deviceMacAddressSchemaAttribute = lucirpcglue.StringSchemaAttribute[deviceModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	deviceMacAddressSchemaAttribute = lucirpcglue.StringSchemaAttribute[deviceModel, lucirpc.Options, lucirpc.Options]{
 		Description:       deviceMacAddressAttributeDescription,
 		ReadResponse:      lucirpcglue.ReadResponseOptionString(deviceModelSetMacAddress, deviceMacAddressAttribute, deviceMacAddressUCIOption),
 		ResourceExistence: lucirpcglue.NoValidation,
@@ -125,7 +125,7 @@ var (
 		},
 	}
 
-	deviceMTUSchemaAttribute = lucirpcglue.Int64SchemaAttribute[deviceModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	deviceMTUSchemaAttribute = lucirpcglue.Int64SchemaAttribute[deviceModel, lucirpc.Options, lucirpc.Options]{
 		Description:       deviceMTUAttributeDescription,
 		ReadResponse:      lucirpcglue.ReadResponseOptionInt64(deviceModelSetMTU, deviceMTUAttribute, deviceMTUUCIOption),
 		ResourceExistence: lucirpcglue.NoValidation,
@@ -135,7 +135,7 @@ var (
 		},
 	}
 
-	deviceMTU6SchemaAttribute = lucirpcglue.Int64SchemaAttribute[deviceModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	deviceMTU6SchemaAttribute = lucirpcglue.Int64SchemaAttribute[deviceModel, lucirpc.Options, lucirpc.Options]{
 		Description:       deviceMTU6AttributeDescription,
 		ReadResponse:      lucirpcglue.ReadResponseOptionInt64(deviceModelSetMTU6, deviceMTU6Attribute, deviceMTU6UCIOption),
 		ResourceExistence: lucirpcglue.NoValidation,
@@ -149,14 +149,14 @@ var (
 		},
 	}
 
-	deviceNameSchemaAttribute = lucirpcglue.StringSchemaAttribute[deviceModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	deviceNameSchemaAttribute = lucirpcglue.StringSchemaAttribute[deviceModel, lucirpc.Options, lucirpc.Options]{
 		Description:       deviceNameAttributeDescription,
 		ReadResponse:      lucirpcglue.ReadResponseOptionString(deviceModelSetName, deviceNameAttribute, deviceNameUCIOption),
 		ResourceExistence: lucirpcglue.Required,
 		UpsertRequest:     lucirpcglue.UpsertRequestOptionString(deviceModelGetName, deviceNameAttribute, deviceNameUCIOption),
 	}
 
-	deviceSchemaAttributes = map[string]lucirpcglue.SchemaAttribute[deviceModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	deviceSchemaAttributes = map[string]lucirpcglue.SchemaAttribute[deviceModel, lucirpc.Options, lucirpc.Options]{
 		deviceBridgePortsAttribute:        deviceBridgePortsSchemaAttribute,
 		deviceBringUpEmptyBridgeAttribute: deviceBringUpEmptyBridgeSchemaAttribute,
 		deviceDADTransmitsAttribute:       deviceDADTransmitsSchemaAttribute,
@@ -170,7 +170,7 @@ var (
 		lucirpcglue.IdAttribute:           lucirpcglue.IdSchemaAttribute(deviceModelGetId, deviceModelSetId),
 	}
 
-	deviceTXQueueLengthSchemaAttribute = lucirpcglue.Int64SchemaAttribute[deviceModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	deviceTXQueueLengthSchemaAttribute = lucirpcglue.Int64SchemaAttribute[deviceModel, lucirpc.Options, lucirpc.Options]{
 		Description:       deviceTXQueueLengthAttributeDescription,
 		ReadResponse:      lucirpcglue.ReadResponseOptionInt64(deviceModelSetTXQueueLength, deviceTXQueueLengthAttribute, deviceTXQueueLengthUCIOption),
 		ResourceExistence: lucirpcglue.NoValidation,
@@ -180,7 +180,7 @@ var (
 		},
 	}
 
-	deviceTypeSchemaAttribute = lucirpcglue.StringSchemaAttribute[deviceModel, map[string]json.RawMessage, map[string]json.RawMessage]{
+	deviceTypeSchemaAttribute = lucirpcglue.StringSchemaAttribute[deviceModel, lucirpc.Options, lucirpc.Options]{
 		Description:       deviceTypeAttributeDescription,
 		ReadResponse:      lucirpcglue.ReadResponseOptionString(deviceModelSetType, deviceTypeAttribute, deviceTypeUCIOption),
 		ResourceExistence: lucirpcglue.Required,

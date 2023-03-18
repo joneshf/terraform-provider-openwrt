@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/logger"
 )
 
@@ -16,7 +17,7 @@ func GetMetadataString(
 	ctx context.Context,
 	fullTypeName string,
 	terraformType string,
-	section map[string]json.RawMessage,
+	section lucirpc.Options,
 	key string,
 ) (context.Context, types.String, diag.Diagnostics) {
 	diagnostics := diag.Diagnostics{}

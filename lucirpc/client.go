@@ -80,7 +80,7 @@ func (c *Client) CreateSection(
 	config string,
 	sectionType string,
 	section string,
-	options map[string]json.RawMessage,
+	options Options,
 ) (bool, error) {
 	marshalledConfig, err := json.Marshal(config)
 	if err != nil {
@@ -209,7 +209,7 @@ func (c *Client) GetSection(
 	ctx context.Context,
 	config string,
 	section string,
-) (map[string]json.RawMessage, error) {
+) (Options, error) {
 	marshalledConfig, err := json.Marshal(config)
 	if err != nil {
 		return nil, fmt.Errorf("unable to serialize config %q for %s: %w", config, humanReadableGetSection, err)
@@ -254,7 +254,7 @@ func (c *Client) GetSection(
 		return nil, fmt.Errorf("incorrect config (%q) and/or section (%q): result from LuCI: %s", config, section, *responseBody)
 	}
 
-	var result map[string]json.RawMessage
+	var result Options
 	err = json.Unmarshal(*responseBody, &result)
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse %s response: %w", humanReadableGetSection, err)
@@ -304,7 +304,7 @@ func (c *Client) UpdateSection(
 	ctx context.Context,
 	config string,
 	section string,
-	options map[string]json.RawMessage,
+	options Options,
 ) (bool, error) {
 	marshalledConfig, err := json.Marshal(config)
 	if err != nil {
@@ -437,6 +437,10 @@ func NewClient(
 	}
 	return client, nil
 }
+
+// Options are the actual UCI options for each section.
+// The values can be booleans, integers, lists, and strings.
+type Options map[string]json.RawMessage
 
 type jsonRPCClient struct {
 	address url.URL

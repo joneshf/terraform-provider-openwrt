@@ -2,7 +2,6 @@ package lucirpcglue
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -19,7 +18,7 @@ var (
 
 func NewDataSource[Model any](
 	getId func(Model) types.String,
-	schemaAttributes map[string]SchemaAttribute[Model, map[string]json.RawMessage, map[string]json.RawMessage],
+	schemaAttributes map[string]SchemaAttribute[Model, lucirpc.Options, lucirpc.Options],
 	schemaDescription string,
 	uciConfig string,
 	uciType string,
@@ -38,7 +37,7 @@ type dataSource[Model any] struct {
 	client            lucirpc.Client
 	fullTypeName      string
 	getId             func(Model) types.String
-	schemaAttributes  map[string]SchemaAttribute[Model, map[string]json.RawMessage, map[string]json.RawMessage]
+	schemaAttributes  map[string]SchemaAttribute[Model, lucirpc.Options, lucirpc.Options]
 	schemaDescription string
 	terraformType     string
 	uciConfig         string
