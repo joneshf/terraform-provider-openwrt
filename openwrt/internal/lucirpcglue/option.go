@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/logger"
 )
 
@@ -20,7 +21,7 @@ func GetOptionBool(
 	ctx context.Context,
 	fullTypeName string,
 	terraformType string,
-	section map[string]json.RawMessage,
+	section lucirpc.Options,
 	attribute path.Path,
 	option string,
 ) (context.Context, types.Bool, diag.Diagnostics) {
@@ -72,7 +73,7 @@ func GetOptionInt64(
 	ctx context.Context,
 	fullTypeName string,
 	terraformType string,
-	section map[string]json.RawMessage,
+	section lucirpc.Options,
 	attribute path.Path,
 	option string,
 ) (context.Context, types.Int64, diag.Diagnostics) {
@@ -117,7 +118,7 @@ func GetOptionSetString(
 	ctx context.Context,
 	fullTypeName string,
 	terraformType string,
-	section map[string]json.RawMessage,
+	section lucirpc.Options,
 	attribute path.Path,
 	option string,
 ) (context.Context, types.Set, diag.Diagnostics) {
@@ -172,7 +173,7 @@ func GetOptionString(
 	ctx context.Context,
 	fullTypeName string,
 	terraformType string,
-	section map[string]json.RawMessage,
+	section lucirpc.Options,
 	attribute path.Path,
 	option string,
 ) (context.Context, types.String, diag.Diagnostics) {

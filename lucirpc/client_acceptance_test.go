@@ -40,7 +40,7 @@ func TestClientCreateSectionAcceptance(t *testing.T) {
 			"",
 			"",
 			"",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 
 		// Then
@@ -65,7 +65,7 @@ func TestClientCreateSectionAcceptance(t *testing.T) {
 			"network",
 			"interface",
 			"testing",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 
 		// Then
@@ -90,7 +90,7 @@ func TestClientCreateSectionAcceptance(t *testing.T) {
 			"network",
 			"interface",
 			"testing",
-			map[string]json.RawMessage{
+			lucirpc.Options{
 				"option_1": json.RawMessage("true"),
 				"option_2": json.RawMessage("31"),
 				"option_3": json.RawMessage(`["foo", "bar", "baz"]`),
@@ -105,7 +105,7 @@ func TestClientCreateSectionAcceptance(t *testing.T) {
 			"testing",
 		)
 		assert.NilError(t, err)
-		assert.DeepEqual(t, got, map[string]json.RawMessage{
+		assert.DeepEqual(t, got, lucirpc.Options{
 			".anonymous": json.RawMessage("false"),
 			".name":      json.RawMessage(`"testing"`),
 			".type":      json.RawMessage(`"interface"`),
@@ -132,7 +132,7 @@ func TestClientCreateSectionAcceptance(t *testing.T) {
 			"network",
 			"interface",
 			"testing",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 
 		// Then
@@ -187,7 +187,7 @@ func TestClientDeleteSectionAcceptance(t *testing.T) {
 			"network",
 			"interface",
 			"testing",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 		assert.NilError(t, err)
 
@@ -218,7 +218,7 @@ func TestClientDeleteSectionAcceptance(t *testing.T) {
 			"network",
 			"interface",
 			"testing",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 		assert.NilError(t, err)
 
@@ -254,7 +254,7 @@ func TestClientDeleteSectionAcceptance(t *testing.T) {
 			"network",
 			"interface",
 			"testing",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 		assert.NilError(t, err)
 
@@ -321,7 +321,7 @@ func TestClientGetSectionAcceptance(t *testing.T) {
 
 		// Then
 		assert.NilError(t, err)
-		want := map[string]json.RawMessage{
+		want := lucirpc.Options{
 			".anonymous":   json.RawMessage("true"),
 			".name":        json.RawMessage(`"cfg01e48a"`),
 			".type":        json.RawMessage(`"system"`),
@@ -401,7 +401,7 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 			ctx,
 			"",
 			"",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 
 		// Then
@@ -424,7 +424,7 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 			"network",
 			"interface",
 			"testing",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 		assert.NilError(t, err)
 
@@ -433,7 +433,7 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 			ctx,
 			"network",
 			"testing",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 
 		// Then
@@ -456,7 +456,7 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 			"network",
 			"interface",
 			"testing",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 		assert.NilError(t, err)
 
@@ -465,7 +465,7 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 			ctx,
 			"network",
 			"testing",
-			map[string]json.RawMessage{
+			lucirpc.Options{
 				"foo": json.RawMessage("true"),
 			},
 		)
@@ -490,7 +490,7 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 			"network",
 			"interface",
 			"testing",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 		assert.NilError(t, err)
 
@@ -499,7 +499,7 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 			ctx,
 			"network",
 			"testing",
-			map[string]json.RawMessage{
+			lucirpc.Options{
 				"option_1": json.RawMessage("true"),
 				"option_2": json.RawMessage("31"),
 				"option_3": json.RawMessage(`["foo", "bar", "baz"]`),
@@ -514,7 +514,7 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 			"testing",
 		)
 		assert.NilError(t, err)
-		assert.DeepEqual(t, got, map[string]json.RawMessage{
+		assert.DeepEqual(t, got, lucirpc.Options{
 			".anonymous": json.RawMessage("false"),
 			".name":      json.RawMessage(`"testing"`),
 			".type":      json.RawMessage(`"interface"`),
@@ -539,7 +539,7 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 			"network",
 			"interface",
 			"testing",
-			map[string]json.RawMessage{},
+			lucirpc.Options{},
 		)
 		assert.NilError(t, err)
 
@@ -548,7 +548,7 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 			ctx,
 			"network",
 			"testing",
-			map[string]json.RawMessage{
+			lucirpc.Options{
 				"option_1": json.RawMessage("true"),
 				"option_2": json.RawMessage("31"),
 				"option_3": json.RawMessage(`["foo", "bar", "baz"]`),

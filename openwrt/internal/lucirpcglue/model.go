@@ -2,7 +2,6 @@ package lucirpcglue
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -14,12 +13,12 @@ func GenerateUpsertBody[Model any](
 	ctx context.Context,
 	fullTypeName string,
 	model Model,
-	attributes map[string]SchemaAttribute[Model, map[string]json.RawMessage, map[string]json.RawMessage],
-) (context.Context, map[string]json.RawMessage, diag.Diagnostics) {
+	attributes map[string]SchemaAttribute[Model, lucirpc.Options, lucirpc.Options],
+) (context.Context, lucirpc.Options, diag.Diagnostics) {
 	tflog.Info(ctx, "Generating API request body")
 	var diagnostics diag.Diagnostics
 	allDiagnostics := diag.Diagnostics{}
-	options := map[string]json.RawMessage{}
+	options := lucirpc.Options{}
 
 	tflog.Debug(ctx, "Handling attributes")
 	for _, attribute := range attributes {
@@ -35,7 +34,7 @@ func ReadModel[Model any](
 	fullTypeName string,
 	terraformType string,
 	client lucirpc.Client,
-	attributes map[string]SchemaAttribute[Model, map[string]json.RawMessage, map[string]json.RawMessage],
+	attributes map[string]SchemaAttribute[Model, lucirpc.Options, lucirpc.Options],
 	uciConfig string,
 	uciSection string,
 ) (context.Context, Model, diag.Diagnostics) {
