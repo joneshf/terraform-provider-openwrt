@@ -4,9 +4,8 @@
   inputs = {
     nixpkgs = {
       owner = "NixOS";
+      ref = "nixos-22.11";
       repo = "nixpkgs";
-      # 22.11
-      rev = "e6d5772f3515b8518d50122471381feae7cbae36";
       type = "github";
     };
   };
