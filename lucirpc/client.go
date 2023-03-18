@@ -300,6 +300,71 @@ func (c *Client) ShowChanges(
 	return result, nil
 }
 
+func (c *Client) UpdateSection(
+	ctx context.Context,
+	config string,
+	section string,
+	options map[string]json.RawMessage,
+) (bool, error) {
+	marshalledConfig, err := json.Marshal(config)
+	if err != nil {
+		return false, fmt.Errorf("unable to serialize config %q for %s: %w", config, humanReadableUpdateSection, err)
+	}
+
+	marshalledSection, err := json.Marshal(section)
+	if err != nil {
+		return false, fmt.Errorf("unable to serialize section %q for %s: %w", section, humanReadableUpdateSection, err)
+	}
+
+	marshalledOptions, err := json.Marshal(options)
+	if err != nil {
+		return false, fmt.Errorf("unable to serialize options %q for %s: %w", options, humanReadableCreateSection, err)
+	}
+
+	requestBody := jsonRPCRequestBody{
+		Method: methodTSet,
+		Params: []json.RawMessage{
+			marshalledConfig,
+			marshalledSection,
+			marshalledOptions,
+		},
+	}
+	responseBody, err := c.jsonRPCClientUCI.Invoke(
+		ctx,
+		humanReadableUpdateSection,
+		requestBody,
+	)
+	if err != nil {
+		return false, fmt.Errorf("unable to %s: %w", humanReadableUpdateSection, err)
+	}
+
+	// The result can be `true` to indicate success,
+	// or `null` to indicate failure.
+	var result bool
+	if responseBody == nil {
+		return false, nil
+	}
+
+	err = json.Unmarshal(*responseBody, &result)
+	if err != nil {
+		return false, fmt.Errorf("unable to parse %s response: %w", humanReadableUpdateSection, err)
+	}
+
+	if !result {
+		return false, fmt.Errorf("unable to %s: it is not clear why this happened", humanReadableUpdateSection)
+	}
+
+	result, err = c.CommitChanges(
+		ctx,
+		config,
+	)
+	if err != nil {
+		return false, fmt.Errorf("was able to %s, but could not %s: %w", humanReadableUpdateSection, humanReadableCommitChanges, err)
+	}
+
+	return result, nil
+}
+
 func NewClient(
 	ctx context.Context,
 	scheme string,
@@ -371,71 +436,6 @@ func NewClient(
 		jsonRPCClientUCI: jsonRPCClientUCI,
 	}
 	return client, nil
-}
-
-func (c *Client) UpdateSection(
-	ctx context.Context,
-	config string,
-	section string,
-	options map[string]json.RawMessage,
-) (bool, error) {
-	marshalledConfig, err := json.Marshal(config)
-	if err != nil {
-		return false, fmt.Errorf("unable to serialize config %q for %s: %w", config, humanReadableUpdateSection, err)
-	}
-
-	marshalledSection, err := json.Marshal(section)
-	if err != nil {
-		return false, fmt.Errorf("unable to serialize section %q for %s: %w", section, humanReadableUpdateSection, err)
-	}
-
-	marshalledOptions, err := json.Marshal(options)
-	if err != nil {
-		return false, fmt.Errorf("unable to serialize options %q for %s: %w", options, humanReadableCreateSection, err)
-	}
-
-	requestBody := jsonRPCRequestBody{
-		Method: methodTSet,
-		Params: []json.RawMessage{
-			marshalledConfig,
-			marshalledSection,
-			marshalledOptions,
-		},
-	}
-	responseBody, err := c.jsonRPCClientUCI.Invoke(
-		ctx,
-		humanReadableUpdateSection,
-		requestBody,
-	)
-	if err != nil {
-		return false, fmt.Errorf("unable to %s: %w", humanReadableUpdateSection, err)
-	}
-
-	// The result can be `true` to indicate success,
-	// or `null` to indicate failure.
-	var result bool
-	if responseBody == nil {
-		return false, nil
-	}
-
-	err = json.Unmarshal(*responseBody, &result)
-	if err != nil {
-		return false, fmt.Errorf("unable to parse %s response: %w", humanReadableUpdateSection, err)
-	}
-
-	if !result {
-		return false, fmt.Errorf("unable to %s: it is not clear why this happened", humanReadableUpdateSection)
-	}
-
-	result, err = c.CommitChanges(
-		ctx,
-		config,
-	)
-	if err != nil {
-		return false, fmt.Errorf("was able to %s, but could not %s: %w", humanReadableUpdateSection, humanReadableCommitChanges, err)
-	}
-
-	return result, nil
 }
 
 type jsonRPCClient struct {
