@@ -220,7 +220,7 @@ func TestClientCreateSection(t *testing.T) {
 			switch r.URL.Path {
 			case "/cgi-bin/luci/rpc/uci":
 				decoder := json.NewDecoder(r.Body)
-				var body lucirpc.Options
+				var body map[string]json.RawMessage
 				err := decoder.Decode(&body)
 				assert.NilError(t, err)
 				method, ok := body["method"]
@@ -451,7 +451,7 @@ func TestClientDeleteSection(t *testing.T) {
 			switch r.URL.Path {
 			case "/cgi-bin/luci/rpc/uci":
 				decoder := json.NewDecoder(r.Body)
-				var body lucirpc.Options
+				var body map[string]json.RawMessage
 				err := decoder.Decode(&body)
 				assert.NilError(t, err)
 				method, ok := body["method"]
@@ -1103,7 +1103,7 @@ func TestClientUpdateSection(t *testing.T) {
 			switch r.URL.Path {
 			case "/cgi-bin/luci/rpc/uci":
 				decoder := json.NewDecoder(r.Body)
-				var body lucirpc.Options
+				var body map[string]json.RawMessage
 				err := decoder.Decode(&body)
 				assert.NilError(t, err)
 				method, ok := body["method"]
