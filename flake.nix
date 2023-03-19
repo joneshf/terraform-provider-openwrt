@@ -36,7 +36,7 @@
             pkgs.git
             pkgs.gnumake
             pkgs.gnupg
-            pkgs.go
+            pkgs.go_1_20
             pkgs.go-tools
             pkgs.gopls
             pkgs.goreleaser
