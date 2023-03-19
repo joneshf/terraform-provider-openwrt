@@ -438,10 +438,6 @@ func NewClient(
 	return client, nil
 }
 
-// Options are the actual UCI options for each section.
-// The values can be booleans, integers, lists, and strings.
-type Options map[string]json.RawMessage
-
 type jsonRPCClient struct {
 	address url.URL
 	client  http.Client
