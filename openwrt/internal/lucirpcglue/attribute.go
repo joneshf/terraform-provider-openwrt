@@ -2,7 +2,6 @@ package lucirpcglue
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/helpers/validatordiag"
@@ -461,13 +460,8 @@ func UpsertRequestOptionBool[Model any](
 			return ctx, options, diag.Diagnostics{}
 		}
 
-		value, diagnostics := serializeBool(str, path.Root(attribute))
-		if diagnostics.HasError() {
-			return ctx, options, diagnostics
-		}
-
 		ctx = logger.SetFieldBool(ctx, fullTypeName, ResourceTerraformType, attribute, str)
-		options[option] = value
+		options[option] = lucirpc.Boolean(str.ValueBool())
 		return ctx, options, diag.Diagnostics{}
 	}
 }
@@ -488,13 +482,8 @@ func UpsertRequestOptionInt64[Model any](
 			return ctx, options, diag.Diagnostics{}
 		}
 
-		value, diagnostics := serializeInt64(str, path.Root(attribute))
-		if diagnostics.HasError() {
-			return ctx, options, diagnostics
-		}
-
 		ctx = logger.SetFieldInt64(ctx, fullTypeName, ResourceTerraformType, attribute, str)
-		options[option] = value
+		options[option] = lucirpc.Integer(int(str.ValueInt64()))
 		return ctx, options, diag.Diagnostics{}
 	}
 }
@@ -542,13 +531,8 @@ func UpsertRequestOptionString[Model any](
 			return ctx, options, diag.Diagnostics{}
 		}
 
-		value, diagnostics := serializeString(str, path.Root(attribute))
-		if diagnostics.HasError() {
-			return ctx, options, diagnostics
-		}
-
 		ctx = logger.SetFieldString(ctx, fullTypeName, ResourceTerraformType, attribute, str)
-		options[option] = value
+		options[option] = lucirpc.String(str.ValueString())
 		return ctx, options, diag.Diagnostics{}
 	}
 }
@@ -711,47 +695,11 @@ func requiresAttributeEqual[Value any](
 	}
 }
 
-func serializeBool(
-	attribute interface{ ValueBool() bool },
-	attributePath path.Path,
-) (json.RawMessage, diag.Diagnostics) {
-	diagnostics := diag.Diagnostics{}
-	value, err := json.Marshal(attribute.ValueBool())
-	if err != nil {
-		diagnostics.AddAttributeError(
-			attributePath,
-			"Could not serialize",
-			err.Error(),
-		)
-		return nil, diagnostics
-	}
-
-	return json.RawMessage(value), diagnostics
-}
-
-func serializeInt64(
-	attribute interface{ ValueInt64() int64 },
-	attributePath path.Path,
-) (json.RawMessage, diag.Diagnostics) {
-	diagnostics := diag.Diagnostics{}
-	value, err := json.Marshal(attribute.ValueInt64())
-	if err != nil {
-		diagnostics.AddAttributeError(
-			attributePath,
-			"Could not serialize",
-			err.Error(),
-		)
-		return nil, diagnostics
-	}
-
-	return json.RawMessage(value), diagnostics
-}
-
 func serializeSetString(
 	ctx context.Context,
 	attribute interface{ Elements() []attr.Value },
 	attributePath path.Path,
-) (json.RawMessage, diag.Diagnostics) {
+) (lucirpc.Option, diag.Diagnostics) {
 	allDiagnostics := diag.Diagnostics{}
 	elements := attribute.Elements()
 	values := []string{}
@@ -772,33 +720,5 @@ func serializeSetString(
 		return nil, allDiagnostics
 	}
 
-	value, err := json.Marshal(values)
-	if err != nil {
-		allDiagnostics.AddAttributeError(
-			attributePath,
-			"Could not serialize",
-			err.Error(),
-		)
-		return nil, allDiagnostics
-	}
-
-	return json.RawMessage(value), allDiagnostics
-}
-
-func serializeString(
-	attribute interface{ ValueString() string },
-	attributePath path.Path,
-) (json.RawMessage, diag.Diagnostics) {
-	diagnostics := diag.Diagnostics{}
-	value, err := json.Marshal(attribute.ValueString())
-	if err != nil {
-		diagnostics.AddAttributeError(
-			attributePath,
-			"Could not serialize",
-			err.Error(),
-		)
-		return nil, diagnostics
-	}
-
-	return json.RawMessage(value), diagnostics
+	return lucirpc.ListString(values), allDiagnostics
 }

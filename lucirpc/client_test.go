@@ -726,9 +726,9 @@ func TestClientGetSection(t *testing.T) {
 		// Then
 		assert.NilError(t, err)
 		want := lucirpc.Options{
-			".name": json.RawMessage(`"section-name"`),
-			"baz":   json.RawMessage(`"1"`),
-			"foo":   json.RawMessage(`"bar"`),
+			".name": lucirpc.String("section-name"),
+			"baz":   lucirpc.Boolean(true),
+			"foo":   lucirpc.String("bar"),
 		}
 		assert.DeepEqual(t, got, want)
 	})

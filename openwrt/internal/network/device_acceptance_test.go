@@ -4,7 +4,6 @@ package network_test
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -24,9 +23,9 @@ func TestNetworkDeviceDataSourceAcceptance(t *testing.T) {
 		t,
 	)
 	options := lucirpc.Options{
-		"name":  json.RawMessage(`"br-testing"`),
-		"ports": json.RawMessage(`["eth0", "eth1"]`),
-		"type":  json.RawMessage(`"bridge"`),
+		"name":  lucirpc.String("br-testing"),
+		"ports": lucirpc.ListString([]string{"eth0", "eth1"}),
+		"type":  lucirpc.String("bridge"),
 	}
 	ok, err := client.CreateSection(ctx, "network", "device", "br_testing", options)
 	assert.NilError(t, err)

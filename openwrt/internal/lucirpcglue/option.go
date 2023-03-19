@@ -2,9 +2,8 @@ package lucirpcglue
 
 import (
 	"context"
-	"encoding/json"
+	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -27,18 +26,12 @@ func GetOptionBool(
 ) (context.Context, types.Bool, diag.Diagnostics) {
 	diagnostics := diag.Diagnostics{}
 	result := types.BoolNull()
-	raw, ok := section[option]
-	if !ok {
-		return ctx, result, diagnostics
-	}
-
-	// Booleans in UCI can be any number of things:
-	// - True: "1", "yes", "on", "true", "enabled"
-	// - False: "0", "no", "off", "false", "disabled"
-	// We try to parse on of these out of the string.
-	var boolish string
-	err := json.Unmarshal(raw, &boolish)
+	value, err := section.GetBoolean(option)
 	if err != nil {
+		if errors.As(err, &lucirpc.OptionNotFoundError{}) {
+			return ctx, result, diagnostics
+		}
+
 		diagnostics.AddAttributeError(
 			attribute,
 			fmt.Sprintf("unable to parse option: %q", option),
@@ -47,22 +40,7 @@ func GetOptionBool(
 		return ctx, result, diagnostics
 	}
 
-	switch boolish {
-	case "1", "yes", "on", "true", "enabled":
-		result = types.BoolValue(true)
-
-	case "0", "no", "off", "false", "disabled":
-		result = types.BoolValue(false)
-
-	default:
-		diagnostics.AddAttributeError(
-			attribute,
-			fmt.Sprintf("Unexpected value for option: %q", option),
-			fmt.Sprintf(`expected one of "1", "yes", "on", "true", "enabled", "0", "no", "off", "false", or "disabled"; got: %q`, boolish),
-		)
-		return ctx, result, diagnostics
-	}
-
+	result = types.BoolValue(value)
 	ctx = logger.SetFieldBool(ctx, fullTypeName, terraformType, option, result)
 	return ctx, result, diagnostics
 }
@@ -79,29 +57,15 @@ func GetOptionInt64(
 ) (context.Context, types.Int64, diag.Diagnostics) {
 	diagnostics := diag.Diagnostics{}
 	result := types.Int64Null()
-	raw, ok := section[option]
-	if !ok {
-		return ctx, result, diagnostics
-	}
-
-	// Integers in UCI are stored as strtings.
-	// We have to unmarshall first, then parse the string.
-	var intish string
-	err := json.Unmarshal(raw, &intish)
+	value, err := section.GetInteger(option)
 	if err != nil {
+		if errors.As(err, &lucirpc.OptionNotFoundError{}) {
+			return ctx, result, diagnostics
+		}
+
 		diagnostics.AddAttributeError(
 			attribute,
 			fmt.Sprintf("unable to parse option: %q", option),
-			err.Error(),
-		)
-		return ctx, result, diagnostics
-	}
-
-	value, err := strconv.Atoi(intish)
-	if err != nil {
-		diagnostics.AddAttributeError(
-			attribute,
-			fmt.Sprintf("unable to convert option: %q to a string", option),
 			err.Error(),
 		)
 		return ctx, result, diagnostics
@@ -124,14 +88,12 @@ func GetOptionSetString(
 ) (context.Context, types.Set, diag.Diagnostics) {
 	allDiagnostics := diag.Diagnostics{}
 	result := types.SetNull(types.StringType)
-	raw, ok := section[option]
-	if !ok {
-		return ctx, result, allDiagnostics
-	}
-
-	var values []string
-	err := json.Unmarshal(raw, &values)
+	values, err := section.GetListString(option)
 	if err != nil {
+		if errors.As(err, &lucirpc.OptionNotFoundError{}) {
+			return ctx, result, allDiagnostics
+		}
+
 		allDiagnostics.AddAttributeError(
 			attribute,
 			fmt.Sprintf("unable to parse option: %q", option),
@@ -179,14 +141,12 @@ func GetOptionString(
 ) (context.Context, types.String, diag.Diagnostics) {
 	diagnostics := diag.Diagnostics{}
 	result := types.StringNull()
-	raw, ok := section[option]
-	if !ok {
-		return ctx, result, diagnostics
-	}
-
-	var value string
-	err := json.Unmarshal(raw, &value)
+	value, err := section.GetString(option)
 	if err != nil {
+		if errors.As(err, &lucirpc.OptionNotFoundError{}) {
+			return ctx, result, diagnostics
+		}
+
 		diagnostics.AddAttributeError(
 			attribute,
 			fmt.Sprintf("unable to parse option: %q", option),

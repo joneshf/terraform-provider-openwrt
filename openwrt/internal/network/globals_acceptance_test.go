@@ -4,7 +4,6 @@ package network_test
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -24,8 +23,8 @@ func TestNetworkGlobalsDataSourceAcceptance(t *testing.T) {
 		t,
 	)
 	options := lucirpc.Options{
-		"packet_steering": json.RawMessage("false"),
-		"ula_prefix":      json.RawMessage(`"fd12:3456:789a::/48"`),
+		"packet_steering": lucirpc.Boolean(false),
+		"ula_prefix":      lucirpc.String("fd12:3456:789a::/48"),
 	}
 	ok, err := client.CreateSection(ctx, "network", "globals", "globals", options)
 	assert.NilError(t, err)
