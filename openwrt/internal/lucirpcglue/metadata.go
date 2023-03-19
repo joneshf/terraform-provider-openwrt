@@ -2,7 +2,6 @@ package lucirpcglue
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -22,13 +21,7 @@ func GetMetadataString(
 ) (context.Context, types.String, diag.Diagnostics) {
 	diagnostics := diag.Diagnostics{}
 	result := types.StringNull()
-	raw, ok := section[key]
-	if !ok {
-		return ctx, result, diagnostics
-	}
-
-	var value string
-	err := json.Unmarshal(raw, &value)
+	value, err := section.GetString(key)
 	if err != nil {
 		diagnostics.AddError(
 			fmt.Sprintf("unable to parse metadata: %q", key),

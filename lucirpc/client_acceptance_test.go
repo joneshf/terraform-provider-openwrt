@@ -4,7 +4,6 @@ package lucirpc_test
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -91,9 +90,9 @@ func TestClientCreateSectionAcceptance(t *testing.T) {
 			"interface",
 			"testing",
 			lucirpc.Options{
-				"option_1": json.RawMessage("true"),
-				"option_2": json.RawMessage("31"),
-				"option_3": json.RawMessage(`["foo", "bar", "baz"]`),
+				"option_1": lucirpc.Boolean(true),
+				"option_2": lucirpc.Integer(31),
+				"option_3": lucirpc.ListString([]string{"foo", "bar", "baz"}),
 			},
 		)
 
@@ -106,12 +105,12 @@ func TestClientCreateSectionAcceptance(t *testing.T) {
 		)
 		assert.NilError(t, err)
 		assert.DeepEqual(t, got, lucirpc.Options{
-			".anonymous": json.RawMessage("false"),
-			".name":      json.RawMessage(`"testing"`),
-			".type":      json.RawMessage(`"interface"`),
-			"option_1":   json.RawMessage(`"1"`),
-			"option_2":   json.RawMessage(`"31"`),
-			"option_3":   json.RawMessage(`["foo","bar","baz"]`),
+			".anonymous": lucirpc.Boolean(false),
+			".name":      lucirpc.String("testing"),
+			".type":      lucirpc.String("interface"),
+			"option_1":   lucirpc.Boolean(true),
+			"option_2":   lucirpc.Integer(31),
+			"option_3":   lucirpc.ListString([]string{"foo", "bar", "baz"}),
 		})
 	})
 
@@ -322,14 +321,14 @@ func TestClientGetSectionAcceptance(t *testing.T) {
 		// Then
 		assert.NilError(t, err)
 		want := lucirpc.Options{
-			".anonymous":   json.RawMessage("true"),
-			".name":        json.RawMessage(`"cfg01e48a"`),
-			".type":        json.RawMessage(`"system"`),
-			"hostname":     json.RawMessage(`"OpenWrt"`),
-			"log_size":     json.RawMessage(`"64"`),
-			"timezone":     json.RawMessage(`"UTC"`),
-			"ttylogin":     json.RawMessage(`"0"`),
-			"urandom_seed": json.RawMessage(`"0"`),
+			".anonymous":   lucirpc.Boolean(true),
+			".name":        lucirpc.String("cfg01e48a"),
+			".type":        lucirpc.String("system"),
+			"hostname":     lucirpc.String("OpenWrt"),
+			"log_size":     lucirpc.Integer(64),
+			"timezone":     lucirpc.String("UTC"),
+			"ttylogin":     lucirpc.Boolean(false),
+			"urandom_seed": lucirpc.Boolean(false),
 		}
 		assert.DeepEqual(t, got, want)
 	})
@@ -466,7 +465,7 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 			"network",
 			"testing",
 			lucirpc.Options{
-				"foo": json.RawMessage("true"),
+				"foo": lucirpc.Boolean(true),
 			},
 		)
 
@@ -500,9 +499,9 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 			"network",
 			"testing",
 			lucirpc.Options{
-				"option_1": json.RawMessage("true"),
-				"option_2": json.RawMessage("31"),
-				"option_3": json.RawMessage(`["foo", "bar", "baz"]`),
+				"option_1": lucirpc.Boolean(true),
+				"option_2": lucirpc.Integer(31),
+				"option_3": lucirpc.ListString([]string{"foo", "bar", "baz"}),
 			},
 		)
 
@@ -515,12 +514,12 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 		)
 		assert.NilError(t, err)
 		assert.DeepEqual(t, got, lucirpc.Options{
-			".anonymous": json.RawMessage("false"),
-			".name":      json.RawMessage(`"testing"`),
-			".type":      json.RawMessage(`"interface"`),
-			"option_1":   json.RawMessage(`"1"`),
-			"option_2":   json.RawMessage(`"31"`),
-			"option_3":   json.RawMessage(`["foo","bar","baz"]`),
+			".anonymous": lucirpc.Boolean(false),
+			".name":      lucirpc.String("testing"),
+			".type":      lucirpc.String("interface"),
+			"option_1":   lucirpc.Boolean(true),
+			"option_2":   lucirpc.Integer(31),
+			"option_3":   lucirpc.ListString([]string{"foo", "bar", "baz"}),
 		})
 	})
 
@@ -549,9 +548,9 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 			"network",
 			"testing",
 			lucirpc.Options{
-				"option_1": json.RawMessage("true"),
-				"option_2": json.RawMessage("31"),
-				"option_3": json.RawMessage(`["foo", "bar", "baz"]`),
+				"option_1": lucirpc.Boolean(true),
+				"option_2": lucirpc.Integer(31),
+				"option_3": lucirpc.ListString([]string{"foo", "bar", "baz"}),
 			},
 		)
 
