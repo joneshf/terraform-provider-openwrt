@@ -32,6 +32,7 @@ const (
 var (
 	_ validator.Bool   = requiresAttribute[any]{}
 	_ validator.Int64  = requiresAttribute[any]{}
+	_ validator.List   = requiresAttribute[any]{}
 	_ validator.Set    = requiresAttribute[any]{}
 	_ validator.String = requiresAttribute[any]{}
 )
@@ -212,6 +213,73 @@ func (a Int64SchemaAttribute[Model, Request, Response]) Upsert(
 	return a.UpsertRequest(ctx, fullTypeName, request, model)
 }
 
+type ListStringSchemaAttribute[Model any, Request any, Response any] struct {
+	DataSourceExistence AttributeExistence
+	DeprecationMessage  string
+	Description         string
+	MarkdownDescription string
+	ReadResponse        func(context.Context, string, string, Response, Model) (context.Context, Model, diag.Diagnostics)
+	ResourceExistence   AttributeExistence
+	Sensitive           bool
+	UpsertRequest       func(context.Context, string, Request, Model) (context.Context, Request, diag.Diagnostics)
+	Validators          []validator.List
+}
+
+func (a ListStringSchemaAttribute[Model, Request, Response]) Read(
+	ctx context.Context,
+	fullTypeName string,
+	terraformType string,
+	response Response,
+	model Model,
+) (context.Context, Model, diag.Diagnostics) {
+	if a.ReadResponse == nil {
+		return ctx, model, diag.Diagnostics{}
+	}
+
+	return a.ReadResponse(ctx, fullTypeName, terraformType, response, model)
+}
+
+func (a ListStringSchemaAttribute[Model, Request, Response]) ToDataSource() datasourceschema.Attribute {
+	return datasourceschema.ListAttribute{
+		Computed:            a.DataSourceExistence.ToComputed(),
+		DeprecationMessage:  a.DeprecationMessage,
+		Description:         a.Description,
+		ElementType:         types.StringType,
+		MarkdownDescription: a.MarkdownDescription,
+		Optional:            a.DataSourceExistence.ToOptional(),
+		Required:            a.DataSourceExistence.ToRequired(),
+		Sensitive:           a.Sensitive,
+		Validators:          a.Validators,
+	}
+}
+
+func (a ListStringSchemaAttribute[Model, Request, Response]) ToResource() resourceschema.Attribute {
+	return resourceschema.ListAttribute{
+		Computed:            a.ResourceExistence.ToComputed(),
+		DeprecationMessage:  a.DeprecationMessage,
+		Description:         a.Description,
+		ElementType:         types.StringType,
+		MarkdownDescription: a.MarkdownDescription,
+		Optional:            a.ResourceExistence.ToOptional(),
+		Required:            a.ResourceExistence.ToRequired(),
+		Sensitive:           a.Sensitive,
+		Validators:          a.Validators,
+	}
+}
+
+func (a ListStringSchemaAttribute[Model, Request, Response]) Upsert(
+	ctx context.Context,
+	fullTypeName string,
+	request Request,
+	model Model,
+) (context.Context, Request, diag.Diagnostics) {
+	if a.UpsertRequest == nil {
+		return ctx, request, diag.Diagnostics{}
+	}
+
+	return a.UpsertRequest(ctx, fullTypeName, request, model)
+}
+
 func ReadResponseOptionBool[Model any](
 	set func(*Model, types.Bool),
 	attribute string,
@@ -243,6 +311,24 @@ func ReadResponseOptionInt64[Model any](
 		model Model,
 	) (context.Context, Model, diag.Diagnostics) {
 		ctx, value, diagnostics := GetOptionInt64(ctx, fullTypeName, terraformType, section, path.Root(attribute), option)
+		set(&model, value)
+		return ctx, model, diagnostics
+	}
+}
+
+func ReadResponseOptionListString[Model any](
+	set func(*Model, types.List),
+	attribute string,
+	option string,
+) func(context.Context, string, string, lucirpc.Options, Model) (context.Context, Model, diag.Diagnostics) {
+	return func(
+		ctx context.Context,
+		fullTypeName string,
+		terraformType string,
+		section lucirpc.Options,
+		model Model,
+	) (context.Context, Model, diag.Diagnostics) {
+		ctx, value, diagnostics := GetOptionListString(ctx, fullTypeName, terraformType, section, path.Root(attribute), option)
 		set(&model, value)
 		return ctx, model, diagnostics
 	}
@@ -488,6 +574,33 @@ func UpsertRequestOptionInt64[Model any](
 	}
 }
 
+func UpsertRequestOptionListString[Model any](
+	get func(Model) types.List,
+	attribute string,
+	option string,
+) func(context.Context, string, lucirpc.Options, Model) (context.Context, lucirpc.Options, diag.Diagnostics) {
+	return func(
+		ctx context.Context,
+		fullTypeName string,
+		options lucirpc.Options,
+		model Model,
+	) (context.Context, lucirpc.Options, diag.Diagnostics) {
+		str := get(model)
+		if !hasValue(str) {
+			return ctx, options, diag.Diagnostics{}
+		}
+
+		value, diagnostics := serializeListString(ctx, str, path.Root(attribute))
+		if diagnostics.HasError() {
+			return ctx, options, diagnostics
+		}
+
+		ctx = logger.SetFieldListString(ctx, fullTypeName, ResourceTerraformType, attribute, str)
+		options[option] = value
+		return ctx, options, diag.Diagnostics{}
+	}
+}
+
 func UpsertRequestOptionSetString[Model any](
 	get func(Model) types.Set,
 	attribute string,
@@ -578,6 +691,18 @@ func (a requiresAttribute[Value]) ValidateInt64(
 	ctx context.Context,
 	req validator.Int64Request,
 	res *validator.Int64Response,
+) {
+	diagnostics := a.validate(ctx, req.Config, req.Path, req.ConfigValue)
+	res.Diagnostics.Append(diagnostics...)
+	if res.Diagnostics.HasError() {
+		return
+	}
+}
+
+func (a requiresAttribute[Value]) ValidateList(
+	ctx context.Context,
+	req validator.ListRequest,
+	res *validator.ListResponse,
 ) {
 	diagnostics := a.validate(ctx, req.Config, req.Path, req.ConfigValue)
 	res.Diagnostics.Append(diagnostics...)
@@ -693,6 +818,34 @@ func requiresAttributeEqual[Value any](
 		expected:   expected,
 		expression: expression,
 	}
+}
+
+func serializeListString(
+	ctx context.Context,
+	attribute interface{ Elements() []attr.Value },
+	attributePath path.Path,
+) (lucirpc.Option, diag.Diagnostics) {
+	allDiagnostics := diag.Diagnostics{}
+	elements := attribute.Elements()
+	values := []string{}
+	for _, element := range elements {
+		var value string
+		diagnostics := tfsdk.ValueAs(ctx, element, &value)
+		allDiagnostics.Append(diagnostics...)
+		if allDiagnostics.HasError() {
+			// We don't want to exit early.
+			// We want to continue to accumulate diagnostics.
+			continue
+		}
+
+		values = append(values, value)
+	}
+
+	if allDiagnostics.HasError() {
+		return nil, allDiagnostics
+	}
+
+	return lucirpc.ListString(values), allDiagnostics
 }
 
 func serializeSetString(

@@ -33,6 +33,30 @@ func SetFieldInt64(
 	return ctx
 }
 
+// SetFieldListString sets a list of strings field on the logger in the [context.Context].
+func SetFieldListString(
+	ctx context.Context,
+	fullTypeName string,
+	terraformType string,
+	key string,
+	value interface{ Elements() []attr.Value },
+) context.Context {
+	values := []string{}
+	elements := value.Elements()
+	for _, element := range elements {
+		var value string
+		diagnostics := tfsdk.ValueAs(ctx, element, &value)
+		if diagnostics.HasError() {
+			continue
+		}
+
+		values = append(values, value)
+	}
+
+	ctx = tflog.SetField(ctx, fmt.Sprintf("%s_%s_%s", fullTypeName, terraformType, key), values)
+	return ctx
+}
+
 // SetFieldSetString sets a set of strings field on the logger in the [context.Context].
 func SetFieldSetString(
 	ctx context.Context,
