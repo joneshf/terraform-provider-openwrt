@@ -76,6 +76,59 @@ func GetOptionInt64(
 	return ctx, result, diagnostics
 }
 
+// GetOptionListString attempts to parse the given option from the section as a []string.
+// Any diagnostic information found in the process (including errors) is returned.
+func GetOptionListString(
+	ctx context.Context,
+	fullTypeName string,
+	terraformType string,
+	section lucirpc.Options,
+	attribute path.Path,
+	option string,
+) (context.Context, types.List, diag.Diagnostics) {
+	allDiagnostics := diag.Diagnostics{}
+	result := types.ListNull(types.StringType)
+	values, err := section.GetListString(option)
+	if err != nil {
+		if errors.As(err, &lucirpc.OptionNotFoundError{}) {
+			return ctx, result, allDiagnostics
+		}
+
+		allDiagnostics.AddAttributeError(
+			attribute,
+			fmt.Sprintf("unable to parse option: %q", option),
+			err.Error(),
+		)
+		return ctx, result, allDiagnostics
+	}
+
+	var attrValues []attr.Value
+	for _, value := range values {
+		var attrValue attr.Value
+		diagnostics := tfsdk.ValueFrom(ctx, value, types.StringType, &attrValue)
+		allDiagnostics.Append(diagnostics...)
+		if allDiagnostics.HasError() {
+			// We don't want to exit early.
+			// We want to continue to accumulate diagnostics.
+			continue
+		}
+
+		attrValues = append(attrValues, attrValue)
+	}
+
+	if allDiagnostics.HasError() {
+		return ctx, result, allDiagnostics
+	}
+
+	result, allDiagnostics = types.ListValue(types.StringType, attrValues)
+	if allDiagnostics.HasError() {
+		return ctx, result, allDiagnostics
+	}
+
+	ctx = logger.SetFieldListString(ctx, fullTypeName, terraformType, option, result)
+	return ctx, result, allDiagnostics
+}
+
 // GetOptionSetString attempts to parse the given option from the section as a []string.
 // Any diagnostic information found in the process (including errors) is returned.
 func GetOptionSetString(
