@@ -40,6 +40,7 @@
             pkgs.go-tools
             pkgs.gopls
             pkgs.goreleaser
+            pkgs.jq
             pkgs.nixpkgs-fmt
             pkgs.terraform
           ];
