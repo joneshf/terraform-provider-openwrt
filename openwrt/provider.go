@@ -153,6 +153,7 @@ func (p *openWrtProvider) DataSources(
 	return []func() datasource.DataSource{
 		network.NewDeviceDataSource,
 		network.NewGlobalsDataSource,
+		network.NewInterfaceDataSource,
 		system.NewSystemDataSource,
 	}
 }
@@ -174,6 +175,7 @@ func (p *openWrtProvider) Resources(
 	return []func() resource.Resource{
 		network.NewDeviceResource,
 		network.NewGlobalsResource,
+		network.NewInterfaceResource,
 		system.NewSystemResource,
 	}
 }
