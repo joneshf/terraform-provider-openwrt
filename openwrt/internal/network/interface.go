@@ -224,13 +224,15 @@ var (
 		ResourceExistence: lucirpcglue.NoValidation,
 		UpsertRequest:     lucirpcglue.UpsertRequestOptionBool(interfaceModelGetPeerDNS, interfacePeerDNSAttribute, interfacePeerDNSUCIOption),
 		Validators: []validator.Bool{
-			lucirpcglue.RequiresAttributeEqualString(
-				path.MatchRoot(interfaceProtocolAttribute),
-				interfaceProtocolDHCP,
-			),
-			lucirpcglue.RequiresAttributeEqualString(
-				path.MatchRoot(interfaceProtocolAttribute),
-				interfaceProtocolDHCPV6,
+			lucirpcglue.AnyBool(
+				lucirpcglue.RequiresAttributeEqualString(
+					path.MatchRoot(interfaceProtocolAttribute),
+					interfaceProtocolDHCP,
+				),
+				lucirpcglue.RequiresAttributeEqualString(
+					path.MatchRoot(interfaceProtocolAttribute),
+					interfaceProtocolDHCPV6,
+				),
 			),
 		},
 	}

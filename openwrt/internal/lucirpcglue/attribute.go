@@ -3,6 +3,7 @@ package lucirpcglue
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/helpers/validatordiag"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -30,12 +31,55 @@ const (
 )
 
 var (
+	_ validator.Bool = anyValidatorBool{}
+
 	_ validator.Bool   = requiresAttribute[any]{}
 	_ validator.Int64  = requiresAttribute[any]{}
 	_ validator.List   = requiresAttribute[any]{}
 	_ validator.Set    = requiresAttribute[any]{}
 	_ validator.String = requiresAttribute[any]{}
 )
+
+// AnyBool returns a validator which ensures that any configured attribute value passes at least one of the given validators.
+func AnyBool(validators ...validator.Bool) validator.Bool {
+	return anyValidatorBool{
+		validators: validators,
+	}
+}
+
+type anyValidatorBool struct {
+	validators []validator.Bool
+}
+
+func (v anyValidatorBool) Description(ctx context.Context) string {
+	var descriptions []string
+
+	for _, subValidator := range v.validators {
+		descriptions = append(descriptions, subValidator.Description(ctx))
+	}
+
+	return fmt.Sprintf("Value must satisfy at least one of the validations: %s", strings.Join(descriptions, " + "))
+}
+
+func (v anyValidatorBool) MarkdownDescription(ctx context.Context) string {
+	return v.Description(ctx)
+}
+
+func (v anyValidatorBool) ValidateBool(ctx context.Context, req validator.BoolRequest, resp *validator.BoolResponse) {
+	for _, subValidator := range v.validators {
+		validateResp := &validator.BoolResponse{}
+
+		subValidator.ValidateBool(ctx, req, validateResp)
+
+		if !validateResp.Diagnostics.HasError() {
+			resp.Diagnostics = validateResp.Diagnostics
+
+			return
+		}
+
+		resp.Diagnostics.Append(validateResp.Diagnostics...)
+	}
+}
 
 type AttributeExistence int
 

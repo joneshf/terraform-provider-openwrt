@@ -134,3 +134,89 @@ resource "openwrt_network_interface" "testing" {
 		updateAndReadResource,
 	)
 }
+
+func TestNetworkInterfaceResourcePeerDNSWithDHCPAcceptance(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	providerBlock := acceptancetest.RunOpenWrtServerWithProviderBlock(
+		ctx,
+		*dockerPool,
+		t,
+	)
+
+	step := resource.TestStep{
+		Config: fmt.Sprintf(`
+%s
+
+resource "openwrt_network_interface" "testing" {
+	device = "br-testing"
+	dns = [
+		"9.9.9.9",
+		"1.1.1.1",
+	]
+	id = "testing"
+	peerdns = false
+	proto = "dhcp"
+}
+`,
+			providerBlock,
+		),
+		Check: resource.ComposeAggregateTestCheckFunc(
+			resource.TestCheckResourceAttr("openwrt_network_interface.testing", "id", "testing"),
+			resource.TestCheckResourceAttr("openwrt_network_interface.testing", "device", "br-testing"),
+			resource.TestCheckResourceAttr("openwrt_network_interface.testing", "dns.0", "9.9.9.9"),
+			resource.TestCheckResourceAttr("openwrt_network_interface.testing", "dns.1", "1.1.1.1"),
+			resource.TestCheckResourceAttr("openwrt_network_interface.testing", "peerdns", "false"),
+			resource.TestCheckResourceAttr("openwrt_network_interface.testing", "proto", "dhcp"),
+		),
+	}
+
+	acceptancetest.TerraformSteps(
+		t,
+		step,
+	)
+}
+
+func TestNetworkInterfaceResourcePeerDNSWithDHCPV6Acceptance(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	providerBlock := acceptancetest.RunOpenWrtServerWithProviderBlock(
+		ctx,
+		*dockerPool,
+		t,
+	)
+
+	step := resource.TestStep{
+		Config: fmt.Sprintf(`
+%s
+
+resource "openwrt_network_interface" "testing" {
+	device = "br-testing"
+	dns = [
+		"9.9.9.9",
+		"1.1.1.1",
+	]
+	id = "testing"
+	peerdns = false
+	proto = "dhcpv6"
+}
+`,
+			providerBlock,
+		),
+		Check: resource.ComposeAggregateTestCheckFunc(
+			resource.TestCheckResourceAttr("openwrt_network_interface.testing", "id", "testing"),
+			resource.TestCheckResourceAttr("openwrt_network_interface.testing", "device", "br-testing"),
+			resource.TestCheckResourceAttr("openwrt_network_interface.testing", "dns.0", "9.9.9.9"),
+			resource.TestCheckResourceAttr("openwrt_network_interface.testing", "dns.1", "1.1.1.1"),
+			resource.TestCheckResourceAttr("openwrt_network_interface.testing", "peerdns", "false"),
+			resource.TestCheckResourceAttr("openwrt_network_interface.testing", "proto", "dhcpv6"),
+		),
+	}
+
+	acceptancetest.TerraformSteps(
+		t,
+		step,
+	)
+}
