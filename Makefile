@@ -11,6 +11,10 @@ CACHE_DIRECTORY := .cache
 build:
 	go build ./...
 
+.PHONY: bump-patch-version
+bump-patch-version:
+	./scripts/bump-patch-version.sh
+
 .PHONY: clean
 clean: clean-acceptance-test-server clean-cache-directory
 
