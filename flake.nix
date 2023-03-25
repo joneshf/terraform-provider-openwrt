@@ -42,6 +42,7 @@
             pkgs.goreleaser
             pkgs.jq
             pkgs.nixpkgs-fmt
+            pkgs.semver
             pkgs.terraform
           ];
         };
