@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
+	frameworkresource "github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -14,9 +14,9 @@ import (
 )
 
 var (
-	_ resource.Resource                = &deviceResource[any]{}
-	_ resource.ResourceWithConfigure   = &deviceResource[any]{}
-	_ resource.ResourceWithImportState = &deviceResource[any]{}
+	_ frameworkresource.Resource                = &resource[any]{}
+	_ frameworkresource.ResourceWithConfigure   = &resource[any]{}
+	_ frameworkresource.ResourceWithImportState = &resource[any]{}
 )
 
 func NewResource[Model any](
@@ -25,8 +25,8 @@ func NewResource[Model any](
 	schemaDescription string,
 	uciConfig string,
 	uciType string,
-) resource.Resource {
-	return &deviceResource[Model]{
+) frameworkresource.Resource {
+	return &resource[Model]{
 		getId:             getId,
 		schemaAttributes:  schemaAttributes,
 		schemaDescription: schemaDescription,
@@ -36,7 +36,7 @@ func NewResource[Model any](
 	}
 }
 
-type deviceResource[Model any] struct {
+type resource[Model any] struct {
 	client            lucirpc.Client
 	fullTypeName      string
 	getId             func(Model) types.String
@@ -48,10 +48,10 @@ type deviceResource[Model any] struct {
 }
 
 // Configure adds the provider configured client to the resource.
-func (d *deviceResource[Model]) Configure(
+func (d *resource[Model]) Configure(
 	ctx context.Context,
-	req resource.ConfigureRequest,
-	res *resource.ConfigureResponse,
+	req frameworkresource.ConfigureRequest,
+	res *frameworkresource.ConfigureResponse,
 ) {
 	tflog.Info(ctx, fmt.Sprintf("Configuring %s.%s resource", d.uciConfig, d.uciType))
 	if req.ProviderData == nil {
@@ -70,10 +70,10 @@ func (d *deviceResource[Model]) Configure(
 }
 
 // Create constructs a new resource and sets the initial Terraform state.
-func (d *deviceResource[Model]) Create(
+func (d *resource[Model]) Create(
 	ctx context.Context,
-	req resource.CreateRequest,
-	res *resource.CreateResponse,
+	req frameworkresource.CreateRequest,
+	res *frameworkresource.CreateResponse,
 ) {
 	tflog.Info(ctx, fmt.Sprintf("Creating %s resource", d.fullTypeName))
 
@@ -135,10 +135,10 @@ func (d *deviceResource[Model]) Create(
 }
 
 // Delete removes the actual resource and remove the Terraform state on success.
-func (d *deviceResource[Model]) Delete(
+func (d *resource[Model]) Delete(
 	ctx context.Context,
-	req resource.DeleteRequest,
-	res *resource.DeleteResponse,
+	req frameworkresource.DeleteRequest,
+	res *frameworkresource.DeleteResponse,
 ) {
 	tflog.Info(ctx, fmt.Sprintf("Deleting %s resource", d.fullTypeName))
 
@@ -167,29 +167,29 @@ func (d *deviceResource[Model]) Delete(
 }
 
 // ImportState brings an existing resource into Terraform state.
-func (d *deviceResource[Model]) ImportState(
+func (d *resource[Model]) ImportState(
 	ctx context.Context,
-	req resource.ImportStateRequest,
-	res *resource.ImportStateResponse,
+	req frameworkresource.ImportStateRequest,
+	res *frameworkresource.ImportStateResponse,
 ) {
 	tflog.Debug(ctx, "Retrieving import id and saving to id attribute")
-	resource.ImportStatePassthroughID(ctx, path.Root(IdAttribute), req, res)
+	frameworkresource.ImportStatePassthroughID(ctx, path.Root(IdAttribute), req, res)
 }
 
 // Metadata sets the resource type name.
-func (d *deviceResource[Model]) Metadata(
+func (d *resource[Model]) Metadata(
 	ctx context.Context,
-	req resource.MetadataRequest,
-	res *resource.MetadataResponse,
+	req frameworkresource.MetadataRequest,
+	res *frameworkresource.MetadataResponse,
 ) {
 	res.TypeName = d.getFullTypeName(req.ProviderTypeName)
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (d *deviceResource[Model]) Read(
+func (d *resource[Model]) Read(
 	ctx context.Context,
-	req resource.ReadRequest,
-	res *resource.ReadResponse,
+	req frameworkresource.ReadRequest,
+	res *frameworkresource.ReadResponse,
 ) {
 	tflog.Info(ctx, fmt.Sprintf("Reading %s resource", d.fullTypeName))
 
@@ -224,10 +224,10 @@ func (d *deviceResource[Model]) Read(
 }
 
 // Schema defines the schema for the resource.
-func (d *deviceResource[Model]) Schema(
+func (d *resource[Model]) Schema(
 	ctx context.Context,
-	req resource.SchemaRequest,
-	res *resource.SchemaResponse,
+	req frameworkresource.SchemaRequest,
+	res *frameworkresource.SchemaResponse,
 ) {
 	attributes := map[string]schema.Attribute{}
 	for k, v := range d.schemaAttributes {
@@ -241,10 +241,10 @@ func (d *deviceResource[Model]) Schema(
 }
 
 // Update modifies part of the resource and sets the Terraform state on success.
-func (d *deviceResource[Model]) Update(
+func (d *resource[Model]) Update(
 	ctx context.Context,
-	req resource.UpdateRequest,
-	res *resource.UpdateResponse,
+	req frameworkresource.UpdateRequest,
+	res *frameworkresource.UpdateResponse,
 ) {
 	tflog.Info(ctx, fmt.Sprintf("Updating %s resource", d.fullTypeName))
 
@@ -304,7 +304,7 @@ func (d *deviceResource[Model]) Update(
 	}
 }
 
-func (d deviceResource[Model]) getFullTypeName(
+func (d resource[Model]) getFullTypeName(
 	providerTypeName string,
 ) string {
 	return fmt.Sprintf("%s_%s_%s", providerTypeName, d.uciConfig, d.uciType)
