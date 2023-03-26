@@ -11,7 +11,7 @@ import (
 	"github.com/joneshf/terraform-provider-openwrt/internal/acceptancetest"
 )
 
-func TestSystemSystemDataSourceAcceptance(t *testing.T) {
+func TestDataSourceAcceptance(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
@@ -46,7 +46,7 @@ data "openwrt_system_system" "this" {
 	)
 }
 
-func TestSystemSystemResourceAcceptance(t *testing.T) {
+func TestResourceAcceptance(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()

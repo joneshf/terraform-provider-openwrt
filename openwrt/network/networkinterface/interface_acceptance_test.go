@@ -1,6 +1,6 @@
 //go:build acceptance.test
 
-package network_test
+package networkinterface_test
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	"gotest.tools/v3/assert"
 )
 
-func TestNetworkInterfaceDataSourceAcceptance(t *testing.T) {
+func TestDataSourceAcceptance(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
@@ -57,7 +57,7 @@ data "openwrt_network_interface" "testing" {
 	)
 }
 
-func TestNetworkInterfaceResourceAcceptance(t *testing.T) {
+func TestResourceAcceptance(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
@@ -135,7 +135,7 @@ resource "openwrt_network_interface" "testing" {
 	)
 }
 
-func TestNetworkInterfaceResourcePeerDNSWithDHCPAcceptance(t *testing.T) {
+func TestResourcePeerDNSWithDHCPAcceptance(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
@@ -178,7 +178,7 @@ resource "openwrt_network_interface" "testing" {
 	)
 }
 
-func TestNetworkInterfaceResourcePeerDNSWithDHCPV6Acceptance(t *testing.T) {
+func TestResourcePeerDNSWithDHCPV6Acceptance(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
