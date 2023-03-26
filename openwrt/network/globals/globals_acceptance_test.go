@@ -1,6 +1,6 @@
 //go:build acceptance.test
 
-package network_test
+package globals_test
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	"gotest.tools/v3/assert"
 )
 
-func TestNetworkGlobalsDataSourceAcceptance(t *testing.T) {
+func TestDataSourceAcceptance(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
@@ -53,7 +53,7 @@ data "openwrt_network_globals" "this" {
 	)
 }
 
-func TestNetworkGlobalsResourceAcceptance(t *testing.T) {
+func TestResourceAcceptance(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()

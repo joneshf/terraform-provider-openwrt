@@ -1,6 +1,6 @@
 //go:build acceptance.test
 
-package network_test
+package device_test
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	"gotest.tools/v3/assert"
 )
 
-func TestNetworkDeviceDataSourceAcceptance(t *testing.T) {
+func TestDataSourceAcceptance(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
@@ -56,7 +56,7 @@ data "openwrt_network_device" "this" {
 	)
 }
 
-func TestNetworkDeviceResourceAcceptance(t *testing.T) {
+func TestResourceAcceptance(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()

@@ -1,6 +1,6 @@
 //go:build acceptance.test
 
-package network_test
+package globals_test
 
 import (
 	"context"

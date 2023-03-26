@@ -17,8 +17,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/lucirpcglue"
-	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/network"
-	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/system"
+	"github.com/joneshf/terraform-provider-openwrt/openwrt/network/device"
+	"github.com/joneshf/terraform-provider-openwrt/openwrt/network/globals"
+	"github.com/joneshf/terraform-provider-openwrt/openwrt/network/networkinterface"
+	"github.com/joneshf/terraform-provider-openwrt/openwrt/system/system"
 )
 
 const (
@@ -151,10 +153,10 @@ func (p *openWrtProvider) DataSources(
 	ctx context.Context,
 ) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		network.NewDeviceDataSource,
-		network.NewGlobalsDataSource,
-		network.NewInterfaceDataSource,
-		system.NewSystemDataSource,
+		device.NewDataSource,
+		globals.NewDataSource,
+		networkinterface.NewDataSource,
+		system.NewDataSource,
 	}
 }
 
@@ -173,10 +175,10 @@ func (p *openWrtProvider) Resources(
 	ctx context.Context,
 ) []func() resource.Resource {
 	return []func() resource.Resource{
-		network.NewDeviceResource,
-		network.NewGlobalsResource,
-		network.NewInterfaceResource,
-		system.NewSystemResource,
+		device.NewResource,
+		globals.NewResource,
+		networkinterface.NewResource,
+		system.NewResource,
 	}
 }
 
