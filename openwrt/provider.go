@@ -21,6 +21,7 @@ import (
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/network/globals"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/network/networkinterface"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/network/networkswitch"
+	"github.com/joneshf/terraform-provider-openwrt/openwrt/network/switchvlan"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/system/system"
 )
 
@@ -158,6 +159,7 @@ func (p *openWrtProvider) DataSources(
 		globals.NewDataSource,
 		networkinterface.NewDataSource,
 		networkswitch.NewDataSource,
+		switchvlan.NewDataSource,
 		system.NewDataSource,
 	}
 }
@@ -181,6 +183,7 @@ func (p *openWrtProvider) Resources(
 		globals.NewResource,
 		networkinterface.NewResource,
 		networkswitch.NewResource,
+		switchvlan.NewResource,
 		system.NewResource,
 	}
 }
