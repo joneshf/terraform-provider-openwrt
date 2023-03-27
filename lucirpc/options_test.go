@@ -277,4 +277,84 @@ func TestOptionsUnmarshalJSON(t *testing.T) {
 		assert.NilError(t, err)
 		assert.DeepEqual(t, options, want)
 	})
+
+	t.Run("coerces stringy values", func(t *testing.T) {
+		// Given
+		var options lucirpc.Options
+		rawJSON := `{
+			"option1": "1",
+			"option2": "yes",
+			"option3": "on",
+			"option4": "true",
+			"option5": "enabled",
+			"option6": "0",
+			"option7": "no",
+			"option8": "off",
+			"option9": "false",
+			"option10": "disabled",
+			"option11": "31"
+		}`
+
+		// When
+		err := json.Unmarshal([]byte(rawJSON), &options)
+
+		// Then
+		assert.NilError(t, err)
+		got1Integer, err := options.GetInteger("option1")
+		want1Integer := 1
+		assert.NilError(t, err)
+		assert.DeepEqual(t, got1Integer, want1Integer)
+		got1String, err := options.GetString("option1")
+		want1String := "1"
+		assert.NilError(t, err)
+		assert.DeepEqual(t, got1String, want1String)
+		got2String, err := options.GetString("option2")
+		want2String := "yes"
+		assert.NilError(t, err)
+		assert.DeepEqual(t, got2String, want2String)
+		got3String, err := options.GetString("option3")
+		want3String := "on"
+		assert.NilError(t, err)
+		assert.DeepEqual(t, got3String, want3String)
+		got4String, err := options.GetString("option4")
+		want4String := "true"
+		assert.NilError(t, err)
+		assert.DeepEqual(t, got4String, want4String)
+		got5String, err := options.GetString("option5")
+		want5String := "enabled"
+		assert.NilError(t, err)
+		assert.DeepEqual(t, got5String, want5String)
+		got6Integer, err := options.GetInteger("option6")
+		want6Integer := 0
+		assert.NilError(t, err)
+		assert.DeepEqual(t, got6Integer, want6Integer)
+		got6String, err := options.GetString("option6")
+		want6String := "0"
+		assert.NilError(t, err)
+		assert.DeepEqual(t, got6String, want6String)
+		got7String, err := options.GetString("option7")
+		want7String := "no"
+		assert.NilError(t, err)
+		assert.DeepEqual(t, got7String, want7String)
+		got8String, err := options.GetString("option8")
+		want8String := "off"
+		assert.NilError(t, err)
+		assert.DeepEqual(t, got8String, want8String)
+		got9String, err := options.GetString("option9")
+		want9String := "false"
+		assert.NilError(t, err)
+		assert.DeepEqual(t, got9String, want9String)
+		got10String, err := options.GetString("option10")
+		want10String := "disabled"
+		assert.NilError(t, err)
+		assert.DeepEqual(t, got10String, want10String)
+		got11Integer, err := options.GetInteger("option11")
+		want11Integer := 31
+		assert.NilError(t, err)
+		assert.DeepEqual(t, got11Integer, want11Integer)
+		got11String, err := options.GetString("option11")
+		want11String := "31"
+		assert.NilError(t, err)
+		assert.DeepEqual(t, got11String, want11String)
+	})
 }

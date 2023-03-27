@@ -194,7 +194,8 @@ func (os *Options) UnmarshalJSON(raw []byte) error {
 }
 
 type optionBoolean struct {
-	value bool
+	original string
+	value    bool
 }
 
 func (o *optionBoolean) AsBoolean() (bool, error) {
@@ -202,7 +203,16 @@ func (o *optionBoolean) AsBoolean() (bool, error) {
 }
 
 func (o *optionBoolean) AsInteger() (int, error) {
-	return 0, NewOptionTypeMismatchError("an integer", "a boolean")
+	switch o.original {
+	case "0":
+		return 0, nil
+
+	case "1":
+		return 1, nil
+
+	default:
+		return 0, NewOptionTypeMismatchError("an integer", "a boolean")
+	}
 }
 
 func (o *optionBoolean) AsListString() ([]string, error) {
@@ -210,7 +220,16 @@ func (o *optionBoolean) AsListString() ([]string, error) {
 }
 
 func (o *optionBoolean) AsString() (string, error) {
-	return "", NewOptionTypeMismatchError("a string", "a boolean")
+	switch o.original {
+	case "0", "no", "off", "false", "disabled":
+		return o.original, nil
+
+	case "1", "yes", "on", "true", "enabled":
+		return o.original, nil
+
+	default:
+		return "", NewOptionTypeMismatchError("a string", "a boolean")
+	}
 }
 
 func (o *optionBoolean) Equal(other *optionBoolean) bool {
@@ -239,6 +258,7 @@ func (o *optionBoolean) UnmarshalJSON(raw []byte) error {
 	var value bool
 	err := json.Unmarshal(raw, &value)
 	if err == nil {
+		o.original = string(raw)
 		o.value = value
 		return nil
 	}
@@ -253,10 +273,12 @@ func (o *optionBoolean) UnmarshalJSON(raw []byte) error {
 
 	switch boolish {
 	case "1", "yes", "on", "true", "enabled":
+		o.original = boolish
 		o.value = true
 		return nil
 
 	case "0", "no", "off", "false", "disabled":
+		o.original = boolish
 		o.value = false
 		return nil
 
@@ -289,7 +311,7 @@ func (o *optionInteger) AsListString() ([]string, error) {
 }
 
 func (o *optionInteger) AsString() (string, error) {
-	return "", NewOptionTypeMismatchError("a string", "an integer")
+	return strconv.Itoa(o.value), nil
 }
 
 func (o *optionInteger) Equal(other *optionInteger) bool {
