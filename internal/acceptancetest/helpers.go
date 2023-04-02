@@ -79,19 +79,7 @@ func AuthenticatedClientWithProviderBlock(
 		openWrtServer.Password,
 	)
 	assert.NilError(t, err)
-	providerBlock = fmt.Sprintf(`
-provider "openwrt" {
-	hostname = %q
-	password = %q
-	port = %d
-	username = %q
-}
-`,
-		openWrtServer.Hostname,
-		openWrtServer.Password,
-		openWrtServer.HTTPPort,
-		openWrtServer.Username,
-	)
+	providerBlock = openWrtServer.ProviderBlock()
 	return
 }
 
@@ -102,6 +90,23 @@ type OpenWrtServer struct {
 	Password string
 	Scheme   string
 	Username string
+}
+
+// ProviderBlock creates a stringified provider block for the OpenWrt provider.
+func (s OpenWrtServer) ProviderBlock() string {
+	return fmt.Sprintf(`
+provider "openwrt" {
+	hostname = %q
+	password = %q
+	port = %d
+	username = %q
+}
+`,
+		s.Hostname,
+		s.Password,
+		s.HTTPPort,
+		s.Username,
+	)
 }
 
 // RunOpenWrtServer constructs a running OpenWrt server.
@@ -149,21 +154,7 @@ func RunOpenWrtServerWithProviderBlock(
 	t.Helper()
 
 	openWrtServer := RunOpenWrtServer(ctx, dockerPool, t)
-	providerBlock := fmt.Sprintf(`
-provider "openwrt" {
-	hostname = %q
-	password = %q
-	port = %d
-	username = %q
-}
-`,
-		openWrtServer.Hostname,
-		openWrtServer.Password,
-		openWrtServer.HTTPPort,
-		openWrtServer.Username,
-	)
-
-	return providerBlock
+	return openWrtServer.ProviderBlock()
 }
 
 // Setup does a bit of setup so acceptance tests can run:
