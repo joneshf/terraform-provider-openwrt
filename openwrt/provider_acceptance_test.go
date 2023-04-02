@@ -51,7 +51,7 @@ func TestOpenWrtProviderConfigureConnectsWithoutError(t *testing.T) {
 
 	// Given
 	ctx := context.Background()
-	hostname, port := acceptancetest.RunOpenWrtServer(
+	openWrtServer := acceptancetest.RunOpenWrtServer(
 		ctx,
 		*dockerPool,
 		t,
@@ -73,9 +73,9 @@ func TestOpenWrtProviderConfigureConnectsWithoutError(t *testing.T) {
 				},
 			},
 			map[string]tftypes.Value{
-				"hostname": tftypes.NewValue(tftypes.String, hostname),
+				"hostname": tftypes.NewValue(tftypes.String, openWrtServer.Hostname),
 				"password": tftypes.NewValue(tftypes.String, acceptancetest.Password),
-				"port":     tftypes.NewValue(tftypes.Number, port),
+				"port":     tftypes.NewValue(tftypes.Number, openWrtServer.HTTPPort),
 				"scheme":   tftypes.NewValue(tftypes.String, acceptancetest.Scheme),
 				"username": tftypes.NewValue(tftypes.String, acceptancetest.Username),
 			},
@@ -98,15 +98,15 @@ func TestOpenWrtProviderConfigureConnectsWithoutErrorWithEnvironmentVariables(t 
 
 	// Given
 	ctx := context.Background()
-	hostname, port := acceptancetest.RunOpenWrtServer(
+	openWrtServer := acceptancetest.RunOpenWrtServer(
 		ctx,
 		*dockerPool,
 		t,
 	)
 	env := map[string]string{
-		"OPENWRT_HOSTNAME": hostname,
+		"OPENWRT_HOSTNAME": openWrtServer.Hostname,
 		"OPENWRT_PASSWORD": acceptancetest.Password,
-		"OPENWRT_PORT":     strconv.Itoa(int(port)),
+		"OPENWRT_PORT":     strconv.Itoa(int(openWrtServer.HTTPPort)),
 		"OPENWRT_SCHEME":   acceptancetest.Scheme,
 		"OPENWRT_USERNAME": acceptancetest.Username,
 	}

@@ -26,7 +26,7 @@ import (
 const (
 	acceptanceTestDockerDockerfile = "acceptance-test.Dockerfile"
 	acceptanceTestDockerName       = "joneshf/openwrt"
-	acceptanceTestDockerPort       = "80/tcp"
+	acceptanceTestDockerHTTPPort   = "80/tcp"
 	acceptanceTestDockerTag        = "acceptance-test"
 
 	dockerContainerHealthy = "healthy"
@@ -50,12 +50,12 @@ func AuthenticatedClient(
 ) *lucirpc.Client {
 	t.Helper()
 
-	host, port := RunOpenWrtServer(ctx, dockerPool, t)
+	openWrtServer := RunOpenWrtServer(ctx, dockerPool, t)
 	client, err := lucirpc.NewClient(
 		ctx,
 		Scheme,
-		host,
-		port,
+		openWrtServer.Hostname,
+		openWrtServer.HTTPPort,
 		Username,
 		Password,
 	)
@@ -73,12 +73,12 @@ func AuthenticatedClientWithProviderBlock(
 ) (client *lucirpc.Client, providerBlock string) {
 	t.Helper()
 
-	hostname, port := RunOpenWrtServer(ctx, dockerPool, t)
+	openWrtServer := RunOpenWrtServer(ctx, dockerPool, t)
 	client, err := lucirpc.NewClient(
 		ctx,
 		Scheme,
-		hostname,
-		port,
+		openWrtServer.Hostname,
+		openWrtServer.HTTPPort,
 		Username,
 		Password,
 	)
@@ -91,12 +91,18 @@ provider "openwrt" {
 	username = %q
 }
 `,
-		hostname,
+		openWrtServer.Hostname,
 		Password,
-		port,
+		openWrtServer.HTTPPort,
 		Username,
 	)
 	return
+}
+
+// OpenWrtServer groups all the information needed to connect to the running OpenWrt server.
+type OpenWrtServer struct {
+	Hostname string
+	HTTPPort uint16
 }
 
 // RunOpenWrtServer constructs a running OpenWrt server.
@@ -106,7 +112,7 @@ func RunOpenWrtServer(
 	ctx context.Context,
 	dockerPool dockertest.Pool,
 	t *testing.T,
-) (hostname string, port uint16) {
+) OpenWrtServer {
 	t.Helper()
 
 	openWrt, err := dockerPool.Run(acceptanceTestDockerName, acceptanceTestDockerTag, []string{})
@@ -119,13 +125,16 @@ func RunOpenWrtServer(
 	assert.NilError(t, err)
 	err = dockerPool.Retry(checkHealth(ctx, dockerPool, *openWrt))
 	assert.NilError(t, err)
-	hostname = openWrt.GetBoundIP(acceptanceTestDockerPort)
-	rawPort := openWrt.GetPort(acceptanceTestDockerPort)
-	intPort, err := strconv.Atoi(rawPort)
+	hostname := openWrt.GetBoundIP(acceptanceTestDockerHTTPPort)
+	rawHTTPPort := openWrt.GetPort(acceptanceTestDockerHTTPPort)
+	intHTTPPort, err := strconv.Atoi(rawHTTPPort)
 	assert.NilError(t, err)
-	port = uint16(intPort)
+	httpPort := uint16(intHTTPPort)
 
-	return
+	return OpenWrtServer{
+		Hostname: hostname,
+		HTTPPort: httpPort,
+	}
 }
 
 // RunOpenWrtServerWithProviderBlock constructs a running OpenWrt server,
@@ -137,7 +146,7 @@ func RunOpenWrtServerWithProviderBlock(
 ) string {
 	t.Helper()
 
-	hostname, port := RunOpenWrtServer(ctx, dockerPool, t)
+	openWrtServer := RunOpenWrtServer(ctx, dockerPool, t)
 	providerBlock := fmt.Sprintf(`
 provider "openwrt" {
 	hostname = %q
@@ -146,9 +155,9 @@ provider "openwrt" {
 	username = %q
 }
 `,
-		hostname,
+		openWrtServer.Hostname,
 		Password,
-		port,
+		openWrtServer.HTTPPort,
 		Username,
 	)
 

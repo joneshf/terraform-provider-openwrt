@@ -364,14 +364,14 @@ func TestNewClientAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		hostname, port := acceptancetest.RunOpenWrtServer(ctx, *dockerPool, t)
+		openWrtServer := acceptancetest.RunOpenWrtServer(ctx, *dockerPool, t)
 
 		// When
 		_, err := lucirpc.NewClient(
 			ctx,
 			acceptancetest.Scheme,
-			hostname,
-			port,
+			openWrtServer.Hostname,
+			openWrtServer.HTTPPort,
 			acceptancetest.Username,
 			acceptancetest.Password,
 		)
