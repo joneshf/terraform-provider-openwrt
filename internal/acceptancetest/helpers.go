@@ -27,6 +27,7 @@ const (
 	acceptanceTestDockerDockerfile = "acceptance-test.Dockerfile"
 	acceptanceTestDockerName       = "joneshf/openwrt"
 	acceptanceTestDockerHTTPPort   = "80/tcp"
+	acceptanceTestDockerSSHPort    = "22/tcp"
 	acceptanceTestDockerTag        = "acceptance-test"
 
 	dockerContainerHealthy = "healthy"
@@ -89,6 +90,7 @@ type OpenWrtServer struct {
 	HTTPPort uint16
 	Password string
 	Scheme   string
+	SSHPort  uint16
 	Username string
 }
 
@@ -134,12 +136,17 @@ func RunOpenWrtServer(
 	intHTTPPort, err := strconv.Atoi(rawHTTPPort)
 	assert.NilError(t, err)
 	httpPort := uint16(intHTTPPort)
+	rawSSHPort := openWrt.GetPort(acceptanceTestDockerSSHPort)
+	intSSHPort, err := strconv.Atoi(rawSSHPort)
+	assert.NilError(t, err)
+	sshPort := uint16(intSSHPort)
 
 	return OpenWrtServer{
 		Hostname: hostname,
 		HTTPPort: httpPort,
 		Password: "",
 		Scheme:   "http",
+		SSHPort:  sshPort,
 		Username: "root",
 	}
 }
