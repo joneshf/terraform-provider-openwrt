@@ -74,10 +74,10 @@ func TestOpenWrtProviderConfigureConnectsWithoutError(t *testing.T) {
 			},
 			map[string]tftypes.Value{
 				"hostname": tftypes.NewValue(tftypes.String, openWrtServer.Hostname),
-				"password": tftypes.NewValue(tftypes.String, acceptancetest.Password),
+				"password": tftypes.NewValue(tftypes.String, openWrtServer.Password),
 				"port":     tftypes.NewValue(tftypes.Number, openWrtServer.HTTPPort),
-				"scheme":   tftypes.NewValue(tftypes.String, acceptancetest.Scheme),
-				"username": tftypes.NewValue(tftypes.String, acceptancetest.Username),
+				"scheme":   tftypes.NewValue(tftypes.String, openWrtServer.Scheme),
+				"username": tftypes.NewValue(tftypes.String, openWrtServer.Username),
 			},
 		),
 	}
@@ -105,10 +105,10 @@ func TestOpenWrtProviderConfigureConnectsWithoutErrorWithEnvironmentVariables(t 
 	)
 	env := map[string]string{
 		"OPENWRT_HOSTNAME": openWrtServer.Hostname,
-		"OPENWRT_PASSWORD": acceptancetest.Password,
+		"OPENWRT_PASSWORD": openWrtServer.Password,
 		"OPENWRT_PORT":     strconv.Itoa(int(openWrtServer.HTTPPort)),
-		"OPENWRT_SCHEME":   acceptancetest.Scheme,
-		"OPENWRT_USERNAME": acceptancetest.Username,
+		"OPENWRT_SCHEME":   openWrtServer.Scheme,
+		"OPENWRT_USERNAME": openWrtServer.Username,
 	}
 	lookupEnv := func(key string) (string, bool) {
 		value, ok := env[key]

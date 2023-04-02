@@ -30,10 +30,6 @@ const (
 	acceptanceTestDockerTag        = "acceptance-test"
 
 	dockerContainerHealthy = "healthy"
-
-	Password = ""
-	Scheme   = "http"
-	Username = "root"
 )
 
 var (
@@ -53,11 +49,11 @@ func AuthenticatedClient(
 	openWrtServer := RunOpenWrtServer(ctx, dockerPool, t)
 	client, err := lucirpc.NewClient(
 		ctx,
-		Scheme,
+		openWrtServer.Scheme,
 		openWrtServer.Hostname,
 		openWrtServer.HTTPPort,
-		Username,
-		Password,
+		openWrtServer.Username,
+		openWrtServer.Password,
 	)
 	assert.NilError(t, err)
 	return client
@@ -76,11 +72,11 @@ func AuthenticatedClientWithProviderBlock(
 	openWrtServer := RunOpenWrtServer(ctx, dockerPool, t)
 	client, err := lucirpc.NewClient(
 		ctx,
-		Scheme,
+		openWrtServer.Scheme,
 		openWrtServer.Hostname,
 		openWrtServer.HTTPPort,
-		Username,
-		Password,
+		openWrtServer.Username,
+		openWrtServer.Password,
 	)
 	assert.NilError(t, err)
 	providerBlock = fmt.Sprintf(`
@@ -92,9 +88,9 @@ provider "openwrt" {
 }
 `,
 		openWrtServer.Hostname,
-		Password,
+		openWrtServer.Password,
 		openWrtServer.HTTPPort,
-		Username,
+		openWrtServer.Username,
 	)
 	return
 }
@@ -103,6 +99,9 @@ provider "openwrt" {
 type OpenWrtServer struct {
 	Hostname string
 	HTTPPort uint16
+	Password string
+	Scheme   string
+	Username string
 }
 
 // RunOpenWrtServer constructs a running OpenWrt server.
@@ -134,6 +133,9 @@ func RunOpenWrtServer(
 	return OpenWrtServer{
 		Hostname: hostname,
 		HTTPPort: httpPort,
+		Password: "",
+		Scheme:   "http",
+		Username: "root",
 	}
 }
 
@@ -156,9 +158,9 @@ provider "openwrt" {
 }
 `,
 		openWrtServer.Hostname,
-		Password,
+		openWrtServer.Password,
 		openWrtServer.HTTPPort,
-		Username,
+		openWrtServer.Username,
 	)
 
 	return providerBlock

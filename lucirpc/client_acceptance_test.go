@@ -369,11 +369,11 @@ func TestNewClientAcceptance(t *testing.T) {
 		// When
 		_, err := lucirpc.NewClient(
 			ctx,
-			acceptancetest.Scheme,
+			openWrtServer.Scheme,
 			openWrtServer.Hostname,
 			openWrtServer.HTTPPort,
-			acceptancetest.Username,
-			acceptancetest.Password,
+			openWrtServer.Username,
+			openWrtServer.Password,
 		)
 
 		// Then
