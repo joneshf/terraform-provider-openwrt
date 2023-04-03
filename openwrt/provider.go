@@ -24,6 +24,7 @@ import (
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/network/switchvlan"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/system/system"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/wireless/wifidevice"
+	"github.com/joneshf/terraform-provider-openwrt/openwrt/wireless/wifiiface"
 )
 
 const (
@@ -163,6 +164,7 @@ func (p *openWrtProvider) DataSources(
 		switchvlan.NewDataSource,
 		system.NewDataSource,
 		wifidevice.NewDataSource,
+		wifiiface.NewDataSource,
 	}
 }
 
@@ -188,6 +190,7 @@ func (p *openWrtProvider) Resources(
 		switchvlan.NewResource,
 		system.NewResource,
 		wifidevice.NewResource,
+		wifiiface.NewResource,
 	}
 }
 
