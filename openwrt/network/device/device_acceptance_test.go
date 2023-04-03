@@ -17,11 +17,16 @@ func TestDataSourceAcceptance(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	client, providerBlock := acceptancetest.AuthenticatedClientWithProviderBlock(
+	openWrtServer := acceptancetest.RunOpenWrtServer(
 		ctx,
 		*dockerPool,
 		t,
 	)
+	client := openWrtServer.LuCIRPCClient(
+		ctx,
+		t,
+	)
+	providerBlock := openWrtServer.ProviderBlock()
 	options := lucirpc.Options{
 		"name":  lucirpc.String("br-testing"),
 		"ports": lucirpc.ListString([]string{"eth0", "eth1"}),
@@ -60,11 +65,12 @@ func TestResourceAcceptance(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	providerBlock := acceptancetest.RunOpenWrtServerWithProviderBlock(
+	openWrtServer := acceptancetest.RunOpenWrtServer(
 		ctx,
 		*dockerPool,
 		t,
 	)
+	providerBlock := openWrtServer.ProviderBlock()
 
 	createAndReadResource := resource.TestStep{
 		Config: fmt.Sprintf(`

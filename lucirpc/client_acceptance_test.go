@@ -27,9 +27,13 @@ func TestClientCreateSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		client := acceptancetest.AuthenticatedClient(
+		openWrtServer := acceptancetest.RunOpenWrtServer(
 			ctx,
 			*dockerPool,
+			t,
+		)
+		client := openWrtServer.LuCIRPCClient(
+			ctx,
 			t,
 		)
 
@@ -52,9 +56,13 @@ func TestClientCreateSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		client := acceptancetest.AuthenticatedClient(
+		openWrtServer := acceptancetest.RunOpenWrtServer(
 			ctx,
 			*dockerPool,
+			t,
+		)
+		client := openWrtServer.LuCIRPCClient(
+			ctx,
 			t,
 		)
 
@@ -77,9 +85,13 @@ func TestClientCreateSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		client := acceptancetest.AuthenticatedClient(
+		openWrtServer := acceptancetest.RunOpenWrtServer(
 			ctx,
 			*dockerPool,
+			t,
+		)
+		client := openWrtServer.LuCIRPCClient(
+			ctx,
 			t,
 		)
 
@@ -119,9 +131,13 @@ func TestClientCreateSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		client := acceptancetest.AuthenticatedClient(
+		openWrtServer := acceptancetest.RunOpenWrtServer(
 			ctx,
 			*dockerPool,
+			t,
+		)
+		client := openWrtServer.LuCIRPCClient(
+			ctx,
 			t,
 		)
 
@@ -153,9 +169,13 @@ func TestClientDeleteSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		client := acceptancetest.AuthenticatedClient(
+		openWrtServer := acceptancetest.RunOpenWrtServer(
 			ctx,
 			*dockerPool,
+			t,
+		)
+		client := openWrtServer.LuCIRPCClient(
+			ctx,
 			t,
 		)
 
@@ -176,9 +196,13 @@ func TestClientDeleteSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		client := acceptancetest.AuthenticatedClient(
+		openWrtServer := acceptancetest.RunOpenWrtServer(
 			ctx,
 			*dockerPool,
+			t,
+		)
+		client := openWrtServer.LuCIRPCClient(
+			ctx,
 			t,
 		)
 		_, err := client.CreateSection(
@@ -207,9 +231,13 @@ func TestClientDeleteSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		client := acceptancetest.AuthenticatedClient(
+		openWrtServer := acceptancetest.RunOpenWrtServer(
 			ctx,
 			*dockerPool,
+			t,
+		)
+		client := openWrtServer.LuCIRPCClient(
+			ctx,
 			t,
 		)
 		_, err := client.CreateSection(
@@ -243,9 +271,13 @@ func TestClientDeleteSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		client := acceptancetest.AuthenticatedClient(
+		openWrtServer := acceptancetest.RunOpenWrtServer(
 			ctx,
 			*dockerPool,
+			t,
+		)
+		client := openWrtServer.LuCIRPCClient(
+			ctx,
 			t,
 		)
 		_, err := client.CreateSection(
@@ -283,9 +315,13 @@ func TestClientGetSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		client := acceptancetest.AuthenticatedClient(
+		openWrtServer := acceptancetest.RunOpenWrtServer(
 			ctx,
 			*dockerPool,
+			t,
+		)
+		client := openWrtServer.LuCIRPCClient(
+			ctx,
 			t,
 		)
 
@@ -305,9 +341,13 @@ func TestClientGetSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		client := acceptancetest.AuthenticatedClient(
+		openWrtServer := acceptancetest.RunOpenWrtServer(
 			ctx,
 			*dockerPool,
+			t,
+		)
+		client := openWrtServer.LuCIRPCClient(
+			ctx,
 			t,
 		)
 
@@ -389,9 +429,13 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		client := acceptancetest.AuthenticatedClient(
+		openWrtServer := acceptancetest.RunOpenWrtServer(
 			ctx,
 			*dockerPool,
+			t,
+		)
+		client := openWrtServer.LuCIRPCClient(
+			ctx,
 			t,
 		)
 
@@ -413,9 +457,13 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		client := acceptancetest.AuthenticatedClient(
+		openWrtServer := acceptancetest.RunOpenWrtServer(
 			ctx,
 			*dockerPool,
+			t,
+		)
+		client := openWrtServer.LuCIRPCClient(
+			ctx,
 			t,
 		)
 		_, err := client.CreateSection(
@@ -445,9 +493,13 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		client := acceptancetest.AuthenticatedClient(
+		openWrtServer := acceptancetest.RunOpenWrtServer(
 			ctx,
 			*dockerPool,
+			t,
+		)
+		client := openWrtServer.LuCIRPCClient(
+			ctx,
 			t,
 		)
 		_, err := client.CreateSection(
@@ -479,9 +531,13 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		client := acceptancetest.AuthenticatedClient(
+		openWrtServer := acceptancetest.RunOpenWrtServer(
 			ctx,
 			*dockerPool,
+			t,
+		)
+		client := openWrtServer.LuCIRPCClient(
+			ctx,
 			t,
 		)
 		_, err := client.CreateSection(
@@ -528,9 +584,13 @@ func TestClientUpdateSectionAcceptance(t *testing.T) {
 
 		// Given
 		ctx := context.Background()
-		client := acceptancetest.AuthenticatedClient(
+		openWrtServer := acceptancetest.RunOpenWrtServer(
 			ctx,
 			*dockerPool,
+			t,
+		)
+		client := openWrtServer.LuCIRPCClient(
+			ctx,
 			t,
 		)
 		_, err := client.CreateSection(
