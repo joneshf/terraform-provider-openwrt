@@ -3,6 +3,7 @@ package lucirpcglue
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -133,5 +134,7 @@ func (d *dataSource[Model]) Schema(
 func (d dataSource[Model]) getFullTypeName(
 	providerTypeName string,
 ) string {
-	return fmt.Sprintf("%s_%s_%s", providerTypeName, d.uciConfig, d.uciType)
+	uciConfig := strings.ReplaceAll(d.uciConfig, "-", "_")
+	uciType := strings.ReplaceAll(d.uciType, "-", "_")
+	return fmt.Sprintf("%s_%s_%s", providerTypeName, uciConfig, uciType)
 }

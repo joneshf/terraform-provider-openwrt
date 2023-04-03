@@ -65,7 +65,7 @@ const (
 	typeUCIOption            = "type"
 
 	uciConfig = "wireless"
-	uciType   = "wifi_device"
+	uciType   = "wifi-device"
 )
 
 var (
