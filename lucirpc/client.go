@@ -491,6 +491,7 @@ func (c jsonRPCClient) Invoke(
 		return nil, fmt.Errorf("problem sending request to %s: %w", humanReadableMethod, err)
 	}
 
+	defer response.Body.Close()
 	if response.StatusCode != 200 {
 		return nil, fmt.Errorf("expected %s to respond with a 200: got %s", humanReadableMethod, response.Status)
 	}
