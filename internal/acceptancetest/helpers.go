@@ -38,52 +38,6 @@ var (
 	acceptanceTestDockerImage          = fmt.Sprintf("%s:%s", acceptanceTestDockerName, acceptanceTestDockerTag)
 )
 
-// AuthenticatedClient starts an OpenWrt server,
-// and returns a [*lucirpc.Client] to interact with it.
-func AuthenticatedClient(
-	ctx context.Context,
-	dockerPool dockertest.Pool,
-	t *testing.T,
-) *lucirpc.Client {
-	t.Helper()
-
-	openWrtServer := RunOpenWrtServer(ctx, dockerPool, t)
-	client, err := lucirpc.NewClient(
-		ctx,
-		openWrtServer.Scheme,
-		openWrtServer.Hostname,
-		openWrtServer.HTTPPort,
-		openWrtServer.Username,
-		openWrtServer.Password,
-	)
-	assert.NilError(t, err)
-	return client
-}
-
-// AuthenticatedClientWithProviderBlock starts an OpenWrt server,
-// returns a [*lucirpc.Client] to interact with it,
-// and a stringified provider block.
-func AuthenticatedClientWithProviderBlock(
-	ctx context.Context,
-	dockerPool dockertest.Pool,
-	t *testing.T,
-) (client *lucirpc.Client, providerBlock string) {
-	t.Helper()
-
-	openWrtServer := RunOpenWrtServer(ctx, dockerPool, t)
-	client, err := lucirpc.NewClient(
-		ctx,
-		openWrtServer.Scheme,
-		openWrtServer.Hostname,
-		openWrtServer.HTTPPort,
-		openWrtServer.Username,
-		openWrtServer.Password,
-	)
-	assert.NilError(t, err)
-	providerBlock = openWrtServer.ProviderBlock()
-	return
-}
-
 // OpenWrtServer groups all the information needed to connect to the running OpenWrt server.
 type OpenWrtServer struct {
 	Hostname string
@@ -92,6 +46,25 @@ type OpenWrtServer struct {
 	Scheme   string
 	SSHPort  uint16
 	Username string
+}
+
+// LuCIRPCClient returns a [*lucirpc.Client] to interact with the [OpenWrtServer].
+func (s OpenWrtServer) LuCIRPCClient(
+	ctx context.Context,
+	t *testing.T,
+) *lucirpc.Client {
+	t.Helper()
+
+	client, err := lucirpc.NewClient(
+		ctx,
+		s.Scheme,
+		s.Hostname,
+		s.HTTPPort,
+		s.Username,
+		s.Password,
+	)
+	assert.NilError(t, err)
+	return client
 }
 
 // ProviderBlock creates a stringified provider block for the OpenWrt provider.
@@ -149,19 +122,6 @@ func RunOpenWrtServer(
 		SSHPort:  sshPort,
 		Username: "root",
 	}
-}
-
-// RunOpenWrtServerWithProviderBlock constructs a running OpenWrt server,
-// and a stringified provider block.
-func RunOpenWrtServerWithProviderBlock(
-	ctx context.Context,
-	dockerPool dockertest.Pool,
-	t *testing.T,
-) string {
-	t.Helper()
-
-	openWrtServer := RunOpenWrtServer(ctx, dockerPool, t)
-	return openWrtServer.ProviderBlock()
 }
 
 // Setup does a bit of setup so acceptance tests can run:

@@ -15,11 +15,12 @@ func TestDataSourceAcceptance(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	providerBlock := acceptancetest.RunOpenWrtServerWithProviderBlock(
+	openWrtServer := acceptancetest.RunOpenWrtServer(
 		ctx,
 		*dockerPool,
 		t,
 	)
+	providerBlock := openWrtServer.ProviderBlock()
 
 	readDataSource := resource.TestStep{
 		Config: fmt.Sprintf(`
@@ -50,11 +51,12 @@ func TestResourceAcceptance(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	providerBlock := acceptancetest.RunOpenWrtServerWithProviderBlock(
+	openWrtServer := acceptancetest.RunOpenWrtServer(
 		ctx,
 		*dockerPool,
 		t,
 	)
+	providerBlock := openWrtServer.ProviderBlock()
 
 	importValidation := resource.TestStep{
 		Config: fmt.Sprintf(`

@@ -76,15 +76,10 @@ func runOpenWrtServerWithWireless(
 	})
 	err = session.Run("touch /etc/config/wireless")
 	assert.NilError(t, err)
-	client, err := lucirpc.NewClient(
+	client := openWrtServer.LuCIRPCClient(
 		ctx,
-		openWrtServer.Scheme,
-		openWrtServer.Hostname,
-		openWrtServer.HTTPPort,
-		openWrtServer.Username,
-		openWrtServer.Password,
+		t,
 	)
-	assert.NilError(t, err)
 	providerBlock := openWrtServer.ProviderBlock()
 	return client, providerBlock
 }
