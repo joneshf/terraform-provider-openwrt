@@ -14,8 +14,6 @@ import (
 )
 
 func TestDataSourceAcceptance(t *testing.T) {
-	t.Parallel()
-
 	ctx := context.Background()
 	openWrtServer := acceptancetest.RunOpenWrtServer(
 		ctx,
@@ -59,8 +57,6 @@ data "openwrt_network_switch" "testing" {
 }
 
 func TestResourceAcceptance(t *testing.T) {
-	t.Parallel()
-
 	ctx := context.Background()
 	openWrtServer := acceptancetest.RunOpenWrtServer(
 		ctx,
@@ -119,8 +115,6 @@ resource "openwrt_network_switch" "testing" {
 }
 
 func TestResourceMirrorMonitorPortWithEnableMirrorReceivedAcceptance(t *testing.T) {
-	t.Parallel()
-
 	ctx := context.Background()
 	openWrtServer := acceptancetest.RunOpenWrtServer(
 		ctx,
@@ -157,8 +151,6 @@ resource "openwrt_network_switch" "testing" {
 }
 
 func TestResourceMirrorMonitorPortWithEnableMirrorTransmittedAcceptance(t *testing.T) {
-	t.Parallel()
-
 	ctx := context.Background()
 	openWrtServer := acceptancetest.RunOpenWrtServer(
 		ctx,
@@ -195,8 +187,6 @@ resource "openwrt_network_switch" "testing" {
 }
 
 func TestResourceMirrorSourcePortWithEnableMirrorReceivedAcceptance(t *testing.T) {
-	t.Parallel()
-
 	ctx := context.Background()
 	openWrtServer := acceptancetest.RunOpenWrtServer(
 		ctx,
@@ -233,8 +223,6 @@ resource "openwrt_network_switch" "testing" {
 }
 
 func TestResourceMirrorSourcePortWithEnableMirrorTransmittedAcceptance(t *testing.T) {
-	t.Parallel()
-
 	ctx := context.Background()
 	openWrtServer := acceptancetest.RunOpenWrtServer(
 		ctx,

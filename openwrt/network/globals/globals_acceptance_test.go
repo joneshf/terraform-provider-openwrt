@@ -14,8 +14,6 @@ import (
 )
 
 func TestDataSourceAcceptance(t *testing.T) {
-	t.Parallel()
-
 	ctx := context.Background()
 	openWrtServer := acceptancetest.RunOpenWrtServer(
 		ctx,
@@ -59,8 +57,6 @@ data "openwrt_network_globals" "this" {
 }
 
 func TestResourceAcceptance(t *testing.T) {
-	t.Parallel()
-
 	ctx := context.Background()
 	openWrtServer := acceptancetest.RunOpenWrtServer(
 		ctx,

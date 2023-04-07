@@ -14,8 +14,6 @@ import (
 )
 
 func TestDataSourceAcceptance(t *testing.T) {
-	t.Parallel()
-
 	ctx := context.Background()
 	openWrtServer := acceptancetest.RunOpenWrtServer(
 		ctx,
@@ -63,8 +61,6 @@ data "openwrt_network_interface" "testing" {
 }
 
 func TestResourceAcceptance(t *testing.T) {
-	t.Parallel()
-
 	ctx := context.Background()
 	openWrtServer := acceptancetest.RunOpenWrtServer(
 		ctx,
@@ -142,8 +138,6 @@ resource "openwrt_network_interface" "testing" {
 }
 
 func TestResourcePeerDNSWithDHCPAcceptance(t *testing.T) {
-	t.Parallel()
-
 	ctx := context.Background()
 	openWrtServer := acceptancetest.RunOpenWrtServer(
 		ctx,
@@ -186,8 +180,6 @@ resource "openwrt_network_interface" "testing" {
 }
 
 func TestResourcePeerDNSWithDHCPV6Acceptance(t *testing.T) {
-	t.Parallel()
-
 	ctx := context.Background()
 	openWrtServer := acceptancetest.RunOpenWrtServer(
 		ctx,

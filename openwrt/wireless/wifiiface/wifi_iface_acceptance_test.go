@@ -14,8 +14,6 @@ import (
 )
 
 func TestDataSourceAcceptance(t *testing.T) {
-	t.Parallel()
-
 	ctx := context.Background()
 	client, providerBlock := runOpenWrtServerWithWireless(
 		ctx,
@@ -58,8 +56,6 @@ data "openwrt_wireless_wifi_iface" "testing" {
 }
 
 func TestResourceAcceptance(t *testing.T) {
-	t.Parallel()
-
 	ctx := context.Background()
 	_, providerBlock := runOpenWrtServerWithWireless(
 		ctx,
