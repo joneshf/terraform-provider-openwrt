@@ -47,8 +47,6 @@ func TestMain(m *testing.M) {
 }
 
 func TestOpenWrtProviderConfigureConnectsWithoutError(t *testing.T) {
-	t.Parallel()
-
 	// Given
 	ctx := context.Background()
 	openWrtServer := acceptancetest.RunOpenWrtServer(
@@ -94,8 +92,6 @@ func TestOpenWrtProviderConfigureConnectsWithoutError(t *testing.T) {
 }
 
 func TestOpenWrtProviderConfigureConnectsWithoutErrorWithEnvironmentVariables(t *testing.T) {
-	t.Parallel()
-
 	// Given
 	ctx := context.Background()
 	openWrtServer := acceptancetest.RunOpenWrtServer(
