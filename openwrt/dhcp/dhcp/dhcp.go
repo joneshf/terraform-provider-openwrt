@@ -4,6 +4,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -34,15 +35,15 @@ const (
 	ignoreUCIOption            = "ignore"
 
 	interfaceAttribute            = "interface"
-	interfaceAttributeDescription = "The interface associated with this DHCP address pool. This name is what the interface is known as in UCI, or the `id` field in Terraform."
+	interfaceAttributeDescription = "The interface associated with this DHCP address pool. This name is what the interface is known as in UCI, or the `id` field in Terraform. Required if `ignore` is not `true`."
 	interfaceUCIOption            = "interface"
 
 	leaseTimeAttribute            = "leasetime"
-	leaseTimeAttributeDescription = "The lease time of addresses handed out to clients. E.g. `12h`, or `30m`."
+	leaseTimeAttributeDescription = "The lease time of addresses handed out to clients. E.g. `12h`, or `30m`. Required if `ignore` is not `true`."
 	leaseTimeUCIOption            = "leasetime"
 
 	limitAttribute            = "limit"
-	limitAttributeDescription = "Specifies the size of the address pool. E.g. With start = 100, and limit = 150, the maximum address will be 249."
+	limitAttributeDescription = "Specifies the size of the address pool. E.g. With start = 100, and limit = 150, the maximum address will be 249. Required if `ignore` is not `true`."
 	limitUCIOption            = "limit"
 
 	routerAdvertisementFlagsAttribute            = "ra_flags"
@@ -63,7 +64,7 @@ const (
 	schemaDescription = "Per interface lease pools and settings for serving DHCP requests."
 
 	startAttribute            = "start"
-	startAttributeDescription = "Specifies the offset from the network address of the underlying interface to calculate the minimum address that may be leased to clients. It may be greater than 255 to span subnets."
+	startAttributeDescription = "Specifies the offset from the network address of the underlying interface to calculate the minimum address that may be leased to clients. It may be greater than 255 to span subnets. Required if `ignore` is not `true`."
 	startUCIOption            = "start"
 
 	uciConfig = "dhcp"
@@ -117,20 +118,29 @@ var (
 		ReadResponse:      lucirpcglue.ReadResponseOptionString(modelSetInterface, interfaceAttribute, interfaceUCIOption),
 		ResourceExistence: lucirpcglue.NoValidation,
 		UpsertRequest:     lucirpcglue.UpsertRequestOptionString(modelGetInterface, interfaceAttribute, interfaceUCIOption),
+		Validators: []validator.String{
+			lucirpcglue.RequiredIfAttributeNotEqualBool(path.MatchRoot(ignoreAttribute), true),
+		},
 	}
 
 	leaseTimeSchemaAttribute = lucirpcglue.StringSchemaAttribute[model, lucirpc.Options, lucirpc.Options]{
 		Description:       leaseTimeAttributeDescription,
 		ReadResponse:      lucirpcglue.ReadResponseOptionString(modelSetLeaseTime, leaseTimeAttribute, leaseTimeUCIOption),
-		ResourceExistence: lucirpcglue.Required,
+		ResourceExistence: lucirpcglue.NoValidation,
 		UpsertRequest:     lucirpcglue.UpsertRequestOptionString(modelGetLeaseTime, leaseTimeAttribute, leaseTimeUCIOption),
+		Validators: []validator.String{
+			lucirpcglue.RequiredIfAttributeNotEqualBool(path.MatchRoot(ignoreAttribute), true),
+		},
 	}
 
 	limitSchemaAttribute = lucirpcglue.Int64SchemaAttribute[model, lucirpc.Options, lucirpc.Options]{
 		Description:       limitAttributeDescription,
 		ReadResponse:      lucirpcglue.ReadResponseOptionInt64(modelSetLimit, limitAttribute, limitUCIOption),
-		ResourceExistence: lucirpcglue.Required,
+		ResourceExistence: lucirpcglue.NoValidation,
 		UpsertRequest:     lucirpcglue.UpsertRequestOptionInt64(modelGetLimit, limitAttribute, limitUCIOption),
+		Validators: []validator.Int64{
+			lucirpcglue.RequiredIfAttributeNotEqualBool(path.MatchRoot(ignoreAttribute), true),
+		},
 	}
 
 	routerAdvertisementFlagsSchemaAttribute = lucirpcglue.SetStringSchemaAttribute[model, lucirpc.Options, lucirpc.Options]{
@@ -181,8 +191,11 @@ var (
 	startSchemaAttribute = lucirpcglue.Int64SchemaAttribute[model, lucirpc.Options, lucirpc.Options]{
 		Description:       startAttributeDescription,
 		ReadResponse:      lucirpcglue.ReadResponseOptionInt64(modelSetStart, startAttribute, startUCIOption),
-		ResourceExistence: lucirpcglue.Required,
+		ResourceExistence: lucirpcglue.NoValidation,
 		UpsertRequest:     lucirpcglue.UpsertRequestOptionInt64(modelGetStart, startAttribute, startUCIOption),
+		Validators: []validator.Int64{
+			lucirpcglue.RequiredIfAttributeNotEqualBool(path.MatchRoot(ignoreAttribute), true),
+		},
 	}
 )
 

@@ -57,9 +57,6 @@ resource "openwrt_dhcp_dhcp" "testing" {
 ### Required
 
 - `id` (String) Name of the section. This name is only used when interacting with UCI directly.
-- `leasetime` (String) The lease time of addresses handed out to clients. E.g. `12h`, or `30m`.
-- `limit` (Number) Specifies the size of the address pool. E.g. With start = 100, and limit = 150, the maximum address will be 249.
-- `start` (Number) Specifies the offset from the network address of the underlying interface to calculate the minimum address that may be leased to clients. It may be greater than 255 to span subnets.
 
 ### Optional
 
@@ -67,9 +64,12 @@ resource "openwrt_dhcp_dhcp" "testing" {
 - `dhcpv6` (String) The mode of the DHCPv6 server. Must be one of: "disabled", "relay", "server".
 - `force` (Boolean) Forces DHCP serving on the specified interface even if another DHCP server is detected on the same network segment.
 - `ignore` (Boolean) Specifies whether dnsmasq should ignore this pool.
-- `interface` (String) The interface associated with this DHCP address pool. This name is what the interface is known as in UCI, or the `id` field in Terraform.
+- `interface` (String) The interface associated with this DHCP address pool. This name is what the interface is known as in UCI, or the `id` field in Terraform. Required if `ignore` is not `true`.
+- `leasetime` (String) The lease time of addresses handed out to clients. E.g. `12h`, or `30m`. Required if `ignore` is not `true`.
+- `limit` (Number) Specifies the size of the address pool. E.g. With start = 100, and limit = 150, the maximum address will be 249. Required if `ignore` is not `true`.
 - `ra` (String) The mode of Router Advertisements. Must be one of: "disabled", "relay", "server".
 - `ra_flags` (Set of String) Router Advertisement flags to include in messages. Must be one of: "home-agent", "managed-config", "none", "other-config".
+- `start` (Number) Specifies the offset from the network address of the underlying interface to calculate the minimum address that may be leased to clients. It may be greater than 255 to span subnets. Required if `ignore` is not `true`.
 
 ## Import
 

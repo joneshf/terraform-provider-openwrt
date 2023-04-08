@@ -75,9 +75,44 @@ func TestResourceAcceptance(t *testing.T) {
 
 resource "openwrt_dhcp_dhcp" "testing" {
 	id = "testing"
+	ignore = true
+}
+`,
+			providerBlock,
+		),
+		Check: resource.ComposeAggregateTestCheckFunc(
+			resource.TestCheckResourceAttr("openwrt_dhcp_dhcp.testing", "id", "testing"),
+			resource.TestCheckResourceAttr("openwrt_dhcp_dhcp.testing", "ignore", "true"),
+			resource.TestCheckNoResourceAttr("openwrt_dhcp_dhcp.testing", "dhcpv4"),
+			resource.TestCheckNoResourceAttr("openwrt_dhcp_dhcp.testing", "dhcpv6"),
+			resource.TestCheckNoResourceAttr("openwrt_dhcp_dhcp.testing", "interface"),
+			resource.TestCheckNoResourceAttr("openwrt_dhcp_dhcp.testing", "leasetime"),
+			resource.TestCheckNoResourceAttr("openwrt_dhcp_dhcp.testing", "limit"),
+			resource.TestCheckNoResourceAttr("openwrt_dhcp_dhcp.testing", "ra_flags"),
+			resource.TestCheckNoResourceAttr("openwrt_dhcp_dhcp.testing", "start"),
+		),
+	}
+	importValidation := resource.TestStep{
+		ImportState:       true,
+		ImportStateVerify: true,
+		ResourceName:      "openwrt_dhcp_dhcp.testing",
+	}
+	ignoreWithOtherAttributes := resource.TestStep{
+		Config: fmt.Sprintf(`
+%s
+
+resource "openwrt_dhcp_dhcp" "testing" {
+	dhcpv4 = "server"
+	dhcpv6 = "disabled"
+	id = "testing"
+	ignore = true
 	interface = "testing"
 	leasetime = "12h"
 	limit = 150
+	ra_flags = [
+		"managed-config",
+		"other-config",
+	]
 	start = 100
 }
 `,
@@ -85,16 +120,16 @@ resource "openwrt_dhcp_dhcp" "testing" {
 		),
 		Check: resource.ComposeAggregateTestCheckFunc(
 			resource.TestCheckResourceAttr("openwrt_dhcp_dhcp.testing", "id", "testing"),
+			resource.TestCheckResourceAttr("openwrt_dhcp_dhcp.testing", "dhcpv4", "server"),
+			resource.TestCheckResourceAttr("openwrt_dhcp_dhcp.testing", "dhcpv6", "disabled"),
+			resource.TestCheckResourceAttr("openwrt_dhcp_dhcp.testing", "ignore", "true"),
 			resource.TestCheckResourceAttr("openwrt_dhcp_dhcp.testing", "interface", "testing"),
 			resource.TestCheckResourceAttr("openwrt_dhcp_dhcp.testing", "leasetime", "12h"),
 			resource.TestCheckResourceAttr("openwrt_dhcp_dhcp.testing", "limit", "150"),
+			resource.TestCheckResourceAttr("openwrt_dhcp_dhcp.testing", "ra_flags.0", "managed-config"),
+			resource.TestCheckResourceAttr("openwrt_dhcp_dhcp.testing", "ra_flags.1", "other-config"),
 			resource.TestCheckResourceAttr("openwrt_dhcp_dhcp.testing", "start", "100"),
 		),
-	}
-	importValidation := resource.TestStep{
-		ImportState:       true,
-		ImportStateVerify: true,
-		ResourceName:      "openwrt_dhcp_dhcp.testing",
 	}
 	updateAndReadResource := resource.TestStep{
 		Config: fmt.Sprintf(`
@@ -133,6 +168,7 @@ resource "openwrt_dhcp_dhcp" "testing" {
 		t,
 		createAndReadResource,
 		importValidation,
+		ignoreWithOtherAttributes,
 		updateAndReadResource,
 	)
 }
