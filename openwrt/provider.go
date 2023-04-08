@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
+	"github.com/joneshf/terraform-provider-openwrt/openwrt/dhcp/dhcp"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/dhcp/dnsmasq"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/dhcp/odhcpd"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/lucirpcglue"
@@ -160,6 +161,7 @@ func (p *openWrtProvider) DataSources(
 ) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		device.NewDataSource,
+		dhcp.NewDataSource,
 		dnsmasq.NewDataSource,
 		globals.NewDataSource,
 		networkinterface.NewDataSource,
@@ -188,6 +190,7 @@ func (p *openWrtProvider) Resources(
 ) []func() resource.Resource {
 	return []func() resource.Resource{
 		device.NewResource,
+		dhcp.NewResource,
 		dnsmasq.NewResource,
 		globals.NewResource,
 		networkinterface.NewResource,
