@@ -6,7 +6,7 @@ on:
       - "**"
 
 jobs:
-  test:
+  documentation:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -21,17 +21,44 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nix-${{ hashfiles('flake.lock', 'flake.nix') }}
             ${{ runner.os }}-nix-
-      - name: Cache Go
+      - name: Cache Go Integration Tests
         uses: actions/cache@v3.3.0
         with:
           # We hash both `go.mod` in addition to `go.sum` because the version of go is only in `go.mod`.
-          key: ${{ runner.os }}-go-${{ hashfiles('go.mod', 'go.sum') }}
+          key: ${{ runner.os }}-go-docs-${{ hashfiles('go.mod', 'go.sum') }}
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
           restore-keys: |
-            ${{ runner.os }}-go-${{ hashfiles('go.mod', 'go.sum') }}
-            ${{ runner.os }}-go-
+            ${{ runner.os }}-go-docs-${{ hashfiles('go.mod', 'go.sum') }}
+      - name: Generate Documentation
+        run: nix --store ~/nix develop . --command make docs
+
+  test-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Install Nix
+        uses: cachix/install-nix-action@v19
+      - name: Cache Nix
+        uses: actions/cache@v3.3.0
+        with:
+          key: ${{ runner.os }}-nix-${{ hashfiles('flake.lock', 'flake.nix') }}
+          path: ~/nix
+          restore-keys: |
+            ${{ runner.os }}-nix-${{ hashfiles('flake.lock', 'flake.nix') }}
+            ${{ runner.os }}-nix-
+      - name: Cache Go Integration Tests
+        uses: actions/cache@v3.3.0
+        with:
+          # We hash both `go.mod` in addition to `go.sum` because the version of go is only in `go.mod`.
+          key: ${{ runner.os }}-go-test-integration-${{ hashfiles('go.mod', 'go.sum') }}
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          restore-keys: |
+            ${{ runner.os }}-go-test-integration-${{ hashfiles('go.mod', 'go.sum') }}
       - name: Cache Docker Image
         uses: actions/cache@v3.3.0
         with:
@@ -40,5 +67,33 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-docker-${{ hashfiles('acceptance-test.Dockerfile', 'acceptance-test.Dockerfile.dockerignore') }}
             ${{ runner.os }}-docker-
-      - name: Test
-        run: nix --store ~/nix develop . --command make test
+      - name: Run Integration Tests
+        run: nix --store ~/nix develop . --command make test-go-integration
+
+  test-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Install Nix
+        uses: cachix/install-nix-action@v19
+      - name: Cache Nix
+        uses: actions/cache@v3.3.0
+        with:
+          key: ${{ runner.os }}-nix-${{ hashfiles('flake.lock', 'flake.nix') }}
+          path: ~/nix
+          restore-keys: |
+            ${{ runner.os }}-nix-${{ hashfiles('flake.lock', 'flake.nix') }}
+            ${{ runner.os }}-nix-
+      - name: Cache Go Unit Tests
+        uses: actions/cache@v3.3.0
+        with:
+          # We hash both `go.mod` in addition to `go.sum` because the version of go is only in `go.mod`.
+          key: ${{ runner.os }}-go-test-unit-${{ hashfiles('go.mod', 'go.sum') }}
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          restore-keys: |
+            ${{ runner.os }}-go-test-unit-${{ hashfiles('go.mod', 'go.sum') }}
+      - name: Run Unit Tests
+        run: nix --store ~/nix develop . --command make test-go-unit
