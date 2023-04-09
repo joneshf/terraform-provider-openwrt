@@ -6,7 +6,7 @@ on:
       - "**"
 
 jobs:
-  documentation:
+  docs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -21,7 +21,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nix-${{ hashfiles('flake.lock', 'flake.nix') }}
             ${{ runner.os }}-nix-
-      - name: Cache Go Integration Tests
+      - name: Cache Go Docs
         uses: actions/cache@v3.3.0
         with:
           # We hash both `go.mod` in addition to `go.sum` because the version of go is only in `go.mod`.
@@ -34,7 +34,7 @@ jobs:
       - name: Generate Documentation
         run: nix --store ~/nix develop . --command make docs
 
-  test-integration:
+  test-go-acceptance-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -49,16 +49,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nix-${{ hashfiles('flake.lock', 'flake.nix') }}
             ${{ runner.os }}-nix-
-      - name: Cache Go Integration Tests
+      - name: Cache Go Acceptance Tests
         uses: actions/cache@v3.3.0
         with:
           # We hash both `go.mod` in addition to `go.sum` because the version of go is only in `go.mod`.
-          key: ${{ runner.os }}-go-test-integration-${{ hashfiles('go.mod', 'go.sum') }}
+          key: ${{ runner.os }}-go-test-go-acceptance-test-${{ hashfiles('go.mod', 'go.sum') }}
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
           restore-keys: |
-            ${{ runner.os }}-go-test-integration-${{ hashfiles('go.mod', 'go.sum') }}
+            ${{ runner.os }}-go-test-go-acceptance-test-${{ hashfiles('go.mod', 'go.sum') }}
       - name: Cache Docker Image
         uses: actions/cache@v3.3.0
         with:
@@ -67,10 +67,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-docker-${{ hashfiles('acceptance-test.Dockerfile', 'acceptance-test.Dockerfile.dockerignore') }}
             ${{ runner.os }}-docker-
-      - name: Run Integration Tests
-        run: nix --store ~/nix develop . --command make test-go-integration
+      - name: Run Acceptance Tests
+        run: nix --store ~/nix develop . --command make test-go-acceptance-test
 
-  test-unit:
+  test-go-unit-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -89,11 +89,11 @@ jobs:
         uses: actions/cache@v3.3.0
         with:
           # We hash both `go.mod` in addition to `go.sum` because the version of go is only in `go.mod`.
-          key: ${{ runner.os }}-go-test-unit-${{ hashfiles('go.mod', 'go.sum') }}
+          key: ${{ runner.os }}-go-test-go-unit-test-${{ hashfiles('go.mod', 'go.sum') }}
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
           restore-keys: |
-            ${{ runner.os }}-go-test-unit-${{ hashfiles('go.mod', 'go.sum') }}
+            ${{ runner.os }}-go-test-go-unit-test-${{ hashfiles('go.mod', 'go.sum') }}
       - name: Run Unit Tests
-        run: nix --store ~/nix develop . --command make test-go-unit
+        run: nix --store ~/nix develop . --command make test-go-unit-test
