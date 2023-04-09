@@ -31,6 +31,8 @@ jobs:
             ~/go/pkg/mod
           restore-keys: |
             ${{ runner.os }}-go-docs-${{ hashfiles('go.mod', 'go.sum') }}
+            ${{ runner.os }}-go-docs-
+            ${{ runner.os }}-go-
       - name: Generate Documentation
         run: nix --store ~/nix develop . --command make docs
 
@@ -59,6 +61,9 @@ jobs:
             ~/go/pkg/mod
           restore-keys: |
             ${{ runner.os }}-go-test-go-acceptance-test-${{ hashfiles('go.mod', 'go.sum') }}
+            ${{ runner.os }}-go-test-go-acceptance-test-
+            ${{ runner.os }}-go-test-
+            ${{ runner.os }}-go-
       - name: Cache Docker Image
         uses: actions/cache@v3.3.0
         with:
@@ -95,5 +100,8 @@ jobs:
             ~/go/pkg/mod
           restore-keys: |
             ${{ runner.os }}-go-test-go-unit-test-${{ hashfiles('go.mod', 'go.sum') }}
+            ${{ runner.os }}-go-test-go-unit-test-
+            ${{ runner.os }}-go-test-
+            ${{ runner.os }}-go-
       - name: Run Unit Tests
         run: nix --store ~/nix develop . --command make test-go-unit-test
