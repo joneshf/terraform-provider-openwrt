@@ -18,6 +18,7 @@ import (
 	"github.com/joneshf/terraform-provider-openwrt/lucirpc"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/dhcp/dhcp"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/dhcp/dnsmasq"
+	"github.com/joneshf/terraform-provider-openwrt/openwrt/dhcp/host"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/dhcp/odhcpd"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/internal/lucirpcglue"
 	"github.com/joneshf/terraform-provider-openwrt/openwrt/network/device"
@@ -164,6 +165,7 @@ func (p *openWrtProvider) DataSources(
 		dhcp.NewDataSource,
 		dnsmasq.NewDataSource,
 		globals.NewDataSource,
+		host.NewDataSource,
 		networkinterface.NewDataSource,
 		networkswitch.NewDataSource,
 		odhcpd.NewDataSource,
@@ -193,6 +195,7 @@ func (p *openWrtProvider) Resources(
 		dhcp.NewResource,
 		dnsmasq.NewResource,
 		globals.NewResource,
+		host.NewResource,
 		networkinterface.NewResource,
 		networkswitch.NewResource,
 		odhcpd.NewResource,
