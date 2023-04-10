@@ -6,7 +6,7 @@ on:
       - "**"
 
 jobs:
-  test:
+  docs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -21,16 +21,49 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nix-${{ hashfiles('flake.lock', 'flake.nix') }}
             ${{ runner.os }}-nix-
-      - name: Cache Go
+      - name: Cache Go Docs
         uses: actions/cache@v3.3.0
         with:
           # We hash both `go.mod` in addition to `go.sum` because the version of go is only in `go.mod`.
-          key: ${{ runner.os }}-go-${{ hashfiles('go.mod', 'go.sum') }}
+          key: ${{ runner.os }}-go-docs-${{ hashfiles('go.mod', 'go.sum') }}
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
           restore-keys: |
-            ${{ runner.os }}-go-${{ hashfiles('go.mod', 'go.sum') }}
+            ${{ runner.os }}-go-docs-${{ hashfiles('go.mod', 'go.sum') }}
+            ${{ runner.os }}-go-docs-
+            ${{ runner.os }}-go-
+      - name: Generate Documentation
+        run: nix --store ~/nix develop . --command make docs
+
+  test-go-acceptance-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Install Nix
+        uses: cachix/install-nix-action@v19
+      - name: Cache Nix
+        uses: actions/cache@v3.3.0
+        with:
+          key: ${{ runner.os }}-nix-${{ hashfiles('flake.lock', 'flake.nix') }}
+          path: ~/nix
+          restore-keys: |
+            ${{ runner.os }}-nix-${{ hashfiles('flake.lock', 'flake.nix') }}
+            ${{ runner.os }}-nix-
+      - name: Cache Go Acceptance Tests
+        uses: actions/cache@v3.3.0
+        with:
+          # We hash both `go.mod` in addition to `go.sum` because the version of go is only in `go.mod`.
+          key: ${{ runner.os }}-go-test-go-acceptance-test-${{ hashfiles('go.mod', 'go.sum') }}-${{ hashfiles('**/*.go') }}
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          restore-keys: |
+            ${{ runner.os }}-go-test-go-acceptance-test-${{ hashfiles('go.mod', 'go.sum') }}-${{ hashfiles('**/*.go') }}
+            ${{ runner.os }}-go-test-go-acceptance-test-${{ hashfiles('go.mod', 'go.sum') }}-
+            ${{ runner.os }}-go-test-go-acceptance-test-
+            ${{ runner.os }}-go-test-
             ${{ runner.os }}-go-
       - name: Cache Docker Image
         uses: actions/cache@v3.3.0
@@ -40,5 +73,41 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-docker-${{ hashfiles('acceptance-test.Dockerfile', 'acceptance-test.Dockerfile.dockerignore') }}
             ${{ runner.os }}-docker-
-      - name: Test
-        run: nix --store ~/nix develop . --command make test
+      - name: Run Acceptance Tests
+        run: nix --store ~/nix develop . --command make test-go-acceptance-test
+        env:
+          GODEBUG: gocachehash=1,gocachetest=1
+
+  test-go-unit-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Install Nix
+        uses: cachix/install-nix-action@v19
+      - name: Cache Nix
+        uses: actions/cache@v3.3.0
+        with:
+          key: ${{ runner.os }}-nix-${{ hashfiles('flake.lock', 'flake.nix') }}
+          path: ~/nix
+          restore-keys: |
+            ${{ runner.os }}-nix-${{ hashfiles('flake.lock', 'flake.nix') }}
+            ${{ runner.os }}-nix-
+      - name: Cache Go Unit Tests
+        uses: actions/cache@v3.3.0
+        with:
+          # We hash both `go.mod` in addition to `go.sum` because the version of go is only in `go.mod`.
+          key: ${{ runner.os }}-go-test-go-unit-test-${{ hashfiles('go.mod', 'go.sum') }}-${{ hashfiles('**/*.go') }}
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          restore-keys: |
+            ${{ runner.os }}-go-test-go-unit-test-${{ hashfiles('go.mod', 'go.sum') }}-${{ hashfiles('**/*.go') }}
+            ${{ runner.os }}-go-test-go-unit-test-${{ hashfiles('go.mod', 'go.sum') }}-
+            ${{ runner.os }}-go-test-go-unit-test-
+            ${{ runner.os }}-go-test-
+            ${{ runner.os }}-go-
+      - name: Run Unit Tests
+        run: nix --store ~/nix develop . --command make test-go-unit-test
+        env:
+          GODEBUG: gocachehash=1,gocachetest=1
