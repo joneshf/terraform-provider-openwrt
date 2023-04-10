@@ -55,12 +55,13 @@ jobs:
         uses: actions/cache@v3.3.0
         with:
           # We hash both `go.mod` in addition to `go.sum` because the version of go is only in `go.mod`.
-          key: ${{ runner.os }}-go-test-go-acceptance-test-${{ hashfiles('go.mod', 'go.sum') }}
+          key: ${{ runner.os }}-go-test-go-acceptance-test-${{ hashfiles('go.mod', 'go.sum') }}-${{ hashfiles('**.go') }}
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
           restore-keys: |
-            ${{ runner.os }}-go-test-go-acceptance-test-${{ hashfiles('go.mod', 'go.sum') }}
+            ${{ runner.os }}-go-test-go-acceptance-test-${{ hashfiles('go.mod', 'go.sum') }}-${{ hashfiles('**.go') }}
+            ${{ runner.os }}-go-test-go-acceptance-test-${{ hashfiles('go.mod', 'go.sum') }}-
             ${{ runner.os }}-go-test-go-acceptance-test-
             ${{ runner.os }}-go-test-
             ${{ runner.os }}-go-
@@ -94,12 +95,13 @@ jobs:
         uses: actions/cache@v3.3.0
         with:
           # We hash both `go.mod` in addition to `go.sum` because the version of go is only in `go.mod`.
-          key: ${{ runner.os }}-go-test-go-unit-test-${{ hashfiles('go.mod', 'go.sum') }}
+          key: ${{ runner.os }}-go-test-go-unit-test-${{ hashfiles('go.mod', 'go.sum') }}-${{ hashfiles('**.go') }}
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
           restore-keys: |
-            ${{ runner.os }}-go-test-go-unit-test-${{ hashfiles('go.mod', 'go.sum') }}
+            ${{ runner.os }}-go-test-go-unit-test-${{ hashfiles('go.mod', 'go.sum') }}-${{ hashfiles('**.go') }}
+            ${{ runner.os }}-go-test-go-unit-test-${{ hashfiles('go.mod', 'go.sum') }}-
             ${{ runner.os }}-go-test-go-unit-test-
             ${{ runner.os }}-go-test-
             ${{ runner.os }}-go-
