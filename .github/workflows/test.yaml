@@ -76,7 +76,7 @@ jobs:
       - name: Run Acceptance Tests
         run: nix --store ~/nix develop . --command make test-go-acceptance-test
         env:
-          GODEBUG: gocachetest=1
+          GODEBUG: gocachehash=1,gocachetest=1
 
   test-go-unit-test:
     runs-on: ubuntu-latest
@@ -110,4 +110,4 @@ jobs:
       - name: Run Unit Tests
         run: nix --store ~/nix develop . --command make test-go-unit-test
         env:
-          GODEBUG: gocachetest=1
+          GODEBUG: gocachehash=1,gocachetest=1
