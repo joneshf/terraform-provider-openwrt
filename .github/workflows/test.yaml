@@ -75,6 +75,8 @@ jobs:
             ${{ runner.os }}-docker-
       - name: Run Acceptance Tests
         run: nix --store ~/nix develop . --command make test-go-acceptance-test
+        env:
+          GODEBUG: gocachetest=1
 
   test-go-unit-test:
     runs-on: ubuntu-latest
@@ -107,3 +109,5 @@ jobs:
             ${{ runner.os }}-go-
       - name: Run Unit Tests
         run: nix --store ~/nix develop . --command make test-go-unit-test
+        env:
+          GODEBUG: gocachetest=1
